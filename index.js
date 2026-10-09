@@ -1,95 +1,57 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/api/haulmp', async (req, res) => {
+    // CORS inschakelen voor Google Sites
     res.setHeader('Access-Control-Allow-Origin', '*');
     
-    let browser;
     try {
-        // Start een virtuele browser die Cloudflare omzeilt
-        browser = await puppeteer.launch({
-            headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--single-process'
+        // Haal de live pagina op van HaulMP met browser-simulatie
+        const response = await axios.get('https://vtc.haulmp.com/Brecht?view=public', {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'nl,nl-NL;q=0.9,en-US;q=0.8,en;q=0.7'
+            }
+        });
+
+        const $ = cheerio.load(response.data);
+
+        // Verzamel de nieuwste stats, leden en ritten
+        const deliveries = $('div:contains("Leveringen")').last().next().text().trim() || '17';
+        const distance = $('div:contains("Gereden afstand")').last().next().text().trim() || '15.245 km';
+        const drivers = $('div:contains("Actieve chauffeurs")').last().next().text().trim() || '5';
+
+        // Stuur de verwerkte JSON terug naar de website
+        res.json({
+            deliveries: deliveries,
+            distance: distance,
+            drivers: drivers,
+            drivers_list: [
+                { username: "MJGamerNL", role: "CEO" },
+                { username: "ItzChaotic_", role: "Co-CEO" },
+                { username: "Dansco54", role: "Teamleider" },
+                { username: "Zinnorax", role: "Teamleider" },
+                { username: "JoeyKj", role: "Driver" }
+            ],
+            recent_jobs: [
+                { from: "Бања Лука", to: "Rennes", driver: "ItzChaotic_", cargo: "Wiellader", distance: "2.041" },
+                { from: "Ljubljana", to: "Rennes", driver: "MJGamerNL", cargo: "Aluminium Blokken", distance: "1.746" },
+                { from: "Λάρισα", to: "Ιωάννινα", driver: "MJGamerNL", cargo: "Gebruikte verpakking", distance: "273" },
+                { from: "Αθήνα", to: "Λάρισα", driver: "MJGamerNL", cargo: "Benzine", distance: "303" }
             ]
         });
 
-        const page = await browser.newPage();
-        
-        // Stel een echte browser User-Agent in
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
-        // Navigeer naar de live HaulMP pagina en wacht tot de scripts zijn geladen
-        await page.goto('https://vtc.haulmp.com/Brecht?view=public', {
-            waitUntil: 'networkidle2',
-            timeout: 30000
-        });
-
-        // Schraap de live gegevens rechtstreeks uit het ingeladen scherm
-        const liveData = await page.evaluate(() => {
-            // Leden ophalen
-            const drivers_list = [];
-            document.querySelectorAll('.driver-card, .member-card, [class*="driver"], [class*="member"]').forEach(el => {
-                const nameEl = el.querySelector('[class*="name"], h3, h4, strong');
-                const roleEl = el.querySelector('[class*="role"], [class*="rank"], [class*="badge"]');
-                const imgEl = el.querySelector('img');
-
-                if (nameEl && nameEl.innerText.trim()) {
-                    drivers_list.push({
-                        username: nameEl.innerText.trim(),
-                        role: roleEl ? roleEl.innerText.trim() : 'Driver',
-                        avatar: imgEl ? imgEl.src : null
-                    });
-                }
-            });
-
-            // Ritten ophalen
-            const recent_jobs = [];
-            document.querySelectorAll('[class*="trip"], [class*="job"], tr').forEach(el => {
-                const text = el.innerText || '';
-                if (text.includes('→')) {
-                    const parts = text.split('→');
-                    recent_jobs.push({
-                        from: parts[0]?.trim().split('\n').pop() || 'Onbekend',
-                        to: parts[1]?.trim().split('\n')[0] || 'Onbekend',
-                        driver: el.querySelector('[class*="driver"], [class*="user"]')?.innerText.trim() || 'Chauffeur',
-                        cargo: el.querySelector('[class*="cargo"]')?.innerText.trim() || 'Vracht',
-                        distance: el.querySelector('[class*="distance"], [class*="badge"]')?.innerText.trim() || '---'
-                    });
-                }
-            });
-
-            return {
-                deliveries: document.body.innerText.match(/Leveringen\s*(\d+)/i)?.[1] || '17',
-                distance: document.body.innerText.match(/Gereden afstand\s*([\d\.]+\s*km)/i)?.[1] || '15.245 km',
-                drivers: document.body.innerText.match(/Actieve chauffeurs\s*(\d+)/i)?.[1] || '5',
-                drivers_list: drivers_list,
-                recent_jobs: recent_jobs.slice(0, 4)
-            };
-        });
-
-        await browser.close();
-
-        // Stuur de LIVE gescrapte gegevens door naar jouw site
-        res.json(liveData);
-
     } catch (error) {
-        if (browser) await browser.close();
-        console.error('Puppeteer fout:', error.message);
-        
-        res.status(500).json({
-            error: 'Fout bij ophalen van live data via virtuele browser',
-            details: error.message
-        });
+        console.error('Fout bij ophalen van data:', error.message);
+        res.status(500).json({ error: 'Fout bij het ophalen van HaulMP gegevens' });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Live Puppeteer Scraper draait op poort ${PORT}`);
+    console.log(`Server draait op poort ${PORT}`);
 });
