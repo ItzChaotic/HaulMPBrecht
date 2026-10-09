@@ -23,7 +23,7 @@ app.get('/api/haulmp', async (req, res) => {
         const distance = $('div:contains("Gereden afstand")').next().text().trim() || '15.245 km';
         const drivers = $('div:contains("Actieve chauffeurs")').next().text().trim() || '5';
 
-        // Schone JSON-reactie terugsturen
+        // Schone JSON-reactie met 4 ritten terugsturen
         res.json({
             deliveries: deliveries,
             distance: distance,
@@ -42,6 +42,20 @@ app.get('/api/haulmp', async (req, res) => {
                     driver: "MJGamerNL",
                     cargo: "Aluminium Blokken",
                     distance: "1.746"
+                },
+                {
+                    from: "Λάρισα",
+                    to: "Ιωάννινα",
+                    driver: "MJGamerNL",
+                    cargo: "Gebruikte verpakking",
+                    distance: "273"
+                },
+                {
+                    from: "Αθήνα",
+                    to: "Λάρισα",
+                    driver: "MJGamerNL",
+                    cargo: "Benzine",
+                    distance: "303"
                 }
             ]
         });
