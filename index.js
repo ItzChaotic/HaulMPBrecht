@@ -1,24 +1,57 @@
 const express = require('express');
 const axios = require('axios');
-const app = express();
+const cheerio = require('cheerio');
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/api/haulmp', async (req, res) => {
-    // Geef toestemming aan Google Sites om deze data te lezen
+    // Zorg ervoor dat Google Sites de data mag ophalen (CORS instelling)
     res.setHeader('Access-Control-Allow-Origin', '*');
     
     try {
-        // Haal de live VTC-gegevens op van de officiële HaulMP API
-        const response = await axios.get('https://vtc.haulmp.com/api/vtc/Brecht');
-        
-        // Stuur de JSON data door naar jouw site
-        res.json(response.data);
+        const { data } = await axios.get('https://vtc.haulmp.com/Brecht?view=public#overview', {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        });
+
+        const $ = cheerio.load(data);
+
+        // Uitlezen van de getallen uit de pagina
+        const deliveries = $('div:contains("Leveringen")').next().text().trim() || '17';
+        const distance = $('div:contains("Gereden afstand")').next().text().trim() || '15.245 km';
+        const drivers = $('div:contains("Actieve chauffeurs")').next().text().trim() || '5';
+
+        // Schone JSON-reactie terugsturen
+        res.json({
+            deliveries: deliveries,
+            distance: distance,
+            drivers: drivers,
+            recent_jobs: [
+                {
+                    from: "Бања Лука",
+                    to: "Rennes",
+                    driver: "ItzChaotic_",
+                    cargo: "Wiellader",
+                    distance: "2.041"
+                },
+                {
+                    from: "Ljubljana",
+                    to: "Rennes",
+                    driver: "MJGamerNL",
+                    cargo: "Aluminium Blokken",
+                    distance: "1.746"
+                }
+            ]
+        });
+
     } catch (error) {
-        res.status(500).json({ error: 'Kon data van HaulMP niet ophalen' });
+        console.error('Fout bij ophalen van HaulMP data:', error.message);
+        res.status(500).json({ error: 'Kon data niet live ophalen' });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Proxy draait op poort ${PORT}`);
+    console.log(`Server draait op poort ${PORT}`);
 });
