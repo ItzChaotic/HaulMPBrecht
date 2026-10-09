@@ -36,11 +36,11 @@ function getFallbackData() {
         distance: "15.245 km",
         drivers: "5",
         drivers_list: [
-            { username: "MJGamerNL", role: "CEO" },
-            { username: "ItzChaotic_", role: "Co-CEO" },
-            { username: "Dansco54", role: "Teamleider" },
-            { username: "Zinnorax", role: "Teamleider" },
-            { username: "JoeyKj", role: "Driver" }
+            { username: "MJGamerNL", role: "Directeur" },
+            { username: "ItzChaotic_", role: "Onder Directeur" },
+            { username: "Dansco54", role: "Leidinggevende" },
+            { username: "Zinnorax", role: "Leidinggevende" },
+            { username: "JoeyKj", role: "Leidinggevende" }
         ],
         recent_jobs: [
             { from: "Бања Лука", to: "Rennes", driver: "ItzChaotic_", cargo: "Wiellader", distance: "2.041" },
