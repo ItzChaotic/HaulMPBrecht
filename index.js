@@ -137,7 +137,10 @@ app.get('/api/haulmp', (req, res) => {
         drivers: "5",
         drivers_list: [
             { username: "MJGamerNL", role: "Directeur" },
-            { username: "ItzChaotic_", role: "Onder Directeur" },
+            { username: "ItzChaotic_", role: "Onder Directeur / Development" },
+            { username: "Ramona", role: "Onder Directeur" },
+            { username: "JoeyKj", role: "Management" },
+            { username: "Jellybear", role: "Management" },
             { username: "Dansco54", role: "Leidinggevende" },
             { username: "Zinnorax", role: "Leidinggevende" },
             { username: "JoeyKj", role: "Leidinggevende" }
