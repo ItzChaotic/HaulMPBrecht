@@ -27,7 +27,6 @@ const rawDriversList = [
     { username: "Jellybear", role: "Management" },
     { username: "Dansco54", role: "Leidinggevende" },
     { username: "Zinnorax", role: "Leidinggevende" },
-    { username: "JoeyKj", role: "Leidinggevende" }
 ];
 
 // Functie om de kleur te bepalen op basis van trefwoorden in de roltitel
