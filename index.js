@@ -4,10 +4,33 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
+
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
-// Beginstanden (worden automatisch opgehoogd bij nieuwe ritten)
+// ==========================================
+// PERSONEEL & WACHTWOORDEN LIJST
+// ==========================================
+// Hier kun je per persoon een gebruikersnaam en eigen wachtwoord instellen!
+const accountsDatabase = [
+    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
+    { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
+    { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
+    { username: "Jellybear", password: "JellyBearPass", role: "Management" },
+    { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
+    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+];
+
+// Databronnen voor het portaal (geheugen-opslag)
+let absenceList = [];
+let customBadges = [];
+let galleryPhotos = [
+    { url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", isPotw: true }
+];
+
+// Beginstanden ritten & statistieken
 let totalDeliveries = 19;
 let totalDistanceKm = 16200;
 
@@ -18,29 +41,15 @@ let recentJobs = [
     { from: "Ljubljana", to: "Rennes", driver: "MJGamerNL", cargo: "Aluminium Blokken", distance: "1.746 km" }
 ];
 
-// Ledenlijst met rolnamen
-const rawDriversList = [
-    { username: "MJGamerNL", role: "Directeur" },
-    { username: "ItzChaotic_", role: "Onder Directeur / Development" },
-    { username: "Ramona", role: "Onder Directeur" },
-    { username: "JoeyKj", role: "Management" },
-    { username: "Jellybear", role: "Management" },
-    { username: "Dansco54", role: "Leidinggevende" },
-    { username: "Zinnorax", role: "Leidinggevende" },
-];
-
-// Functie om de kleur te bepalen op basis van trefwoorden in de roltitel
 function getRoleColor(role) {
     const r = (role || '').toLowerCase();
-    
-    if (r.includes('onder directeur')) return 'orange';  // Oranje
-    if (r.includes('directeur')) return 'red';           // Rood
-    if (r.includes('management')) return 'yellow';       // Geel
-    if (r.includes('leidinggevende')) return 'green';    // Groen
-    if (r.includes('senior werknemer')) return 'blue';   // Blauw
-    if (r.includes('werknemer')) return 'purple';        // Paars
-    
-    return 'gray'; // Standaardkleur
+    if (r.includes('onder directeur')) return 'orange';
+    if (r.includes('directeur')) return 'red';
+    if (r.includes('management')) return 'yellow';
+    if (r.includes('leidinggevende')) return 'green';
+    if (r.includes('senior werknemer')) return 'blue';
+    if (r.includes('werknemer')) return 'purple';
+    return 'gray';
 }
 
 const client = new Client({
@@ -149,10 +158,47 @@ async function fetchDiscordLogs() {
     }
 }
 
+// ==========================================
+// API ROUTES VOOR WEBSITE & PORTAAL
+// ==========================================
+
+// Inloggen op het portaal met individueel wachtwoord
+app.post('/api/login', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
+    const { username, password } = req.body;
+    
+    // Zoek het account op in de database
+    const account = accountsDatabase.find(
+        acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
+    );
+
+    if (!account) {
+        return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
+    }
+
+    // Bereken persoonlijke statistieken
+    const driverJobs = recentJobs.filter(j => j.driver.toLowerCase() === account.username.toLowerCase());
+    const driverKm = driverJobs.reduce((acc, curr) => acc + (parseInt(curr.distance.replace(/\D/g, ''), 10) || 0), 0);
+
+    res.json({
+        success: true,
+        username: account.username,
+        role: account.role,
+        color: getRoleColor(account.role),
+        stats: {
+            deliveries: driverJobs.length,
+            distance: `${driverKm.toLocaleString('nl-NL')} km`
+        }
+    });
+});
+
+// Hoofd API Endpoint
 app.get('/api/haulmp', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
-    const formattedDrivers = rawDriversList.map(m => ({
+    const formattedDrivers = accountsDatabase.map(m => ({
         username: m.username,
         role: m.role,
         color: getRoleColor(m.role)
@@ -163,8 +209,78 @@ app.get('/api/haulmp', (req, res) => {
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
         drivers: formattedDrivers.length.toString(),
         drivers_list: formattedDrivers,
-        recent_jobs: recentJobs
+        recent_jobs: recentJobs,
+        absence: absenceList,
+        gallery: galleryPhotos,
+        badges: customBadges
     });
+});
+
+// Afwezigheid indienen
+app.post('/api/absence', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    const { username, fromDate, toDate, reason } = req.body;
+    if (!username || !fromDate || !toDate) {
+        return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
+    }
+
+    absenceList.push({ username, fromDate, toDate, reason, dateSubmitted: new Date().toLocaleDateString('nl-NL') });
+    res.json({ success: true, message: 'Afwezigheid succesvol doorgegeven!' });
+});
+
+// Foto uploaden
+app.post('/api/gallery', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    const { url, username } = req.body;
+    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+    const role = account ? account.role.toLowerCase() : '';
+
+    if (!account || (!role.includes('directeur') && !role.includes('management'))) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om foto\'s te uploaden.' });
+    }
+
+    if (!url) {
+        return res.status(400).json({ success: false, message: 'Geef een geldige URL op.' });
+    }
+
+    galleryPhotos.push({ url, uploadedBy: username, isPotw: false });
+    res.json({ success: true, message: 'Foto succesvol toegevoegd aan de galerij!' });
+});
+
+// Foto van de week instellen
+app.post('/api/set-potw', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    const { index, username } = req.body;
+    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+
+    if (!account || !account.role.toLowerCase().includes('directeur')) {
+        return res.status(403).json({ success: false, message: 'Alleen Directeur en Onder Directeur kunnen dit instellen.' });
+    }
+
+    galleryPhotos.forEach((p, i) => p.isPotw = (i === parseInt(index)));
+    res.json({ success: true, message: 'Foto van de week ingesteld!' });
+});
+
+// Badges toekennen
+app.post('/api/badges', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    const { title, targetUser, username } = req.body;
+    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+
+    if (!account || !account.role.toLowerCase().includes('directeur')) {
+        return res.status(403).json({ success: false, message: 'Alleen Directeur en Onder Directeur kunnen badges toekennen.' });
+    }
+
+    customBadges.push({ title, targetUser });
+    res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
 if (DISCORD_BOT_TOKEN) {
@@ -174,5 +290,5 @@ if (DISCORD_BOT_TOKEN) {
 }
 
 app.listen(PORT, () => {
-    console.log(`Proxy actief op poort ${PORT}`);
+    console.log(`Portaal-server actief op poort ${PORT}`);
 });
