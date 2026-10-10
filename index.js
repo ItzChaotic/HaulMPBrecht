@@ -63,7 +63,8 @@ function getRoleColor(role) {
 }
 
 function canManageBadges(role) {
-    const r = (role || '').toLowerCase();
+    if (!role) return false;
+    const r = role.toLowerCase();
     return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
 }
 
@@ -298,23 +299,26 @@ app.post('/api/badges', (req, res) => {
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
-// Badges Verwijderen (Via ID)
+// Badges Verwijderen (GEFIXTE ROUTE)
 app.delete('/api/badges/:id', (req, res) => {
     const badgeId = req.params.id;
     const username = req.query.username;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
-    if (!account || !canManageBadges(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om badges te verwijderen.' });
+    // Als er een username is doorgegeven, checken we het account
+    if (username) {
+        const account = accountsDatabase.find(d => d.username.toLowerCase() === username.toLowerCase());
+        if (!account || !canManageBadges(account.role)) {
+            return res.status(403).json({ success: false, message: 'Geen rechten om badges te verwijderen.' });
+        }
     }
 
-    const initialLength = customBadges.length;
+    const prevLength = customBadges.length;
     customBadges = customBadges.filter(b => b.id !== badgeId);
 
-    if (customBadges.length < initialLength) {
-        res.json({ success: true, message: 'Badge succesvol ingetrokken!' });
+    if (customBadges.length < prevLength) {
+        return res.json({ success: true, message: 'Badge succesvol ingetrokken!' });
     } else {
-        res.status(404).json({ success: false, message: 'Badge niet gevonden.' });
+        return res.status(404).json({ success: false, message: 'Badge kon niet gevonden worden.' });
     }
 });
 
