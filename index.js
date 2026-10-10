@@ -6,12 +6,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-const upload = multer({ storage: multer.memoryStorage() }); // Slaat geüploade foto's tijdelijk op in geheugen
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // Max 10MB per foto
+});
 
-// CORS Middleware
+// CORS Header Setup
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
@@ -22,20 +25,23 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
+// Database met Accounts & Rangen
 const accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
-    { username: "Jellybear", role: "JellyBearPass", role: "Management" },
-    { username: "Dansco54", role: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", role: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "Jellybear", password: "JellyBearPass", role: "Management" },
+    { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
+    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
+// In-Memory Data Opslag
 let absenceList = [];
 let customBadges = [];
 let galleryPhotos = [
-    { url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", isPotw: true }
+    { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" },
+    { id: "photo-2", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png", uploadedBy: "ItzChaotic_", date: "10-10-2026" }
 ];
 
 let totalDeliveries = 19;
@@ -135,9 +141,10 @@ async function fetchDiscordLogs() {
 }
 
 // ==========================================
-// API ROUTES
+// API ENDPOINTS
 // ==========================================
 
+// Inloggen
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const account = accountsDatabase.find(
@@ -163,6 +170,7 @@ app.post('/api/login', (req, res) => {
     });
 });
 
+// Algemene Website & Portaal Data
 app.get('/api/haulmp', (req, res) => {
     const formattedDrivers = accountsDatabase.map(m => ({
         username: m.username,
@@ -182,24 +190,52 @@ app.get('/api/haulmp', (req, res) => {
     });
 });
 
+// Afwezigheid Inloggen / Doorgeven
 app.post('/api/absence', (req, res) => {
     const { username, fromDate, toDate, reason } = req.body;
     if (!username || !fromDate || !toDate) {
         return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
     }
 
-    absenceList.push({ username, fromDate, toDate, reason, dateSubmitted: new Date().toLocaleDateString('nl-NL') });
-    res.json({ success: true, message: 'Afwezigheid succesvol doorgegeven!' });
+    const newAbsence = {
+        id: "abs-" + Date.now(),
+        username,
+        fromDate,
+        toDate,
+        reason: reason || "Geen reden opgegeven",
+        status: "In behandeling",
+        dateSubmitted: new Date().toLocaleDateString('nl-NL')
+    };
+
+    absenceList.unshift(newAbsence);
+    res.json({ success: true, message: 'Afwezigheid succesvol ingediend!' });
 });
 
-// Foto uploaden via bestand (omgezet naar Base64 string voor directe weergave)
+// Afwezigheid Status Wijzigen (Directeur & Onder Directeur)
+app.post('/api/absence/status', (req, res) => {
+    const { absenceId, newStatus, username } = req.body;
+    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+
+    if (!account || !account.role.toLowerCase().includes('directeur')) {
+        return res.status(403).json({ success: false, message: 'Alleen Directie kan dit goedkeuren of afwijzen.' });
+    }
+
+    const item = absenceList.find(a => a.id === absenceId);
+    if (item) {
+        item.status = newStatus;
+        return res.json({ success: true, message: `Status gewijzigd naar '${newStatus}'` });
+    }
+
+    res.status(404).json({ success: false, message: 'Afwezigheidsverzoek niet gevonden.' });
+});
+
+// Foto Uploaden (Direct Live)
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const username = req.body.username;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-    const role = account ? account.role.toLowerCase() : '';
 
-    if (!account || (!role.includes('directeur') && !role.includes('management') && !role.includes('leidinggevende'))) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om foto\'s te uploaden.' });
+    if (!account) {
+        return res.status(403).json({ success: false, message: 'Geen geldig account.' });
     }
 
     if (!req.file) {
@@ -209,31 +245,42 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
 
-    galleryPhotos.push({ url: dataUrl, uploadedBy: username, isPotw: false });
-    res.json({ success: true, message: 'Foto succesvol geüpload!' });
+    const newPhoto = {
+        id: "photo-" + Date.now(),
+        url: dataUrl,
+        uploadedBy: username,
+        date: new Date().toLocaleDateString('nl-NL')
+    };
+
+    galleryPhotos.unshift(newPhoto);
+    res.json({ success: true, message: 'Foto geüpload en direct zichtbaar in de galerij!' });
 });
 
-app.post('/api/set-potw', (req, res) => {
-    const { index, username } = req.body;
+// Foto Verwijderen (Directeur, Onder Directeur & Management)
+app.delete('/api/gallery/:id', (req, res) => {
+    const photoId = req.params.id;
+    const username = req.query.username;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+    const role = account ? account.role.toLowerCase() : '';
 
-    if (!account || !account.role.toLowerCase().includes('directeur')) {
-        return res.status(403).json({ success: false, message: 'Alleen Directeur en Onder Directeur kunnen dit instellen.' });
+    if (!account || (!role.includes('directeur') && !role.includes('management'))) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om foto\'s te verwijderen.' });
     }
 
-    galleryPhotos.forEach((p, i) => p.isPotw = (i === parseInt(index)));
-    res.json({ success: true, message: 'Foto van de week ingesteld!' });
+    galleryPhotos = galleryPhotos.filter(p => p.id !== photoId);
+    res.json({ success: true, message: 'Foto succesvol verwijderd.' });
 });
 
+// Badges Toekennen (Directeur & Onder Directeur)
 app.post('/api/badges', (req, res) => {
     const { title, targetUser, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account || !account.role.toLowerCase().includes('directeur')) {
-        return res.status(403).json({ success: false, message: 'Alleen Directeur en Onder Directeur kunnen badges toekennen.' });
+        return res.status(403).json({ success: false, message: 'Alleen Directie kan badges toekennen.' });
     }
 
-    customBadges.push({ title, targetUser });
+    customBadges.push({ id: "badge-" + Date.now(), title, targetUser, awardedBy: username });
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
