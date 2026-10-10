@@ -1,12 +1,14 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+const upload = multer({ storage: multer.memoryStorage() }); // Slaat geüploade foto's tijdelijk op in geheugen
 
-// CORS Middleware toevoegen zodat de website altijd data mag ophalen/versturen
+// CORS Middleware
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -20,16 +22,13 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
-// ==========================================
-// PERSONEEL & WACHTWOORDEN LIJST
-// ==========================================
 const accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", role: "JellyBearPass", role: "Management" },
-    { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
+    { username: "Dansco54", role: "DanscoPass", role: "Leidinggevende" },
     { username: "Zinnorax", role: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
@@ -128,39 +127,8 @@ async function fetchDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-
         const messages = await channel.messages.fetch({ limit: 15 });
-        const parsed = [];
-
-        messages.forEach(msg => {
-            if (msg.embeds && msg.embeds.length > 0) {
-                const embed = msg.embeds[0];
-                const title = embed.title || '';
-                
-                if (title.includes('→')) {
-                    const parts = title.split('→');
-                    let driver = 'Chauffeur';
-                    let distanceStr = '---';
-                    
-                    embed.fields?.forEach(f => {
-                        if (f.name.toLowerCase().includes('driver')) driver = f.value.replace(/[\*\_\`]/g, '').trim();
-                        if (f.name.toLowerCase().includes('distance')) distanceStr = f.value.replace(/[\*\_\`]/g, '').trim();
-                    });
-
-                    parsed.push({
-                        from: parts[0]?.trim() || 'Onbekend',
-                        to: parts[1]?.trim() || 'Onbekend',
-                        driver: driver,
-                        cargo: embed.description?.split('\n')[0]?.trim() || 'Vracht',
-                        distance: distanceStr
-                    });
-                }
-            }
-        });
-
-        if (parsed.length > 0) {
-            recentJobs = parsed.slice(0, 5);
-        }
+        messages.forEach(msg => parseAndAddJob(msg, false));
     } catch (err) {
         console.error('Fout bij ophalen Discord geschiedenis:', err.message);
     }
@@ -172,7 +140,6 @@ async function fetchDiscordLogs() {
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    
     const account = accountsDatabase.find(
         acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
     );
@@ -225,21 +192,25 @@ app.post('/api/absence', (req, res) => {
     res.json({ success: true, message: 'Afwezigheid succesvol doorgegeven!' });
 });
 
-app.post('/api/gallery', (req, res) => {
-    const { url, username } = req.body;
+// Foto uploaden via bestand (omgezet naar Base64 string voor directe weergave)
+app.post('/api/gallery', upload.single('photo'), (req, res) => {
+    const username = req.body.username;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
     const role = account ? account.role.toLowerCase() : '';
 
-    if (!account || (!role.includes('directeur') && !role.includes('management'))) {
+    if (!account || (!role.includes('directeur') && !role.includes('management') && !role.includes('leidinggevende'))) {
         return res.status(403).json({ success: false, message: 'Geen rechten om foto\'s te uploaden.' });
     }
 
-    if (!url) {
-        return res.status(400).json({ success: false, message: 'Geef een geldige URL op.' });
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
     }
 
-    galleryPhotos.push({ url, uploadedBy: username, isPotw: false });
-    res.json({ success: true, message: 'Foto succesvol toegevoegd aan de galerij!' });
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
+
+    galleryPhotos.push({ url: dataUrl, uploadedBy: username, isPotw: false });
+    res.json({ success: true, message: 'Foto succesvol geüpload!' });
 });
 
 app.post('/api/set-potw', (req, res) => {
