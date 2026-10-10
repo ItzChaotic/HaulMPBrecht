@@ -35,7 +35,7 @@ const accountsDatabase = [
 ];
 
 let absenceList = [];
-let customBadges = []; // { id, title, targetUser, awardedBy, date }
+let customBadges = []; 
 let galleryPhotos = [
     { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" },
     { id: "photo-2", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png", uploadedBy: "ItzChaotic_", date: "10-10-2026" }
@@ -43,7 +43,10 @@ let galleryPhotos = [
 
 let totalDeliveries = 19;
 let totalDistanceKm = 16200;
-let allJobsHistory = []; // Houdt alle gescrapte jobs vast
+let allJobsHistory = [
+    { id: "demo-1", from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km", kmAmount: 478, timestamp: Date.now() },
+    { id: "demo-2", from: "Amsterdam", to: "Eindhoven", driver: "JoeyKj", cargo: "Chemische Sorbens", distance: "146 km", kmAmount: 146, timestamp: Date.now() }
+];
 
 function cleanText(text) {
     if (!text) return '';
@@ -56,8 +59,6 @@ function getRoleColor(role) {
     if (r.includes('directeur')) return 'red';
     if (r.includes('management')) return 'yellow';
     if (r.includes('leidinggevende')) return 'green';
-    if (r.includes('senior werknemer')) return 'blue';
-    if (r.includes('werknemer')) return 'purple';
     return 'gray';
 }
 
@@ -130,7 +131,6 @@ function parseAndAddJob(message, isLiveNew = false) {
                 timestamp
             };
 
-            // Voeg toe aan historie (duplicaten vermijden)
             if (!allJobsHistory.some(j => j.id === jobObj.id)) {
                 allJobsHistory.unshift(jobObj);
             }
@@ -149,7 +149,6 @@ async function fetchDiscordLogs() {
     }
 }
 
-// Inloggen
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const account = accountsDatabase.find(
@@ -160,7 +159,6 @@ app.post('/api/login', (req, res) => {
         return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
     }
 
-    // Statistieken berekenen over de afgelopen 10 dagen
     const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
     const userJobsLast10Days = allJobsHistory.filter(j => 
         j.driver.toLowerCase() === account.username.toLowerCase() && j.timestamp >= tenDaysAgo
@@ -181,7 +179,6 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// Main API
 app.get('/api/haulmp', (req, res) => {
     const formattedDrivers = accountsDatabase.map(m => ({
         username: m.username,
@@ -195,14 +192,13 @@ app.get('/api/haulmp', (req, res) => {
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
         drivers: formattedDrivers.length.toString(),
         drivers_list: formattedDrivers,
-        recent_jobs: allJobsHistory.slice(0, 10), // Bovenste 10 recente ritten
+        recent_jobs: allJobsHistory.slice(0, 10),
         absence: absenceList,
         gallery: galleryPhotos,
         badges: customBadges
     });
 });
 
-// Afwezigheid Indienen
 app.post('/api/absence', (req, res) => {
     const { username, fromDate, toDate, reason } = req.body;
     if (!username || !fromDate || !toDate) {
@@ -223,13 +219,12 @@ app.post('/api/absence', (req, res) => {
     res.json({ success: true, message: 'Afwezigheid succesvol ingediend!' });
 });
 
-// Afwezigheid Status (Directeur & Onder Directeur)
 app.post('/api/absence/status', (req, res) => {
     const { absenceId, newStatus, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account || !account.role.toLowerCase().includes('directeur')) {
-        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directie kunnen dit goedkeuren of afwijzen.' });
+        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directie kunnen dit wijzigen.' });
     }
 
     const item = absenceList.find(a => a.id === absenceId);
@@ -241,7 +236,6 @@ app.post('/api/absence/status', (req, res) => {
     res.status(404).json({ success: false, message: 'Afwezigheidsverzoek niet gevonden.' });
 });
 
-// Foto Upload
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const username = req.body.username;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
@@ -263,7 +257,6 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     res.json({ success: true, message: 'Foto geüpload en direct zichtbaar!' });
 });
 
-// Foto Verwijderen
 app.delete('/api/gallery/:id', (req, res) => {
     const photoId = req.params.id;
     const username = req.query.username;
@@ -271,14 +264,13 @@ app.delete('/api/gallery/:id', (req, res) => {
     const role = account ? account.role.toLowerCase() : '';
 
     if (!account || (!role.includes('directeur') && !role.includes('management'))) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om foto\'s te verwijderen.' });
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     galleryPhotos = galleryPhotos.filter(p => p.id !== photoId);
     res.json({ success: true, message: 'Foto succesvol verwijderd.' });
 });
 
-// Badges Toekennen (Directie, Management, Leidinggevenden)
 app.post('/api/badges', (req, res) => {
     const { title, targetUser, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
@@ -299,7 +291,6 @@ app.post('/api/badges', (req, res) => {
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
-// Badges Verwijderen
 app.delete('/api/badges/:id', (req, res) => {
     const badgeId = req.params.id;
     const username = req.query.username;
