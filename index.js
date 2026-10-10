@@ -13,32 +13,6 @@ let totalDistanceKm = 16200;
 
 let recentJobs = [
     { from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km" },
-    {Om de gewenste kleuren op basis van trefwoorden (*"bevat"*) mee te geven aan het dashboard, kunnen we een **`color`** eigenschap toevoegen aan elk lid in de `drivers_list`. 
-
-Met een kleine hulpprogramma-functie (`getRoleColor`) kijkt het script naar de tekst in de rol en kent het automatisch de juiste kleurcode toe.
-
----
-
-### Aangepaste `index.js`
-
-Vervang je gehele `index.js` door onderstaande code:
-
-```javascript
-const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
-
-// Beginstanden (worden automatisch opgehoogd bij nieuwe ritten)
-let totalDeliveries = 19;
-let totalDistanceKm = 16200;
-
-let recentJobs = [
-    { from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km" },
     { from: "Rennes", to: "Bordeaux", driver: "itzchaotic_", cargo: "Benzine", distance: "477 km" },
     { from: "Бања Лука", to: "Rennes", driver: "ItzChaotic_", cargo: "Wiellader", distance: "2.041 km" },
     { from: "Ljubljana", to: "Rennes", driver: "MJGamerNL", cargo: "Aluminium Blokken", distance: "1.746 km" }
@@ -56,11 +30,10 @@ const rawDriversList = [
     { username: "JoeyKj", role: "Leidinggevende" }
 ];
 
-// Functie om de kleur te bepalen op basis van de roltitel ("bevat")
+// Functie om de kleur te bepalen op basis van trefwoorden in de roltitel
 function getRoleColor(role) {
     const r = (role || '').toLowerCase();
     
-    // De volgorde is belangrijk: 'Onder Directeur' moet voor 'Directeur' gecheckt worden
     if (r.includes('onder directeur')) return 'orange';  // Oranje
     if (r.includes('directeur')) return 'red';           // Rood
     if (r.includes('management')) return 'yellow';       // Geel
@@ -68,7 +41,7 @@ function getRoleColor(role) {
     if (r.includes('senior werknemer')) return 'blue';   // Blauw
     if (r.includes('werknemer')) return 'purple';        // Paars
     
-    return 'gray'; // Standaardkleur indien er geen match is
+    return 'gray'; // Standaardkleur
 }
 
 const client = new Client({
@@ -84,7 +57,6 @@ client.on('ready', () => {
     fetchDiscordLogs();
 });
 
-// Zodra er een nieuwe rit in Discord komt: verwerk rit + hoog de totalen op!
 client.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) {
         parseAndAddJob(message, true);
@@ -181,7 +153,6 @@ async function fetchDiscordLogs() {
 app.get('/api/haulmp', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
-    // Dynamisch toevoegen van het 'color' veld op basis van de rolnaam
     const formattedDrivers = rawDriversList.map(m => ({
         username: m.username,
         role: m.role,
@@ -204,5 +175,5 @@ if (DISCORD_BOT_TOKEN) {
 }
 
 app.listen(PORT, () => {
-    console.log(`Automatische teller-proxy met rolkleuren actief op poort ${PORT}`);
+    console.log(`Proxy actief op poort ${PORT}`);
 });
