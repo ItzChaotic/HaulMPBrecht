@@ -1,7 +1,7 @@
 {
   "name": "haulmp-proxy",
   "version": "1.0.0",
-  "description": "Live Discord Webhook Proxy voor HaulMP VTC data",
+  "description": "Live Proxy, Fotogalerij & Personeelsportaal voor Brecht Transport B.V.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
