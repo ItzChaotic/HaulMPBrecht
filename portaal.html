@@ -87,7 +87,7 @@
     <div class="login-wrapper" id="login-section">
         <div class="login-card">
             <h2 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-lock"></i> Personeel Portaal</h2>
-            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Meld je aan met je persoonlijke accountsgegevens.</p>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Meld je aan met je persoonlijke accountgegevens.</p>
             
             <label style="font-size:0.85rem; color:var(--text-muted);">Gebruikersnaam</label>
             <input type="text" id="login-user" placeholder="Bijv. MJGamerNL" class="form-input">
@@ -209,6 +209,19 @@
     <script>
         let currentUser = null;
 
+        // Controleer bij het laden of er al een actieve sessie bestaat in sessionStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = sessionStorage.getItem('brecht_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    showDashboard();
+                } catch(e) {
+                    sessionStorage.removeItem('brecht_user');
+                }
+            }
+        });
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-page').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
@@ -231,6 +244,8 @@
                 const data = await res.json();
                 if (res.ok && data.success) {
                     currentUser = data;
+                    // Sla de ingelogde gebruiker op in sessionStorage
+                    sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
                     showDashboard();
                 } else {
                     errorDiv.innerText = data.message || 'Onjuiste gegevens.';
@@ -242,6 +257,8 @@
 
         function logout() {
             currentUser = null;
+            // Verwijder de sessie bij uitloggen
+            sessionStorage.removeItem('brecht_user');
             document.getElementById('login-section').style.display = 'flex';
             document.getElementById('dashboard-section').style.display = 'none';
             document.getElementById('user-header-info').style.display = 'none';
