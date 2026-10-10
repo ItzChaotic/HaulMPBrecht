@@ -22,19 +22,14 @@
         body { background: var(--bg-base); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
 
         header {
-            background: rgba(25, 2, 2, 0.95);
-            border-bottom: 1px solid var(--border-red);
-            padding: 15px 30px;
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(25, 2, 2, 0.95); border-bottom: 1px solid var(--border-red);
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
         }
 
         .portal-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; font-weight: bold; }
         .portal-logo { width: 36px; height: 36px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
 
-        /* Login Layout */
-        .login-wrapper {
-            flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px;
-        }
+        .login-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .login-card {
             background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px;
             padding: 40px; max-width: 450px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
@@ -50,27 +45,18 @@
         }
         .btn-red:hover { background: var(--accent-red); box-shadow: 0 0 15px rgba(255,51,51,0.5); }
 
-        /* Dashboard Layout */
-        .dashboard-container {
-            display: none; flex: 1; max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px;
-        }
+        .dashboard-container { display: none; flex: 1; max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; }
 
-        .dash-nav {
-            display: flex; gap: 12px; border-bottom: 1px solid var(--border-red); padding-bottom: 15px; margin-bottom: 30px; flex-wrap: wrap;
-        }
+        .dash-nav { display: flex; gap: 12px; border-bottom: 1px solid var(--border-red); padding-bottom: 15px; margin-bottom: 30px; flex-wrap: wrap; }
         .nav-tab {
             background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-red);
             padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s;
         }
         .nav-tab.active, .nav-tab:hover { background: var(--primary-light); color: white; border-color: var(--accent-red); }
 
-        .dash-card {
-            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 25px; margin-bottom: 25px;
-        }
+        .dash-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 25px; margin-bottom: 25px; }
 
-        .badge-status {
-            padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-block;
-        }
+        .badge-status { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
         .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
         .status-approved { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid #28a745; }
         .status-rejected { background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid #dc3545; }
@@ -98,7 +84,6 @@
         </div>
     </header>
 
-    <!-- INLOGSCHERM -->
     <div class="login-wrapper" id="login-section">
         <div class="login-card">
             <h2 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-lock"></i> Personeel Portaal</h2>
@@ -119,9 +104,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="dashboard-container" id="dashboard-section">
-        
         <div class="dash-nav" id="tab-buttons">
             <button class="nav-tab active" onclick="switchTab('tab-overview')"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
             <button class="nav-tab" onclick="switchTab('tab-absence')"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
@@ -129,7 +112,6 @@
             <button class="nav-tab" id="management-tab-btn" style="display:none;" onclick="switchTab('tab-management')"><i class="fa-solid fa-user-gear"></i> Management & Leden</button>
         </div>
 
-        <!-- TAB 1: OVERZICHT -->
         <div id="tab-overview" class="tab-page">
             <div class="dash-card">
                 <h2 id="welcome-title" style="color:var(--accent-red);">Hallo!</h2>
@@ -151,12 +133,9 @@
             </div>
         </div>
 
-        <!-- TAB 2: AFWEZIGHEID -->
         <div id="tab-absence" class="tab-page" style="display:none;">
             <div class="dash-card">
                 <h3><i class="fa-solid fa-pen-to-square"></i> Afwezigheid Doorgeven</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Meld hier je vakantie of afwezigheid aan bij de directie.</p>
-                
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                     <div>
                         <label style="font-size:0.85rem; color:var(--text-muted);">Van datum:</label>
@@ -183,31 +162,25 @@
                             <th id="th-actions" style="display:none;">Acties (Directie)</th>
                         </tr>
                     </thead>
-                    <tbody id="absence-table-body">
-                        <!-- Dynamisch -->
-                    </tbody>
+                    <tbody id="absence-table-body"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- TAB 3: FOTO UPLOADEN -->
         <div id="tab-upload" class="tab-page" style="display:none;">
             <div class="dash-card">
                 <h3><i class="fa-solid fa-file-arrow-up"></i> Foto Uploaden naar Galerij</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin:10px 0;">Selecteer een foto van je vrachtwagen vanaf je computer of telefoon. Deze komt direct live op de website.</p>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin:10px 0;">Selecteer een foto van je vrachtwagen vanaf je computer of telefoon.</p>
                 <input type="file" id="photo-file" accept="image/*" class="form-input">
                 <button onclick="uploadPhoto()" class="btn-red" style="width:auto; padding:10px 25px;">Uploaden</button>
             </div>
 
             <div class="dash-card">
                 <h3><i class="fa-solid fa-images"></i> Galerij Beheren (Directie & Management)</h3>
-                <div id="gallery-manage-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
-                    <!-- Dynamisch met verwijderknoppen -->
-                </div>
+                <div id="gallery-manage-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;"></div>
             </div>
         </div>
 
-        <!-- TAB 4: MANAGEMENT & LEDEN -->
         <div id="tab-management" class="tab-page" style="display:none;">
             <div class="dash-card" id="badge-assign-box" style="display:none;">
                 <h3><i class="fa-solid fa-award"></i> Badge Toekennen</h3>
@@ -227,13 +200,10 @@
                             <th>Rol</th>
                         </tr>
                     </thead>
-                    <tbody id="members-table-body">
-                        <!-- Dynamisch -->
-                    </tbody>
+                    <tbody id="members-table-body"></tbody>
                 </table>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -242,7 +212,6 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-page').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-            
             document.getElementById(tabId).style.display = 'block';
             event.currentTarget.classList.add('active');
         }
@@ -251,7 +220,6 @@
             const username = document.getElementById('login-user').value;
             const password = document.getElementById('login-pass').value;
             const errorDiv = document.getElementById('login-error');
-
             errorDiv.innerText = "Bezig met inloggen...";
 
             try {
@@ -260,9 +228,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-
                 const data = await res.json();
-                
                 if (res.ok && data.success) {
                     currentUser = data;
                     showDashboard();
@@ -288,21 +254,17 @@
 
             document.getElementById('user-display-name').innerText = currentUser.username;
             document.getElementById('welcome-title').innerText = `Hallo ${currentUser.username}! (${currentUser.role})`;
-
             document.getElementById('user-stat-deliveries').innerText = currentUser.stats.deliveries;
             document.getElementById('user-stat-distance').innerText = currentUser.stats.distance;
 
             const isDirectie = currentUser.role.toLowerCase().includes('directeur');
             const isManagement = isDirectie || currentUser.role.toLowerCase().includes('management');
 
-            if (isManagement) {
-                document.getElementById('management-tab-btn').style.display = 'inline-block';
-            }
+            if (isManagement) document.getElementById('management-tab-btn').style.display = 'inline-block';
             if (isDirectie) {
                 document.getElementById('badge-assign-box').style.display = 'block';
                 document.getElementById('th-actions').style.display = 'table-cell';
             }
-
             refreshData();
         }
 
@@ -310,7 +272,6 @@
             const res = await fetch('https://haulmpbrecht.onrender.com/api/haulmp');
             const data = await res.json();
 
-            // Afwezigheid Tabel
             const absenceTbody = document.getElementById('absence-table-body');
             absenceTbody.innerHTML = '';
             const isDirectie = currentUser.role.toLowerCase().includes('directeur');
@@ -320,13 +281,7 @@
                 if (a.status === 'Goedgekeurd') statusBadge = `<span class="badge-status status-approved">Goedgekeurd</span>`;
                 if (a.status === 'Afgewezen') statusBadge = `<span class="badge-status status-rejected">Afgewezen</span>`;
 
-                let actionBtns = '';
-                if (isDirectie) {
-                    actionBtns = `<td>
-                        <button onclick="changeAbsenceStatus('${a.id}', 'Goedgekeurd')" class="admin-btn btn-approve">✓</button>
-                        <button onclick="changeAbsenceStatus('${a.id}', 'Afgewezen')" class="admin-btn btn-reject">✗</button>
-                    </td>`;
-                }
+                let actionBtns = isDirectie ? `<td><button onclick="changeAbsenceStatus('${a.id}', 'Goedgekeurd')" class="admin-btn btn-approve">✓</button> <button onclick="changeAbsenceStatus('${a.id}', 'Afgewezen')" class="admin-btn btn-reject">✗</button></td>` : '';
 
                 absenceTbody.insertAdjacentHTML('beforeend', `
                     <tr>
@@ -339,17 +294,12 @@
                 `);
             });
 
-            // Galerij Beheren met Verwijderknop
             const galleryManage = document.getElementById('gallery-manage-container');
             galleryManage.innerHTML = '';
             const isManagement = currentUser.role.toLowerCase().includes('directeur') || currentUser.role.toLowerCase().includes('management');
 
             data.gallery.forEach(p => {
-                let deleteBtn = '';
-                if (isManagement) {
-                    deleteBtn = `<button onclick="deletePhoto('${p.id}')" class="admin-btn btn-delete" style="margin-top:8px; width:100%;"><i class="fa-solid fa-trash"></i> Verwijderen</button>`;
-                }
-
+                let deleteBtn = isManagement ? `<button onclick="deletePhoto('${p.id}')" class="admin-btn btn-delete" style="margin-top:8px; width:100%;"><i class="fa-solid fa-trash"></i> Verwijderen</button>` : '';
                 galleryManage.insertAdjacentHTML('beforeend', `
                     <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; border:1px solid var(--border-red);">
                         <img src="${p.url}" style="width:100%; height:120px; object-fit:cover; border-radius:6px;">
@@ -359,16 +309,10 @@
                 `);
             });
 
-            // Leden Tabel
             const membersTbody = document.getElementById('members-table-body');
             membersTbody.innerHTML = '';
             data.drivers_list.forEach(m => {
-                membersTbody.insertAdjacentHTML('beforeend', `
-                    <tr>
-                        <td><b>${m.username}</b></td>
-                        <td>${m.role}</td>
-                    </tr>
-                `);
+                membersTbody.insertAdjacentHTML('beforeend', `<tr><td><b>${m.username}</b></td><td>${m.role}</td></tr>`);
             });
         }
 
@@ -376,11 +320,7 @@
             const fromDate = document.getElementById('abs-from').value;
             const toDate = document.getElementById('abs-to').value;
             const reason = document.getElementById('abs-reason').value;
-
-            if (!fromDate || !toDate) {
-                alert('Selecteer een van- en tot datum!');
-                return;
-            }
+            if (!fromDate || !toDate) { alert('Selecteer datums!'); return; }
 
             const res = await fetch('https://haulmpbrecht.onrender.com/api/absence', {
                 method: 'POST',
@@ -405,19 +345,13 @@
 
         async function uploadPhoto() {
             const fileInput = document.getElementById('photo-file');
-            if (fileInput.files.length === 0) {
-                alert('Selecteer eerst een bestand!');
-                return;
-            }
+            if (fileInput.files.length === 0) { alert('Selecteer een bestand!'); return; }
 
             const formData = new FormData();
             formData.append('photo', fileInput.files[0]);
             formData.append('username', currentUser.username);
 
-            const res = await fetch('https://haulmpbrecht.onrender.com/api/gallery', {
-                method: 'POST',
-                body: formData
-            });
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/gallery', { method: 'POST', body: formData });
             const data = await res.json();
             alert(data.message);
             fileInput.value = '';
@@ -426,10 +360,7 @@
 
         async function deletePhoto(photoId) {
             if (!confirm('Weet je zeker dat je deze foto wilt verwijderen?')) return;
-
-            const res = await fetch(`https://haulmpbrecht.onrender.com/api/gallery/${photoId}?username=${currentUser.username}`, {
-                method: 'DELETE'
-            });
+            const res = await fetch(`https://haulmpbrecht.onrender.com/api/gallery/${photoId}?username=${currentUser.username}`, { method: 'DELETE' });
             const data = await res.json();
             alert(data.message);
             refreshData();
@@ -438,7 +369,6 @@
         async function awardBadge() {
             const title = document.getElementById('badge-title').value;
             const targetUser = document.getElementById('badge-user').value;
-
             const res = await fetch('https://haulmpbrecht.onrender.com/api/badges', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
