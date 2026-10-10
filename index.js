@@ -13,10 +13,63 @@ let totalDistanceKm = 16200;
 
 let recentJobs = [
     { from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km" },
+    {Om de gewenste kleuren op basis van trefwoorden (*"bevat"*) mee te geven aan het dashboard, kunnen we een **`color`** eigenschap toevoegen aan elk lid in de `drivers_list`. 
+
+Met een kleine hulpprogramma-functie (`getRoleColor`) kijkt het script naar de tekst in de rol en kent het automatisch de juiste kleurcode toe.
+
+---
+
+### Aangepaste `index.js`
+
+Vervang je gehele `index.js` door onderstaande code:
+
+```javascript
+const express = require('express');
+const { Client, GatewayIntentBits } = require('discord.js');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
+
+// Beginstanden (worden automatisch opgehoogd bij nieuwe ritten)
+let totalDeliveries = 19;
+let totalDistanceKm = 16200;
+
+let recentJobs = [
+    { from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km" },
     { from: "Rennes", to: "Bordeaux", driver: "itzchaotic_", cargo: "Benzine", distance: "477 km" },
     { from: "Бања Лука", to: "Rennes", driver: "ItzChaotic_", cargo: "Wiellader", distance: "2.041 km" },
     { from: "Ljubljana", to: "Rennes", driver: "MJGamerNL", cargo: "Aluminium Blokken", distance: "1.746 km" }
 ];
+
+// Ledenlijst met rolnamen
+const rawDriversList = [
+    { username: "MJGamerNL", role: "Directeur" },
+    { username: "ItzChaotic_", role: "Onder Directeur / Development" },
+    { username: "Ramona", role: "Onder Directeur" },
+    { username: "JoeyKj", role: "Management" },
+    { username: "Jellybear", role: "Management" },
+    { username: "Dansco54", role: "Leidinggevende" },
+    { username: "Zinnorax", role: "Leidinggevende" },
+    { username: "JoeyKj", role: "Leidinggevende" }
+];
+
+// Functie om de kleur te bepalen op basis van de roltitel ("bevat")
+function getRoleColor(role) {
+    const r = (role || '').toLowerCase();
+    
+    // De volgorde is belangrijk: 'Onder Directeur' moet voor 'Directeur' gecheckt worden
+    if (r.includes('onder directeur')) return 'orange';  // Oranje
+    if (r.includes('directeur')) return 'red';           // Rood
+    if (r.includes('management')) return 'yellow';       // Geel
+    if (r.includes('leidinggevende')) return 'green';    // Groen
+    if (r.includes('senior werknemer')) return 'blue';   // Blauw
+    if (r.includes('werknemer')) return 'purple';        // Paars
+    
+    return 'gray'; // Standaardkleur indien er geen match is
+}
 
 const client = new Client({
     intents: [
@@ -64,10 +117,8 @@ function parseAndAddJob(message, isLiveNew = false) {
                 cargo = description.split('\n')[0].trim();
             }
 
-            // Haal het getal uit de afstandsstring (bijv "478 km" -> 478)
             const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
 
-            // Als het een gloednieuwe rit is die live binnenkomt: telt hij mee in de totalen
             if (isLiveNew) {
                 totalDeliveries += 1;
                 totalDistanceKm += kmAmount;
@@ -130,21 +181,18 @@ async function fetchDiscordLogs() {
 app.get('/api/haulmp', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
-    // Geef geformatteerde data terug aan het dashboard
+    // Dynamisch toevoegen van het 'color' veld op basis van de rolnaam
+    const formattedDrivers = rawDriversList.map(m => ({
+        username: m.username,
+        role: m.role,
+        color: getRoleColor(m.role)
+    }));
+
     res.json({
         deliveries: totalDeliveries.toString(),
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
-        drivers: "5",
-        drivers_list: [
-            { username: "MJGamerNL", role: "Directeur" },
-            { username: "ItzChaotic_", role: "Onder Directeur / Development" },
-            { username: "Ramona", role: "Onder Directeur" },
-            { username: "JoeyKj", role: "Management" },
-            { username: "Jellybear", role: "Management" },
-            { username: "Dansco54", role: "Leidinggevende" },
-            { username: "Zinnorax", role: "Leidinggevende" },
-            { username: "JoeyKj", role: "Leidinggevende" }
-        ],
+        drivers: formattedDrivers.length.toString(),
+        drivers_list: formattedDrivers,
         recent_jobs: recentJobs
     });
 });
@@ -156,5 +204,5 @@ if (DISCORD_BOT_TOKEN) {
 }
 
 app.listen(PORT, () => {
-    console.log(`Automatische teller-proxy actief op poort ${PORT}`);
+    console.log(`Automatische teller-proxy met rolkleuren actief op poort ${PORT}`);
 });
