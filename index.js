@@ -2,6 +2,44 @@ const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 
 const app = express();
+// Voeg deze regel direct onder 'const app = express();' toe als hij er nog niet staat:
+app.use(express.json());
+
+// En zorg dat je login route er zo uitziet:
+app.post('/api/login', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    
+    // Als het een preflight OPTIONS request is, direct succes retourneren
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    
+    const { username, password } = req.body;
+    
+    const account = accountsDatabase.find(
+        acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
+    );
+
+    if (!account) {
+        return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
+    }
+
+    const driverJobs = recentJobs.filter(j => j.driver.toLowerCase() === account.username.toLowerCase());
+    const driverKm = driverJobs.reduce((acc, curr) => acc + (parseInt(curr.distance.replace(/\D/g, ''), 10) || 0), 0);
+
+    res.json({
+        success: true,
+        username: account.username,
+        role: account.role,
+        color: getRoleColor(account.role),
+        stats: {
+            deliveries: driverJobs.length,
+            distance: `${driverKm.toLocaleString('nl-NL')} km`
+        }
+    });
+});
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
