@@ -6,14 +6,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(__dirname)); // Zorgt dat statische bestanden netjes geserveerd worden
+app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 } // Max 10MB
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// CORS Header Setup
+// CORS Middleware
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
@@ -30,9 +30,9 @@ const accountsDatabase = [
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
-    { username: "Jellybear", role: "JellyBearPass", role: "Management" },
-    { username: "Dansco54", role: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", role: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "Jellybear", password: "JellyBearPass", role: "Management" },
+    { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
+    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
 let absenceList = [];
@@ -46,11 +46,16 @@ let totalDeliveries = 19;
 let totalDistanceKm = 16200;
 
 let recentJobs = [
-    { from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km" },
-    { from: "Rennes", to: "Bordeaux", driver: "itzchaotic_", cargo: "Benzine", distance: "477 km" },
-    { from: "Бања Лука", to: "Rennes", driver: "ItzChaotic_", cargo: "Wiellader", distance: "2.041 km" },
-    { from: "Ljubljana", to: "Rennes", driver: "MJGamerNL", cargo: "Aluminium Blokken", distance: "1.746 km" }
+    { from: "Πάτρα", to: "Αθήνα", driver: "MJGamerNL", cargo: "Vaccinaties", distance: "319 km" },
+    { from: "Amsterdam", to: "Eindhoven", driver: "JoeyKj", cargo: "Chemische Sorbens", distance: "146 km" },
+    { from: "Αθήνα", to: "Λάρισα", driver: "MJGamerNL", cargo: "Benzine", distance: "303 km" },
+    { from: "Λάρισα", to: "Ιωάννινα", driver: "MJGamerNL", cargo: "Gebruikte verpakking", distance: "273 km" }
 ];
+
+function cleanText(text) {
+    if (!text) return '';
+    return text.replace(/[\*\_\`]/g, '').trim();
+}
 
 function getRoleColor(role) {
     const r = (role || '').toLowerCase();
@@ -92,20 +97,20 @@ function parseAndAddJob(message, isLiveNew = false) {
             const routeStr = title.includes('→') ? title : description;
             const parts = routeStr.split('→');
             
-            const from = parts[0]?.replace(/[\*\_\`]/g, '').trim() || 'Onbekend';
-            const to = parts[1]?.replace(/[\*\_\`]/g, '').trim() || 'Onbekend';
+            const from = cleanText(parts[0]) || 'Onbekend';
+            const to = cleanText(parts[1]) || 'Onbekend';
 
             let driver = 'Chauffeur';
             let distanceStr = '0';
             let cargo = 'Vracht';
 
             embed.fields?.forEach(f => {
-                if (f.name.toLowerCase().includes('driver')) driver = f.value.replace(/[\*\_\`]/g, '').trim();
-                if (f.name.toLowerCase().includes('distance')) distanceStr = f.value.replace(/[\*\_\`]/g, '').trim();
+                if (f.name.toLowerCase().includes('driver')) driver = cleanText(f.value);
+                if (f.name.toLowerCase().includes('distance')) distanceStr = cleanText(f.value);
             });
 
             if (description && !description.includes('→')) {
-                cargo = description.split('\n')[0].trim();
+                cargo = cleanText(description.split('\n')[0]);
             }
 
             const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
@@ -123,7 +128,7 @@ function parseAndAddJob(message, isLiveNew = false) {
                 distance: `${kmAmount.toLocaleString('nl-NL')} km` 
             });
             
-            // Bewaar de 10 meest recente ritten
+            // Houd maximaal 10 recente ritten bij
             recentJobs = recentJobs.slice(0, 10);
         }
     }
@@ -133,10 +138,10 @@ async function fetchDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-        const messages = await channel.messages.fetch({ limit: 25 });
+        const messages = await channel.messages.fetch({ limit: 30 });
         messages.forEach(msg => parseAndAddJob(msg, false));
     } catch (err) {
-        console.error('Fout bij ophalen Discord geschiedenis:', err.message);
+        console.error('Fout bij ophalen Discord logs:', err.message);
     }
 }
 
@@ -177,7 +182,7 @@ app.get('/api/haulmp', (req, res) => {
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
         drivers: formattedDrivers.length.toString(),
         drivers_list: formattedDrivers,
-        recent_jobs: recentJobs,
+        recent_jobs: recentJobs.slice(0, 10),
         absence: absenceList,
         gallery: galleryPhotos,
         badges: customBadges
@@ -226,7 +231,7 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account) return res.status(403).json({ success: false, message: 'Geen geldig account.' });
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerdf.' });
 
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
