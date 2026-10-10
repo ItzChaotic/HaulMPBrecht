@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personeelsportaal | Brecht Transport B.V.</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #0d0101;
+            --bg-card: rgba(35, 3, 3, 0.7);
+            --primary-light: #cc0000;
+            --accent-red: #ff3333;
+            --border-red: rgba(204, 0, 0, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #d0b8b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg-base); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+        header {
+            background: rgba(25, 2, 2, 0.95);
+            border-bottom: 1px solid var(--border-red);
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .portal-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; font-weight: bold; }
+        .portal-logo { width: 36px; height: 36px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+
+        /* Login Layout */
+        .login-wrapper {
+            flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .login-card {
+            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px;
+            padding: 40px; max-width: 450px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+        }
+        .form-input {
+            width: 100%; padding: 12px 16px; margin: 10px 0 20px 0;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-red);
+            color: white; border-radius: 10px; font-size: 0.95rem;
+        }
+        .btn-red {
+            width: 100%; padding: 12px; background: var(--primary-light); color: white;
+            border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-red:hover { background: var(--accent-red); box-shadow: 0 0 15px rgba(255,51,51,0.5); }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: none; flex: 1; max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px;
+        }
+
+        .dash-nav {
+            display: flex; gap: 12px; border-bottom: 1px solid var(--border-red); padding-bottom: 15px; margin-bottom: 30px; flex-wrap: wrap;
+        }
+        .nav-tab {
+            background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-red);
+            padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s;
+        }
+        .nav-tab.active, .nav-tab:hover { background: var(--primary-light); color: white; border-color: var(--accent-red); }
+
+        .dash-card {
+            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 25px; margin-bottom: 25px;
+        }
+
+        .badge-status {
+            padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-block;
+        }
+        .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
+        .status-approved { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid #28a745; }
+        .status-rejected { background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid #dc3545; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid rgba(204,0,0,0.15); font-size: 0.9rem; }
+        th { color: var(--accent-red); }
+
+        .admin-btn { padding: 6px 12px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+        .btn-approve { background: #28a745; color: white; }
+        .btn-reject { background: #dc3545; color: white; }
+        .btn-delete { background: #ff3333; color: white; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="portal-brand">
+            <div class="portal-logo">B</div>
+            <span>Brecht Transport B.V.</span>
+        </a>
+        <div id="user-header-info" style="display:none; align-items:center; gap:15px;">
+            <span id="user-display-name" style="font-weight:bold;"></span>
+            <button onclick="logout()" style="background:rgba(255,255,255,0.1); border:1px solid var(--border-red); color:white; padding:6px 12px; border-radius:8px; cursor:pointer;">Uitloggen</button>
+        </div>
+    </header>
+
+    <!-- INLOGSCHERM -->
+    <div class="login-wrapper" id="login-section">
+        <div class="login-card">
+            <h2 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-lock"></i> Personeel Portaal</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Meld je aan met je persoonlijke accountsgegevens.</p>
+            
+            <label style="font-size:0.85rem; color:var(--text-muted);">Gebruikersnaam</label>
+            <input type="text" id="login-user" placeholder="Bijv. MJGamerNL" class="form-input">
+
+            <label style="font-size:0.85rem; color:var(--text-muted);">Wachtwoord</label>
+            <input type="password" id="login-pass" placeholder="Je wachtwoord" class="form-input">
+
+            <button onclick="handleLogin()" class="btn-red"><i class="fa-solid fa-right-to-bracket"></i> Inloggen</button>
+            <div id="login-error" style="color:#ff4d4d; margin-top:12px; font-size:0.85rem; text-align:center;"></div>
+            
+            <div style="margin-top:20px; text-align:center;">
+                <a href="index.html" style="color:var(--text-muted); font-size:0.85rem; text-decoration:none;">← Terug naar de website</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard-container" id="dashboard-section">
+        
+        <div class="dash-nav" id="tab-buttons">
+            <button class="nav-tab active" onclick="switchTab('tab-overview')"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('tab-absence')"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
+            <button class="nav-tab" onclick="switchTab('tab-upload')"><i class="fa-solid fa-upload"></i> Foto Uploaden</button>
+            <button class="nav-tab" id="management-tab-btn" style="display:none;" onclick="switchTab('tab-management')"><i class="fa-solid fa-user-gear"></i> Management & Leden</button>
+        </div>
+
+        <!-- TAB 1: OVERZICHT -->
+        <div id="tab-overview" class="tab-page">
+            <div class="dash-card">
+                <h2 id="welcome-title" style="color:var(--accent-red);">Hallo!</h2>
+                <p style="color:var(--text-muted); margin-top:5px;">Welkom op het interne personeelsportaal van Brecht Transport B.V.</p>
+            </div>
+
+            <div class="dash-card">
+                <h3><i class="fa-solid fa-truck-fast"></i> Jouw Statistieken</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
+                    <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; border:1px solid var(--border-red);">
+                        <span style="color:var(--text-muted); font-size:0.85rem;">VOLBRACHTE RITTEN</span>
+                        <h2 id="user-stat-deliveries" style="color:#fff; margin-top:5px;">0</h2>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; border:1px solid var(--border-red);">
+                        <span style="color:var(--text-muted); font-size:0.85rem;">GEREDEN AFSTAND</span>
+                        <h2 id="user-stat-distance" style="color:#fff; margin-top:5px;">0 km</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: AFWEZIGHEID -->
+        <div id="tab-absence" class="tab-page" style="display:none;">
+            <div class="dash-card">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Afwezigheid Doorgeven</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Meld hier je vakantie of afwezigheid aan bij de directie.</p>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--text-muted);">Van datum:</label>
+                        <input type="date" id="abs-from" class="form-input" style="margin-bottom:10px;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--text-muted);">Tot datum:</label>
+                        <input type="date" id="abs-to" class="form-input" style="margin-bottom:10px;">
+                    </div>
+                </div>
+                <input type="text" id="abs-reason" placeholder="Reden (bijv. Vakantie, tentamens, ziekte)" class="form-input" style="margin-bottom:15px;">
+                <button onclick="submitAbsence()" class="btn-red" style="width:auto; padding:10px 25px;">Aanvraag Indienen</button>
+            </div>
+
+            <div class="dash-card">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Ingediende Afwezigheden</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Naam</th>
+                            <th>Periode</th>
+                            <th>Reden</th>
+                            <th>Status</th>
+                            <th id="th-actions" style="display:none;">Acties (Directie)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="absence-table-body">
+                        <!-- Dynamisch -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: FOTO UPLOADEN -->
+        <div id="tab-upload" class="tab-page" style="display:none;">
+            <div class="dash-card">
+                <h3><i class="fa-solid fa-file-arrow-up"></i> Foto Uploaden naar Galerij</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin:10px 0;">Selecteer een foto van je vrachtwagen vanaf je computer of telefoon. Deze komt direct live op de website.</p>
+                <input type="file" id="photo-file" accept="image/*" class="form-input">
+                <button onclick="uploadPhoto()" class="btn-red" style="width:auto; padding:10px 25px;">Uploaden</button>
+            </div>
+
+            <div class="dash-card">
+                <h3><i class="fa-solid fa-images"></i> Galerij Beheren (Directie & Management)</h3>
+                <div id="gallery-manage-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
+                    <!-- Dynamisch met verwijderknoppen -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MANAGEMENT & LEDEN -->
+        <div id="tab-management" class="tab-page" style="display:none;">
+            <div class="dash-card" id="badge-assign-box" style="display:none;">
+                <h3><i class="fa-solid fa-award"></i> Badge Toekennen</h3>
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                    <input type="text" id="badge-title" placeholder="Badge Naam (bijv. Nachtrakker)" class="form-input" style="flex:1; margin:0;">
+                    <input type="text" id="badge-user" placeholder="Voor gebruiker (bijv. MJGamerNL)" class="form-input" style="flex:1; margin:0;">
+                    <button onclick="awardBadge()" class="btn-red" style="width:auto; padding:10px 20px;">Toekennen</button>
+                </div>
+            </div>
+
+            <div class="dash-card">
+                <h3><i class="fa-solid fa-users"></i> Personeelsoverzicht</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Gebruikersnaam</th>
+                            <th>Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        <!-- Dynamisch -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-page').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            const errorDiv = document.getElementById('login-error');
+
+            errorDiv.innerText = "Bezig met inloggen...";
+
+            try {
+                const res = await fetch('https://haulmpbrecht.onrender.com/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    currentUser = data;
+                    showDashboard();
+                } else {
+                    errorDiv.innerText = data.message || 'Onjuiste gegevens.';
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Kan geen verbinding maken met de server.';
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('login-section').style.display = 'flex';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('user-header-info').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('user-header-info').style.display = 'flex';
+
+            document.getElementById('user-display-name').innerText = currentUser.username;
+            document.getElementById('welcome-title').innerText = `Hallo ${currentUser.username}! (${currentUser.role})`;
+
+            document.getElementById('user-stat-deliveries').innerText = currentUser.stats.deliveries;
+            document.getElementById('user-stat-distance').innerText = currentUser.stats.distance;
+
+            const isDirectie = currentUser.role.toLowerCase().includes('directeur');
+            const isManagement = isDirectie || currentUser.role.toLowerCase().includes('management');
+
+            if (isManagement) {
+                document.getElementById('management-tab-btn').style.display = 'inline-block';
+            }
+            if (isDirectie) {
+                document.getElementById('badge-assign-box').style.display = 'block';
+                document.getElementById('th-actions').style.display = 'table-cell';
+            }
+
+            refreshData();
+        }
+
+        async function refreshData() {
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/haulmp');
+            const data = await res.json();
+
+            // Afwezigheid Tabel
+            const absenceTbody = document.getElementById('absence-table-body');
+            absenceTbody.innerHTML = '';
+            const isDirectie = currentUser.role.toLowerCase().includes('directeur');
+
+            data.absence.forEach(a => {
+                let statusBadge = `<span class="badge-status status-pending">In behandeling</span>`;
+                if (a.status === 'Goedgekeurd') statusBadge = `<span class="badge-status status-approved">Goedgekeurd</span>`;
+                if (a.status === 'Afgewezen') statusBadge = `<span class="badge-status status-rejected">Afgewezen</span>`;
+
+                let actionBtns = '';
+                if (isDirectie) {
+                    actionBtns = `<td>
+                        <button onclick="changeAbsenceStatus('${a.id}', 'Goedgekeurd')" class="admin-btn btn-approve">✓</button>
+                        <button onclick="changeAbsenceStatus('${a.id}', 'Afgewezen')" class="admin-btn btn-reject">✗</button>
+                    </td>`;
+                }
+
+                absenceTbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${a.username}</b></td>
+                        <td>${a.fromDate} t/m ${a.toDate}</td>
+                        <td>${a.reason}</td>
+                        <td>${statusBadge}</td>
+                        ${actionBtns}
+                    </tr>
+                `);
+            });
+
+            // Galerij Beheren met Verwijderknop
+            const galleryManage = document.getElementById('gallery-manage-container');
+            galleryManage.innerHTML = '';
+            const isManagement = currentUser.role.toLowerCase().includes('directeur') || currentUser.role.toLowerCase().includes('management');
+
+            data.gallery.forEach(p => {
+                let deleteBtn = '';
+                if (isManagement) {
+                    deleteBtn = `<button onclick="deletePhoto('${p.id}')" class="admin-btn btn-delete" style="margin-top:8px; width:100%;"><i class="fa-solid fa-trash"></i> Verwijderen</button>`;
+                }
+
+                galleryManage.insertAdjacentHTML('beforeend', `
+                    <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; border:1px solid var(--border-red);">
+                        <img src="${p.url}" style="width:100%; height:120px; object-fit:cover; border-radius:6px;">
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Door: ${p.uploadedBy}</div>
+                        ${deleteBtn}
+                    </div>
+                `);
+            });
+
+            // Leden Tabel
+            const membersTbody = document.getElementById('members-table-body');
+            membersTbody.innerHTML = '';
+            data.drivers_list.forEach(m => {
+                membersTbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${m.username}</b></td>
+                        <td>${m.role}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        async function submitAbsence() {
+            const fromDate = document.getElementById('abs-from').value;
+            const toDate = document.getElementById('abs-to').value;
+            const reason = document.getElementById('abs-reason').value;
+
+            if (!fromDate || !toDate) {
+                alert('Selecteer een van- en tot datum!');
+                return;
+            }
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/absence', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser.username, fromDate, toDate, reason })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshData();
+        }
+
+        async function changeAbsenceStatus(absenceId, newStatus) {
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/absence/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ absenceId, newStatus, username: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshData();
+        }
+
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photo-file');
+            if (fileInput.files.length === 0) {
+                alert('Selecteer eerst een bestand!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('photo', fileInput.files[0]);
+            formData.append('username', currentUser.username);
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/gallery', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            alert(data.message);
+            fileInput.value = '';
+            refreshData();
+        }
+
+        async function deletePhoto(photoId) {
+            if (!confirm('Weet je zeker dat je deze foto wilt verwijderen?')) return;
+
+            const res = await fetch(`https://haulmpbrecht.onrender.com/api/gallery/${photoId}?username=${currentUser.username}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshData();
+        }
+
+        async function awardBadge() {
+            const title = document.getElementById('badge-title').value;
+            const targetUser = document.getElementById('badge-user').value;
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/badges', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, targetUser, username: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshData();
+        }
+    </script>
+</body>
+</html>
