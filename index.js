@@ -90,7 +90,6 @@ function parseAndAddJob(message, isLiveNew = false) {
     let from = 'Onbekend', to = 'Onbekend', driver = 'Chauffeur', cargo = 'Vracht', distanceStr = '0';
     let timestamp = message.createdTimestamp || Date.now();
 
-    // Controleer of er embeds zijn
     if (message.embeds && message.embeds.length > 0) {
         const embed = message.embeds[0];
         const title = embed.title || '';
@@ -111,9 +110,7 @@ function parseAndAddJob(message, isLiveNew = false) {
         if (description && !description.includes('→')) {
             cargo = cleanText(description.split('\n')[0]);
         }
-    } 
-    // Fallback: Als het een gewoon tekstbericht is met pijltje
-    else if (message.content && message.content.includes('→')) {
+    } else if (message.content && message.content.includes('→')) {
         const parts = message.content.split('→');
         from = cleanText(parts[0]);
         to = cleanText(parts[1]);
@@ -153,7 +150,6 @@ async function fetchDiscordLogs() {
         if (!channel) return;
         const messages = await channel.messages.fetch({ limit: 100 });
         messages.forEach(msg => parseAndAddJob(msg, false));
-        console.log(`Geladen: ${allJobsHistory.length} ritten uit Discord.`);
     } catch (err) {
         console.error('Fout bij ophalen Discord logs:', err.message);
     }
@@ -281,6 +277,7 @@ app.delete('/api/gallery/:id', (req, res) => {
     res.json({ success: true, message: 'Foto succesvol verwijderd.' });
 });
 
+// Badges Toekennen
 app.post('/api/badges', (req, res) => {
     const { title, targetUser, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
@@ -290,9 +287,9 @@ app.post('/api/badges', (req, res) => {
     }
 
     const newBadge = { 
-        id: "badge-" + Date.now(), 
-        title, 
-        targetUser, 
+        id: "badge-" + Date.now() + "-" + Math.floor(Math.random() * 1000), 
+        title: title.trim(), 
+        targetUser: targetUser.trim(), 
         awardedBy: username,
         date: new Date().toLocaleDateString('nl-NL')
     };
@@ -301,6 +298,7 @@ app.post('/api/badges', (req, res) => {
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
+// Badges Verwijderen (Via ID)
 app.delete('/api/badges/:id', (req, res) => {
     const badgeId = req.params.id;
     const username = req.query.username;
@@ -310,8 +308,14 @@ app.delete('/api/badges/:id', (req, res) => {
         return res.status(403).json({ success: false, message: 'Geen rechten om badges te verwijderen.' });
     }
 
+    const initialLength = customBadges.length;
     customBadges = customBadges.filter(b => b.id !== badgeId);
-    res.json({ success: true, message: 'Badge ingetrokken/verwijderd.' });
+
+    if (customBadges.length < initialLength) {
+        res.json({ success: true, message: 'Badge succesvol ingetrokken!' });
+    } else {
+        res.status(404).json({ success: false, message: 'Badge niet gevonden.' });
+    }
 });
 
 if (DISCORD_BOT_TOKEN) {
