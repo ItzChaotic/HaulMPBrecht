@@ -6,9 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(express.static(__dirname)); // Zorgt dat statische bestanden netjes geserveerd worden
+
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 } // Max 10MB per foto
+    limits: { fileSize: 10 * 1024 * 1024 } // Max 10MB
 });
 
 // CORS Header Setup
@@ -16,27 +18,23 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
+    if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
 });
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
-// Database met Accounts & Rangen
 const accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
-    { username: "Jellybear", password: "JellyBearPass", role: "Management" },
-    { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "Jellybear", role: "JellyBearPass", role: "Management" },
+    { username: "Dansco54", role: "DanscoPass", role: "Leidinggevende" },
+    { username: "Zinnorax", role: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
-// In-Memory Data Opslag
 let absenceList = [];
 let customBadges = [];
 let galleryPhotos = [
@@ -124,7 +122,9 @@ function parseAndAddJob(message, isLiveNew = false) {
                 cargo, 
                 distance: `${kmAmount.toLocaleString('nl-NL')} km` 
             });
-            recentJobs = recentJobs.slice(0, 5);
+            
+            // Bewaar de 10 meest recente ritten
+            recentJobs = recentJobs.slice(0, 10);
         }
     }
 }
@@ -133,18 +133,13 @@ async function fetchDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-        const messages = await channel.messages.fetch({ limit: 15 });
+        const messages = await channel.messages.fetch({ limit: 25 });
         messages.forEach(msg => parseAndAddJob(msg, false));
     } catch (err) {
         console.error('Fout bij ophalen Discord geschiedenis:', err.message);
     }
 }
 
-// ==========================================
-// API ENDPOINTS
-// ==========================================
-
-// Inloggen
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const account = accountsDatabase.find(
@@ -170,7 +165,6 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// Algemene Website & Portaal Data
 app.get('/api/haulmp', (req, res) => {
     const formattedDrivers = accountsDatabase.map(m => ({
         username: m.username,
@@ -190,7 +184,6 @@ app.get('/api/haulmp', (req, res) => {
     });
 });
 
-// Afwezigheid Inloggen / Doorgeven
 app.post('/api/absence', (req, res) => {
     const { username, fromDate, toDate, reason } = req.body;
     if (!username || !fromDate || !toDate) {
@@ -211,7 +204,6 @@ app.post('/api/absence', (req, res) => {
     res.json({ success: true, message: 'Afwezigheid succesvol ingediend!' });
 });
 
-// Afwezigheid Status Wijzigen (Directeur & Onder Directeur)
 app.post('/api/absence/status', (req, res) => {
     const { absenceId, newStatus, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
@@ -229,18 +221,12 @@ app.post('/api/absence/status', (req, res) => {
     res.status(404).json({ success: false, message: 'Afwezigheidsverzoek niet gevonden.' });
 });
 
-// Foto Uploaden (Direct Live)
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const username = req.body.username;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
-    if (!account) {
-        return res.status(403).json({ success: false, message: 'Geen geldig account.' });
-    }
-
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
-    }
+    if (!account) return res.status(403).json({ success: false, message: 'Geen geldig account.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
 
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
@@ -256,7 +242,6 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     res.json({ success: true, message: 'Foto geüpload en direct zichtbaar in de galerij!' });
 });
 
-// Foto Verwijderen (Directeur, Onder Directeur & Management)
 app.delete('/api/gallery/:id', (req, res) => {
     const photoId = req.params.id;
     const username = req.query.username;
@@ -271,7 +256,6 @@ app.delete('/api/gallery/:id', (req, res) => {
     res.json({ success: true, message: 'Foto succesvol verwijderd.' });
 });
 
-// Badges Toekennen (Directeur & Onder Directeur)
 app.post('/api/badges', (req, res) => {
     const { title, targetUser, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
