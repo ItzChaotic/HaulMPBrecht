@@ -1,333 +1,738 @@
-const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
-const multer = require('multer');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.json());
-app.use(express.static(__dirname));
-
-const upload = multer({ 
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }
-});
-
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') return res.sendStatus(200);
-    next();
-});
-
-const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
-
-const accountsDatabase = [
-    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
-    { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
-    { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
-    { username: "Jellybear", password: "JellyBearPass", role: "Management" },
-    { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
-];
-
-let absenceList = [];
-let customBadges = []; 
-let galleryPhotos = [
-    { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" },
-    { id: "photo-2", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png", uploadedBy: "ItzChaotic_", date: "10-10-2026" }
-];
-
-let totalDeliveries = 19;
-let totalDistanceKm = 16200;
-let allJobsHistory = [
-    { id: "demo-1", from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km", kmAmount: 478, timestamp: Date.now() },
-    { id: "demo-2", from: "Amsterdam", to: "Eindhoven", driver: "JoeyKj", cargo: "Chemische Sorbens", distance: "146 km", kmAmount: 146, timestamp: Date.now() }
-];
-
-function cleanText(text) {
-    if (!text) return '';
-    return text.replace(/[\*\_\`]/g, '').trim();
-}
-
-function getRoleColor(role) {
-    const r = (role || '').toLowerCase();
-    if (r.includes('onder directeur')) return 'orange';
-    if (r.includes('directeur')) return 'red';
-    if (r.includes('management')) return 'yellow';
-    if (r.includes('leidinggevende')) return 'green';
-    return 'gray';
-}
-
-function canManageBadges(role) {
-    if (!role) return false;
-    const r = role.toLowerCase();
-    return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
-}
-
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
-});
-
-client.on('ready', () => {
-    console.log(`Discord Bot ingelogd als ${client.user.tag}`);
-    fetchDiscordLogs();
-});
-
-client.on('messageCreate', (message) => {
-    if (message.channelId === DISCORD_CHANNEL_ID) {
-        parseAndAddJob(message, true);
-    }
-});
-
-function parseAndAddJob(message, isLiveNew = false) {
-    let from = 'Onbekend', to = 'Onbekend', driver = 'Chauffeur', cargo = 'Vracht', distanceStr = '0';
-    let timestamp = message.createdTimestamp || Date.now();
-
-    if (message.embeds && message.embeds.length > 0) {
-        const embed = message.embeds[0];
-        const title = embed.title || '';
-        const description = embed.description || '';
-        
-        if (title.includes('→') || description.includes('→')) {
-            const routeStr = title.includes('→') ? title : description;
-            const parts = routeStr.split('→');
-            from = cleanText(parts[0]);
-            to = cleanText(parts[1]);
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brecht Transport B.V. | ETS2 VTC</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #110202;
+            --bg-card: rgba(51, 0, 0, 0.45);
+            --primary: #800000;
+            --primary-light: #cc0000;
+            --accent-red: #ff3333;
+            --border-red: rgba(204, 0, 0, 0.25);
+            --text-main: #ffffff;
+            --text-muted: #d0b8b8;
+            --glass-blur: blur(16px);
         }
 
-        embed.fields?.forEach(f => {
-            if (f.name.toLowerCase().includes('driver')) driver = cleanText(f.value);
-            if (f.name.toLowerCase().includes('distance')) distanceStr = cleanText(f.value);
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; padding-top: 5px; }
+
+        nav {
+            position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1200px; width: 95%;
+            background: rgba(35, 3, 3, 0.85); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-red); border-radius: 20px; padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; cursor: pointer; }
+        .logo-badge {
+            width: 40px; height: 40px; background: linear-gradient(135deg, #cc0000, #330000);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 20px; border: 1px solid rgba(255,255,255,0.2); color: #fff;
+        }
+
+        .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; }
+        .nav-links { display: flex; gap: 15px; list-style: none; align-items: center; }
+        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links button:hover { color: #fff; }
+
+        .btn-apply {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: #fff !important; padding: 10px 20px; border-radius: 12px; font-weight: 700 !important;
+            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        }
+
+        .btn-portal {
+            background: rgba(255, 255, 255, 0.08); color: #fff !important; padding: 10px 18px;
+            border-radius: 12px; font-weight: 700 !important; border: 1px solid var(--accent-red);
+            display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+
+        .btn-dashboard-tab {
+            background: var(--primary-light); color: #fff !important; padding: 10px 18px;
+            border-radius: 12px; font-weight: 700 !important; border: 1px solid #ff6666;
+            display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 0 15px rgba(255,51,51,0.4);
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .page-view { display: none; }
+        .page-view.active { display: block; }
+
+        .hero { text-align: center; padding: 40px 0 30px 0; }
+        .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3.2rem; font-weight: 700; margin-bottom: 16px; color: #fff; }
+        .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 680px; margin: 0 auto 36px auto; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 40px 0; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 24px; text-align: center; }
+        .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700; color: #fff; }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+
+        .section-header { text-align: center; margin: 40px 0 25px 0; }
+        .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; color: #fff; }
+        
+        .gallery-grid, .team-grid, .fleet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 20px; backdrop-filter: var(--glass-blur); }
+        .gallery-img, .fleet-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
+
+        .member-card { display: flex; align-items: center; gap: 16px; }
+        .member-avatar { width: 52px; height: 52px; border-radius: 14px; background: rgba(35, 10, 10, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); }
+        .member-role { display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; margin-top: 4px; }
+
+        .role-red { background: rgba(229, 62, 62, 0.2); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
+        .role-orange { background: rgba(221, 107, 32, 0.2); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.4); }
+        .role-yellow { background: rgba(214, 158, 46, 0.2); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
+        .role-green { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.4); }
+
+        .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(204,0,0,0.15); }
+        .trip-route { font-weight: bold; font-size: 1rem; color: #fff; }
+        .trip-details { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
+        .badge-tag { background: rgba(255, 51, 51, 0.2); border: 1px solid var(--accent-red); color: #ff9999; padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; margin: 2px; }
+
+        .form-input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: white; border-radius: 10px; }
+        .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-red:hover { background: var(--accent-red); }
+
+        .dash-nav { display: flex; gap: 10px; margin: 20px 0; border-bottom: 1px solid var(--border-red); padding-bottom: 12px; flex-wrap: wrap; }
+        .tab-btn { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-red); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .tab-btn.active { background: var(--primary-light); color: white; border-color: var(--accent-red); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid rgba(204,0,0,0.15); font-size: 0.9rem; }
+        th { color: var(--accent-red); }
+
+        .badge-status { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
+        .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
+        .status-approved { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid #28a745; }
+        .status-rejected { background: rgba(220, 53, 69, 0.2); color: #dc3545; border: 1px solid #dc3545; }
+
+        .admin-btn { padding: 4px 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+
+        #login-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center; }
+
+        footer { border-top: 1px solid var(--border-red); padding: 30px 0; text-align: center; color: var(--text-muted); margin-top: 40px; background: rgba(15, 2, 2, 0.85); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div onclick="switchView('home-view'); return false;" class="brand-logo">
+            <div class="logo-badge">B</div>
+            <div><div class="brand-title">BRECHT TRANSPORT B.V.</div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="javascript:void(0);" onclick="switchView('home-view'); return false;">Home</a></li>
+            <li><a href="#gallerij-sec">Fotogalerij</a></li>
+            <li><a href="#team">Het Team</a></li>
+            <li><a href="#vloot">Vloot</a></li>
+            <li><a href="#activiteit">Onderweg</a></li>
+            
+            <li id="nav-dashboard-tab" style="display:none;">
+                <button onclick="switchView('portal-view'); return false;" class="btn-dashboard-tab"><i class="fa-solid fa-gauge"></i> Portaal Dashboard</button>
+            </li>
+
+            <li id="nav-login-btn">
+                <button onclick="openLoginModal()" class="btn-portal"><i class="fa-solid fa-lock"></i> Inloggen</button>
+            </li>
+
+            <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> Solliciteer Direct</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        
+        <!-- HOME VIEW -->
+        <div id="home-view" class="page-view active">
+            <section class="hero">
+                <h1>Brecht Transport B.V.</h1>
+                <p>Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.</p>
+            </section>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-num" id="stat-distance">0 km</div><div class="stat-label">Gereden Afstand (30D)</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-deliveries">0</div><div class="stat-label">Leveringen Volbracht</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-drivers">0</div><div class="stat-label">Actieve Chauffeurs</div></div>
+            </div>
+
+            <div class="section-header" id="gallerij-sec">
+                <h2>Fotogalerij Preview</h2>
+                <p style="color:var(--text-muted);">Sfeerimpressies en snapshots van onze chauffeurs onderweg</p>
+            </div>
+            <div class="gallery-grid" id="public-gallery-container"></div>
+            <div style="text-align:center; margin-bottom:40px;">
+                <button onclick="switchView('gallery-view')" class="btn-portal"><i class="fa-solid fa-images"></i> Bekijk Volledig Foto-Archief</button>
+            </div>
+
+            <div class="section-header" id="team"><h2>Ons Team</h2></div>
+            <div class="team-grid" id="team-container"></div>
+
+            <div class="section-header" id="vloot"><h2>Onze Vloot</h2></div>
+            <div class="fleet-grid">
+                <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg" class="fleet-img"><div style="font-weight:bold;">Scania S 2016</div></div>
+                <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png" class="fleet-img"><div style="font-weight:bold;">Volvo FH 16</div></div>
+                <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/RealDaf.png" class="fleet-img"><div style="font-weight:bold;">DAF XF Euro 6</div></div>
+            </div>
+
+            <div class="section-header" id="activiteit">
+                <h2>Onderweg</h2>
+                <p style="color:var(--text-muted);">De 10 meest recente ritten van onze chauffeurs live uit Discord</p>
+            </div>
+            <div class="trips-card" id="trips-container" style="margin-bottom:50px;">
+                <p style="text-align:center; color:var(--text-muted);">Laden van recente ritten...</p>
+            </div>
+        </div>
+
+        <!-- FOTO ARCHIEF VIEW -->
+        <div id="gallery-view" class="page-view">
+            <div class="section-header">
+                <h2>Volledig Foto-Archief</h2>
+                <p style="color:var(--text-muted);">Zoek en bekijk alle geüploade foto's</p>
+            </div>
+            <div style="text-align:center; margin-bottom:20px;">
+                <input type="text" id="search-gallery" onkeyup="filterFullGallery()" placeholder="Zoek op chauffeur (bijv. MJGamerNL)..." class="form-input" style="max-width:400px; display:inline-block;">
+                <button onclick="switchView('home-view')" class="btn-portal" style="margin-left:10px;">← Terug naar Home</button>
+            </div>
+            <div class="gallery-grid" id="full-gallery-container"></div>
+        </div>
+
+        <!-- PERSONEELSPORTAAL VIEW -->
+        <div id="portal-view" class="page-view">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div>
+                    <h1 id="welcome-title" style="color:var(--accent-red); font-size:2rem;">Hallo!</h1>
+                    <p style="color:var(--text-muted);" id="user-role-display">Ingelogd op het personeelsportaal</p>
+                </div>
+                <div>
+                    <button onclick="logout()" class="btn-red" style="background:#444;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                    <button onclick="switchView('home-view')" class="btn-portal" style="margin-left:10px;">← Website Bekijken</button>
+                </div>
+            </div>
+
+            <div class="dash-nav">
+                <button class="tab-btn active" onclick="switchPortalTab('p-tab-stats')"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+                <button class="tab-btn" onclick="switchPortalTab('p-tab-absence')"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid Doorgeven</button>
+                <button class="tab-btn" onclick="switchPortalTab('p-tab-upload')"><i class="fa-solid fa-file-arrow-up"></i> Foto Uploaden</button>
+                <button class="tab-btn" id="mgt-tab-btn" style="display:none;" onclick="switchPortalTab('p-tab-mgt')"><i class="fa-solid fa-user-gear"></i> Management & Badges</button>
+            </div>
+
+            <div id="p-tab-stats" class="portal-tab-content">
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-truck-fast"></i> Jouw Statistieken (Afgelopen 10 Dagen)</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px;">
+                        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; border:1px solid var(--border-red);">
+                            <span style="color:var(--text-muted); font-size:0.85rem;">GEREDEN RITTEN (10D)</span>
+                            <h2 id="user-stat-deliveries" style="color:#fff; margin-top:5px;">0</h2>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; border:1px solid var(--border-red);">
+                            <span style="color:var(--text-muted); font-size:0.85rem;">GEREDEN AFSTAND (10D)</span>
+                            <h2 id="user-stat-distance" style="color:#fff; margin-top:5px;">0 km</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-award"></i> Mijn Behaalde Badges</h3>
+                    <div id="my-badges-container" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                        <span style="color:var(--text-muted); font-size:0.9rem;">Nog geen badges behaald.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="p-tab-absence" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-pen-to-square"></i> Afwezigheid Melden</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:10px;">
+                        <div><label style="font-size:0.85rem; color:var(--text-muted);">Van:</label><input type="date" id="abs-from" class="form-input"></div>
+                        <div><label style="font-size:0.85rem; color:var(--text-muted);">Tot:</label><input type="date" id="abs-to" class="form-input"></div>
+                    </div>
+                    <input type="text" id="abs-reason" placeholder="Reden (bijv. Vakantie)" class="form-input">
+                    <button onclick="submitAbsence()" class="btn-red">Aanvraag Indienen</button>
+                </div>
+
+                <div class="gallery-card" style="margin-top:20px;">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Afwezigheidsverzoeken</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Naam</th>
+                                <th>Periode</th>
+                                <th>Reden</th>
+                                <th>Status</th>
+                                <th id="th-admin-actions" style="display:none;">Acties (Directie)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="absence-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="p-tab-upload" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-upload"></i> Foto Uploaden</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin:10px 0;">Kies een foto vanaf je pc of telefoon. Deze komt direct live in de galerij.</p>
+                    <input type="file" id="photo-file" accept="image/*" class="form-input">
+                    <button onclick="uploadPhoto()" class="btn-red">Foto Uploaden</button>
+                </div>
+
+                <div class="gallery-card" style="margin-top:20px;">
+                    <h3><i class="fa-solid fa-images"></i> Beheer Geüploade Foto's</h3>
+                    <div id="gallery-manage-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:15px; margin-top:15px;"></div>
+                </div>
+            </div>
+
+            <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card" id="badge-box" style="display:none; margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-award"></i> Badge Toekennen</h3>
+                    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                        <input type="text" id="badge-title" placeholder="Badge Naam (bijv. Nachtrakker)" class="form-input" style="flex:1; margin:0;">
+                        <input type="text" id="badge-user" placeholder="Voor Gebruiker (bijv. MJGamerNL)" class="form-input" style="flex:1; margin:0;">
+                        <button onclick="awardBadge()" class="btn-red" style="white-space:nowrap;">Badge Geven</button>
+                    </div>
+                </div>
+
+                <!-- OVERZICHT & VERWIJDER TABEL VOOR BADGES -->
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-shield-halved"></i> Actieve Badges Beheren</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Badge Naam</th>
+                                <th>Gebruiker</th>
+                                <th>Toegekend Door</th>
+                                <th>Actie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-badges-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-users"></i> Personeelsoverzicht & Achievements</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Gebruikersnaam</th><th>Rol</th><th>Badges</th></tr>
+                        </thead>
+                        <tbody id="members-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- INLOG MODAL -->
+    <div id="login-modal">
+        <div class="gallery-card" style="max-width:400px; width:90%; padding:30px; border-color:var(--accent-red);">
+            <h2 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-lock"></i> Personeel Inloggen</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Meld je aan met je personeelsaccount.</p>
+            
+            <input type="text" id="login-user" placeholder="Gebruikersnaam" class="form-input">
+            <input type="password" id="login-pass" placeholder="Wachtwoord" class="form-input">
+
+            <button onclick="handleLogin()" class="btn-red" style="width:100%; margin-top:10px;">Inloggen</button>
+            <button onclick="closeLoginModal()" style="background:transparent; color:#aaa; border:none; width:100%; margin-top:10px; cursor:pointer;">Annuleren</button>
+            <div id="login-error" style="color:#ff4d4d; font-size:0.85rem; margin-top:10px; text-align:center;"></div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN LIGHTBOX -->
+    <div id="lightbox-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:3000; justify-content:center; align-items:center; flex-direction:column;">
+        <span onclick="closeLightbox()" style="position:absolute; top:25px; right:35px; color:#fff; font-size:2.5rem; cursor:pointer;">&times;</span>
+        <img id="lightbox-img" src="" style="max-width:90%; max-height:80vh; border-radius:12px; border:2px solid var(--border-red);">
+        <div id="lightbox-caption" style="margin-top:15px; color:var(--text-muted); font-size:1.1rem;"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden.</p>
+    </footer>
+
+    <script>
+        let currentUser = null;
+        let allGalleryPhotos = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = sessionStorage.getItem('brecht_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    updateNavForLoggedInUser();
+                } catch(e) {
+                    sessionStorage.removeItem('brecht_user');
+                }
+            }
+            loadData();
         });
 
-        if (description && !description.includes('→')) {
-            cargo = cleanText(description.split('\n')[0]);
+        function switchView(viewId) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    } else if (message.content && message.content.includes('→')) {
-        const parts = message.content.split('→');
-        from = cleanText(parts[0]);
-        to = cleanText(parts[1]);
-        driver = cleanText(message.author.username);
-        cargo = "Standaard Vracht";
-        distanceStr = "250 km";
-    } else {
-        return;
-    }
 
-    const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
-
-    if (isLiveNew) {
-        totalDeliveries += 1;
-        totalDistanceKm += kmAmount;
-    }
-
-    const jobObj = {
-        id: message.id || "job-" + Date.now(),
-        from,
-        to,
-        driver,
-        cargo,
-        distance: `${kmAmount.toLocaleString('nl-NL')} km`,
-        kmAmount,
-        timestamp
-    };
-
-    if (!allJobsHistory.some(j => j.id === jobObj.id)) {
-        allJobsHistory.unshift(jobObj);
-    }
-}
-
-async function fetchDiscordLogs() {
-    try {
-        const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
-        if (!channel) return;
-        const messages = await channel.messages.fetch({ limit: 100 });
-        messages.forEach(msg => parseAndAddJob(msg, false));
-    } catch (err) {
-        console.error('Fout bij ophalen Discord logs:', err.message);
-    }
-}
-
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    const account = accountsDatabase.find(
-        acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
-    );
-
-    if (!account) {
-        return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
-    }
-
-    const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
-    const userJobsLast10Days = allJobsHistory.filter(j => 
-        j.driver.toLowerCase() === account.username.toLowerCase() && j.timestamp >= tenDaysAgo
-    );
-
-    const driverKm = userJobsLast10Days.reduce((acc, curr) => acc + curr.kmAmount, 0);
-
-    res.json({
-        success: true,
-        username: account.username,
-        role: account.role,
-        color: getRoleColor(account.role),
-        canManageBadges: canManageBadges(account.role),
-        stats: {
-            deliveries: userJobsLast10Days.length,
-            distance: `${driverKm.toLocaleString('nl-NL')} km`
+        function openLoginModal() {
+            document.getElementById('login-modal').style.display = 'flex';
         }
-    });
-});
 
-app.get('/api/haulmp', (req, res) => {
-    const formattedDrivers = accountsDatabase.map(m => ({
-        username: m.username,
-        role: m.role,
-        color: getRoleColor(m.role),
-        badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
-    }));
-
-    res.json({
-        deliveries: totalDeliveries.toString(),
-        distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
-        drivers: formattedDrivers.length.toString(),
-        drivers_list: formattedDrivers,
-        recent_jobs: allJobsHistory.slice(0, 10),
-        absence: absenceList,
-        gallery: galleryPhotos,
-        badges: customBadges
-    });
-});
-
-app.post('/api/absence', (req, res) => {
-    const { username, fromDate, toDate, reason } = req.body;
-    if (!username || !fromDate || !toDate) {
-        return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
-    }
-
-    const newAbsence = {
-        id: "abs-" + Date.now(),
-        username,
-        fromDate,
-        toDate,
-        reason: reason || "Geen reden opgegeven",
-        status: "In behandeling",
-        dateSubmitted: new Date().toLocaleDateString('nl-NL')
-    };
-
-    absenceList.unshift(newAbsence);
-    res.json({ success: true, message: 'Afwezigheid succesvol ingediend!' });
-});
-
-app.post('/api/absence/status', (req, res) => {
-    const { absenceId, newStatus, username } = req.body;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account || !account.role.toLowerCase().includes('directeur')) {
-        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directie kunnen dit wijzigen.' });
-    }
-
-    const item = absenceList.find(a => a.id === absenceId);
-    if (item) {
-        item.status = newStatus;
-        return res.json({ success: true, message: `Status gewijzigd naar '${newStatus}'` });
-    }
-
-    res.status(404).json({ success: false, message: 'Afwezigheidsverzoek niet gevonden.' });
-});
-
-app.post('/api/gallery', upload.single('photo'), (req, res) => {
-    const username = req.body.username;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account) return res.status(403).json({ success: false, message: 'Geen geldig account.' });
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
-
-    const b64 = Buffer.from(req.file.buffer).toString('base64');
-    const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
-
-    const newPhoto = {
-        id: "photo-" + Date.now(),
-        url: dataUrl,
-        uploadedBy: username,
-        date: new Date().toLocaleDateString('nl-NL')
-    };
-
-    galleryPhotos.unshift(newPhoto);
-    res.json({ success: true, message: 'Foto geüpload en direct zichtbaar!' });
-});
-
-app.delete('/api/gallery/:id', (req, res) => {
-    const photoId = req.params.id;
-    const username = req.query.username;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-    const role = account ? account.role.toLowerCase() : '';
-
-    if (!account || (!role.includes('directeur') && !role.includes('management'))) {
-        return res.status(403).json({ success: false, message: 'Geen rechten.' });
-    }
-
-    galleryPhotos = galleryPhotos.filter(p => p.id !== photoId);
-    res.json({ success: true, message: 'Foto succesvol verwijderd.' });
-});
-
-// Badges Toekennen
-app.post('/api/badges', (req, res) => {
-    const { title, targetUser, username } = req.body;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account || !canManageBadges(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om badges toe te kennen.' });
-    }
-
-    const newBadge = { 
-        id: "badge-" + Date.now() + "-" + Math.floor(Math.random() * 1000), 
-        title: title.trim(), 
-        targetUser: targetUser.trim(), 
-        awardedBy: username,
-        date: new Date().toLocaleDateString('nl-NL')
-    };
-
-    customBadges.push(newBadge);
-    res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
-});
-
-// Badges Verwijderen (GEFIXTE ROUTE)
-app.delete('/api/badges/:id', (req, res) => {
-    const badgeId = req.params.id;
-    const username = req.query.username;
-
-    // Als er een username is doorgegeven, checken we het account
-    if (username) {
-        const account = accountsDatabase.find(d => d.username.toLowerCase() === username.toLowerCase());
-        if (!account || !canManageBadges(account.role)) {
-            return res.status(403).json({ success: false, message: 'Geen rechten om badges te verwijderen.' });
+        function closeLoginModal() {
+            document.getElementById('login-modal').style.display = 'none';
         }
-    }
 
-    const prevLength = customBadges.length;
-    customBadges = customBadges.filter(b => b.id !== badgeId);
+        function updateNavForLoggedInUser() {
+            if (currentUser) {
+                document.getElementById('nav-dashboard-tab').style.display = 'inline-block';
+                document.getElementById('nav-login-btn').style.display = 'none';
+            } else {
+                document.getElementById('nav-dashboard-tab').style.display = 'none';
+                document.getElementById('nav-login-btn').style.display = 'inline-block';
+            }
+        }
 
-    if (customBadges.length < prevLength) {
-        return res.json({ success: true, message: 'Badge succesvol ingetrokken!' });
-    } else {
-        return res.status(404).json({ success: false, message: 'Badge kon niet gevonden worden.' });
-    }
-});
+        async function handleLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.innerText = "Bezig met inloggen...";
 
-if (DISCORD_BOT_TOKEN) {
-    client.login(DISCORD_BOT_TOKEN);
-} else {
-    console.log("Wachten op DISCORD_BOT_TOKEN in Render...");
-}
+            try {
+                const res = await fetch('https://haulmpbrecht.onrender.com/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    currentUser = data;
+                    sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                    closeLoginModal();
+                    updateNavForLoggedInUser();
+                    openPortalDashboard();
+                } else {
+                    errorDiv.innerText = data.message || 'Onjuiste gegevens.';
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Kan geen verbinding maken met de server.';
+            }
+        }
 
-app.listen(PORT, () => {
-    console.log(`Portaal-server actief op poort ${PORT}`);
-});
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('brecht_user');
+            updateNavForLoggedInUser();
+            switchView('home-view');
+        }
+
+        function openPortalDashboard() {
+            if (!currentUser) return openLoginModal();
+
+            document.getElementById('welcome-title').innerText = `Hallo ${currentUser.username}!`;
+            document.getElementById('user-role-display').innerText = `Rol: ${currentUser.role}`;
+            document.getElementById('user-stat-deliveries').innerText = currentUser.stats.deliveries;
+            document.getElementById('user-stat-distance').innerText = currentUser.stats.distance;
+
+            const isDirectie = currentUser.role.toLowerCase().includes('directeur');
+            const canManageBadges = currentUser.canManageBadges;
+
+            if (canManageBadges) {
+                document.getElementById('mgt-tab-btn').style.display = 'inline-block';
+                document.getElementById('badge-box').style.display = 'block';
+            }
+            if (isDirectie) {
+                document.getElementById('th-admin-actions').style.display = 'table-cell';
+            }
+
+            refreshPortalData();
+            switchView('portal-view');
+        }
+
+        function switchPortalTab(tabId) {
+            document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch('https://haulmpbrecht.onrender.com/api/haulmp');
+                const data = await res.json();
+
+                if (data.distance) document.getElementById('stat-distance').innerText = data.distance;
+                if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
+                if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
+
+                allGalleryPhotos = data.gallery || [];
+
+                const pubGallery = document.getElementById('public-gallery-container');
+                pubGallery.innerHTML = '';
+                if (allGalleryPhotos.length > 0) {
+                    allGalleryPhotos.slice(0, 3).forEach(p => {
+                        pubGallery.insertAdjacentHTML('beforeend', `
+                            <div class="gallery-card" onclick="openLightbox('${p.url}', '${p.uploadedBy}', '${p.date || 'Recent'}')" style="cursor:pointer;">
+                                <img src="${p.url}" class="gallery-img">
+                                <div style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div>
+                            </div>
+                        `);
+                    });
+                }
+
+                renderFullGallery(allGalleryPhotos);
+
+                if (Array.isArray(data.drivers_list)) {
+                    const teamContainer = document.getElementById('team-container');
+                    teamContainer.innerHTML = '';
+                    data.drivers_list.forEach(m => {
+                        let roleClass = 'role-' + (m.color || 'gray');
+                        teamContainer.insertAdjacentHTML('beforeend', `
+                            <div class="member-card">
+                                <div class="member-avatar"><i class="fa-solid fa-user"></i></div>
+                                <div>
+                                    <div style="font-weight:bold;">${m.username}</div>
+                                    <span class="member-role ${roleClass}">${m.role}</span>
+                                </div>
+                            </div>
+                        `);
+                    });
+                }
+
+                if (Array.isArray(data.recent_jobs)) {
+                    const container = document.getElementById('trips-container');
+                    container.innerHTML = '';
+                    data.recent_jobs.slice(0, 10).forEach(job => {
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="trip-item">
+                                <div>
+                                    <div class="trip-route">${job.from} → ${job.to}</div>
+                                    <div class="trip-details">Bestuurder: <b>${job.driver}</b> • Vracht: ${job.cargo}</div>
+                                </div>
+                                <div style="background:rgba(204,0,0,0.2); color:var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold; font-size:0.85rem;">${job.distance}</div>
+                            </div>
+                        `);
+                    });
+                }
+
+            } catch (err) {
+                console.log('API niet bereikbaar');
+            }
+        }
+
+        function renderFullGallery(photos) {
+            const container = document.getElementById('full-gallery-container');
+            container.innerHTML = '';
+            photos.forEach(p => {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="gallery-card" onclick="openLightbox('${p.url}', '${p.uploadedBy}', '${p.date || 'Recent'}')" style="cursor:pointer;">
+                        <img src="${p.url}" class="gallery-img">
+                        <div style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy} • ${p.date || 'Recent'}</div>
+                    </div>
+                `);
+            });
+        }
+
+        function filterFullGallery() {
+            const q = document.getElementById('search-gallery').value.toLowerCase();
+            const filtered = allGalleryPhotos.filter(p => p.uploadedBy.toLowerCase().includes(q));
+            renderFullGallery(filtered);
+        }
+
+        async function refreshPortalData() {
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/haulmp');
+            const data = await res.json();
+
+            const isDirectie = currentUser.role.toLowerCase().includes('directeur');
+
+            // Mijn Badges
+            const myBadgesContainer = document.getElementById('my-badges-container');
+            myBadgesContainer.innerHTML = '';
+            const myBadges = (data.badges || []).filter(b => b.targetUser.toLowerCase() === currentUser.username.toLowerCase());
+            
+            if (myBadges.length > 0) {
+                myBadges.forEach(b => {
+                    myBadgesContainer.insertAdjacentHTML('beforeend', `<span class="badge-tag"><i class="fa-solid fa-award"></i> ${b.title}</span>`);
+                });
+            } else {
+                myBadgesContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">Nog geen badges behaald.</span>';
+            }
+
+            // Afwezigheid
+            const absTbody = document.getElementById('absence-table-body');
+            absTbody.innerHTML = '';
+            data.absence.forEach(a => {
+                let statusBadge = `<span class="badge-status status-pending">In behandeling</span>`;
+                if (a.status === 'Goedgekeurd') statusBadge = `<span class="badge-status status-approved">Goedgekeurd</span>`;
+                if (a.status === 'Afgewezen') statusBadge = `<span class="badge-status status-rejected">Afgewezen</span>`;
+
+                let actionBtns = isDirectie ? `<td><button onclick="changeAbsenceStatus('${a.id}', 'Goedgekeurd')" class="admin-btn" style="background:#28a745; color:white;">✓</button> <button onclick="changeAbsenceStatus('${a.id}', 'Afgewezen')" class="admin-btn" style="background:#dc3545; color:white;">✗</button></td>` : '';
+
+                absTbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${a.username}</b></td>
+                        <td>${a.fromDate} t/m ${a.toDate}</td>
+                        <td>${a.reason}</td>
+                        <td>${statusBadge}</td>
+                        ${actionBtns}
+                    </tr>
+                `);
+            });
+
+            // Foto Beheer
+            const galleryManage = document.getElementById('gallery-manage-container');
+            galleryManage.innerHTML = '';
+            const isManagement = currentUser.role.toLowerCase().includes('directeur') || currentUser.role.toLowerCase().includes('management');
+
+            data.gallery.forEach(p => {
+                let deleteBtn = isManagement ? `<button onclick="deletePhoto('${p.id}')" class="btn-red" style="margin-top:8px; width:100%; padding:4px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Wissen</button>` : '';
+                galleryManage.insertAdjacentHTML('beforeend', `
+                    <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:8px; border:1px solid var(--border-red);">
+                        <img src="${p.url}" style="width:100%; height:100px; object-fit:cover; border-radius:6px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">${p.uploadedBy}</div>
+                        ${deleteBtn}
+                    </div>
+                `);
+            });
+
+            // Actieve Badges Tabel (Management)
+            const activeBadgesTbody = document.getElementById('active-badges-table-body');
+            activeBadgesTbody.innerHTML = '';
+            if (data.badges && data.badges.length > 0) {
+                data.badges.forEach(b => {
+                    activeBadgesTbody.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td><span class="badge-tag"><i class="fa-solid fa-award"></i> ${b.title}</span></td>
+                            <td><b>${b.targetUser}</b></td>
+                            <td>${b.awardedBy}</td>
+                            <td><button type="button" onclick="deleteBadge('${b.id}')" class="btn-red" style="padding:4px 10px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Intrekken</button></td>
+                        </tr>
+                    `);
+                });
+            } else {
+                activeBadgesTbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted);">Er zijn momenteel geen actieve badges toegekend.</td></tr>';
+            }
+
+            // Leden & Badges
+            const membersTbody = document.getElementById('members-table-body');
+            membersTbody.innerHTML = '';
+            data.drivers_list.forEach(m => {
+                let badgeListHtml = (m.badges || []).map(b => {
+                    return `<span class="badge-tag"><i class="fa-solid fa-award"></i> ${b.title}</span>`;
+                }).join(' ') || '<span style="color:#aaa; font-size:0.8rem;">Geen</span>';
+
+                membersTbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${m.username}</b></td>
+                        <td>${m.role}</td>
+                        <td>${badgeListHtml}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        async function submitAbsence() {
+            const fromDate = document.getElementById('abs-from').value;
+            const toDate = document.getElementById('abs-to').value;
+            const reason = document.getElementById('abs-reason').value;
+            if (!fromDate || !toDate) return alert('Selecteer datums!');
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/absence', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser.username, fromDate, toDate, reason })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+        }
+
+        async function changeAbsenceStatus(absenceId, newStatus) {
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/absence/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ absenceId, newStatus, username: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+        }
+
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photo-file');
+            if (fileInput.files.length === 0) return alert('Selecteer een bestand!');
+
+            const formData = new FormData();
+            formData.append('photo', fileInput.files[0]);
+            formData.append('username', currentUser.username);
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/gallery', { method: 'POST', body: formData });
+            const data = await res.json();
+            alert(data.message);
+            fileInput.value = '';
+            refreshPortalData();
+            loadData();
+        }
+
+        async function deletePhoto(photoId) {
+            if (!confirm('Weet je zeker dat je deze foto wilt verwijderen?')) return;
+            const res = await fetch(`https://haulmpbrecht.onrender.com/api/gallery/${photoId}?username=${currentUser.username}`, { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+            loadData();
+        }
+
+        async function awardBadge() {
+            const title = document.getElementById('badge-title').value;
+            const targetUser = document.getElementById('badge-user').value;
+            if (!title || !targetUser) return alert('Vul zowel badge naam als gebruikersnaam in!');
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/badges', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, targetUser, username: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            document.getElementById('badge-title').value = '';
+            document.getElementById('badge-user').value = '';
+            refreshPortalData();
+        }
+
+        // 100% GARANTIE DELETE BADGE FUNCTIE
+        async function deleteBadge(badgeId) {
+            if (!confirm('Weet je zeker dat je deze badge wilt intrekken?')) return;
+            
+            try {
+                const res = await fetch('https://haulmpbrecht.onrender.com/api/badges/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        badgeId: badgeId, 
+                        username: currentUser ? currentUser.username : '' 
+                    })
+                });
+                const data = await res.json();
+                alert(data.message);
+                refreshPortalData();
+            } catch (err) {
+                alert('Er is een verbindingsfout opgetreden bij het intrekken van de badge.');
+            }
+        }
+
+        function openLightbox(url, author, date) {
+            document.getElementById('lightbox-img').src = url;
+            document.getElementById('lightbox-caption').innerHTML = `<i class="fa-solid fa-camera"></i> Gemaakt door <b>${author}</b> op ${date}`;
+            document.getElementById('lightbox-modal').style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
