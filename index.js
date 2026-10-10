@@ -2,47 +2,20 @@ const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 
 const app = express();
-// Voeg deze regel direct onder 'const app = express();' toe als hij er nog niet staat:
-app.use(express.json());
-
-// En zorg dat je login route er zo uitziet:
-app.post('/api/login', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    
-    // Als het een preflight OPTIONS request is, direct succes retourneren
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-    
-    const { username, password } = req.body;
-    
-    const account = accountsDatabase.find(
-        acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
-    );
-
-    if (!account) {
-        return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
-    }
-
-    const driverJobs = recentJobs.filter(j => j.driver.toLowerCase() === account.username.toLowerCase());
-    const driverKm = driverJobs.reduce((acc, curr) => acc + (parseInt(curr.distance.replace(/\D/g, ''), 10) || 0), 0);
-
-    res.json({
-        success: true,
-        username: account.username,
-        role: account.role,
-        color: getRoleColor(account.role),
-        stats: {
-            deliveries: driverJobs.length,
-            distance: `${driverKm.toLocaleString('nl-NL')} km`
-        }
-    });
-});
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// CORS Middleware toevoegen zodat de website altijd data mag ophalen/versturen
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
@@ -50,25 +23,22 @@ const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '155807470319580783
 // ==========================================
 // PERSONEEL & WACHTWOORDEN LIJST
 // ==========================================
-// Hier kun je per persoon een gebruikersnaam en eigen wachtwoord instellen!
 const accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
-    { username: "Jellybear", password: "JellyBearPass", role: "Management" },
+    { username: "Jellybear", role: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "Zinnorax", role: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
-// Databronnen voor het portaal (geheugen-opslag)
 let absenceList = [];
 let customBadges = [];
 let galleryPhotos = [
     { url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", isPotw: true }
 ];
 
-// Beginstanden ritten & statistieken
 let totalDeliveries = 19;
 let totalDistanceKm = 16200;
 
@@ -197,17 +167,12 @@ async function fetchDiscordLogs() {
 }
 
 // ==========================================
-// API ROUTES VOOR WEBSITE & PORTAAL
+// API ROUTES
 // ==========================================
 
-// Inloggen op het portaal met individueel wachtwoord
 app.post('/api/login', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    
     const { username, password } = req.body;
     
-    // Zoek het account op in de database
     const account = accountsDatabase.find(
         acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
     );
@@ -216,7 +181,6 @@ app.post('/api/login', (req, res) => {
         return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
     }
 
-    // Bereken persoonlijke statistieken
     const driverJobs = recentJobs.filter(j => j.driver.toLowerCase() === account.username.toLowerCase());
     const driverKm = driverJobs.reduce((acc, curr) => acc + (parseInt(curr.distance.replace(/\D/g, ''), 10) || 0), 0);
 
@@ -232,10 +196,7 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// Hoofd API Endpoint
 app.get('/api/haulmp', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    
     const formattedDrivers = accountsDatabase.map(m => ({
         username: m.username,
         role: m.role,
@@ -254,11 +215,7 @@ app.get('/api/haulmp', (req, res) => {
     });
 });
 
-// Afwezigheid indienen
 app.post('/api/absence', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     const { username, fromDate, toDate, reason } = req.body;
     if (!username || !fromDate || !toDate) {
         return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
@@ -268,11 +225,7 @@ app.post('/api/absence', (req, res) => {
     res.json({ success: true, message: 'Afwezigheid succesvol doorgegeven!' });
 });
 
-// Foto uploaden
 app.post('/api/gallery', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     const { url, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
     const role = account ? account.role.toLowerCase() : '';
@@ -289,11 +242,7 @@ app.post('/api/gallery', (req, res) => {
     res.json({ success: true, message: 'Foto succesvol toegevoegd aan de galerij!' });
 });
 
-// Foto van de week instellen
 app.post('/api/set-potw', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     const { index, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
@@ -305,11 +254,7 @@ app.post('/api/set-potw', (req, res) => {
     res.json({ success: true, message: 'Foto van de week ingesteld!' });
 });
 
-// Badges toekennen
 app.post('/api/badges', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     const { title, targetUser, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
