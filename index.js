@@ -87,54 +87,63 @@ client.on('messageCreate', (message) => {
 });
 
 function parseAndAddJob(message, isLiveNew = false) {
+    let from = 'Onbekend', to = 'Onbekend', driver = 'Chauffeur', cargo = 'Vracht', distanceStr = '0';
+    let timestamp = message.createdTimestamp || Date.now();
+
+    // Controleer of er embeds zijn
     if (message.embeds && message.embeds.length > 0) {
         const embed = message.embeds[0];
         const title = embed.title || '';
         const description = embed.description || '';
-        const timestamp = message.createdTimestamp || Date.now();
-
+        
         if (title.includes('→') || description.includes('→')) {
             const routeStr = title.includes('→') ? title : description;
             const parts = routeStr.split('→');
-            
-            const from = cleanText(parts[0]) || 'Onbekend';
-            const to = cleanText(parts[1]) || 'Onbekend';
-
-            let driver = 'Chauffeur';
-            let distanceStr = '0';
-            let cargo = 'Vracht';
-
-            embed.fields?.forEach(f => {
-                if (f.name.toLowerCase().includes('driver')) driver = cleanText(f.value);
-                if (f.name.toLowerCase().includes('distance')) distanceStr = cleanText(f.value);
-            });
-
-            if (description && !description.includes('→')) {
-                cargo = cleanText(description.split('\n')[0]);
-            }
-
-            const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
-
-            if (isLiveNew) {
-                totalDeliveries += 1;
-                totalDistanceKm += kmAmount;
-            }
-
-            const jobObj = {
-                id: message.id || "job-" + Date.now(),
-                from,
-                to,
-                driver,
-                cargo,
-                distance: `${kmAmount.toLocaleString('nl-NL')} km`,
-                kmAmount,
-                timestamp
-            };
-
-            if (!allJobsHistory.some(j => j.id === jobObj.id)) {
-                allJobsHistory.unshift(jobObj);
-            }
+            from = cleanText(parts[0]);
+            to = cleanText(parts[1]);
         }
+
+        embed.fields?.forEach(f => {
+            if (f.name.toLowerCase().includes('driver')) driver = cleanText(f.value);
+            if (f.name.toLowerCase().includes('distance')) distanceStr = cleanText(f.value);
+        });
+
+        if (description && !description.includes('→')) {
+            cargo = cleanText(description.split('\n')[0]);
+        }
+    } 
+    // Fallback: Als het een gewoon tekstbericht is met pijltje
+    else if (message.content && message.content.includes('→')) {
+        const parts = message.content.split('→');
+        from = cleanText(parts[0]);
+        to = cleanText(parts[1]);
+        driver = cleanText(message.author.username);
+        cargo = "Standaard Vracht";
+        distanceStr = "250 km";
+    } else {
+        return;
+    }
+
+    const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
+
+    if (isLiveNew) {
+        totalDeliveries += 1;
+        totalDistanceKm += kmAmount;
+    }
+
+    const jobObj = {
+        id: message.id || "job-" + Date.now(),
+        from,
+        to,
+        driver,
+        cargo,
+        distance: `${kmAmount.toLocaleString('nl-NL')} km`,
+        kmAmount,
+        timestamp
+    };
+
+    if (!allJobsHistory.some(j => j.id === jobObj.id)) {
+        allJobsHistory.unshift(jobObj);
     }
 }
 
@@ -144,6 +153,7 @@ async function fetchDiscordLogs() {
         if (!channel) return;
         const messages = await channel.messages.fetch({ limit: 100 });
         messages.forEach(msg => parseAndAddJob(msg, false));
+        console.log(`Geladen: ${allJobsHistory.length} ritten uit Discord.`);
     } catch (err) {
         console.error('Fout bij ophalen Discord logs:', err.message);
     }
