@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brecht Transport B.V. | ETS2 VTC</title>
     
-    <!-- FAVICON / BROWSER TAB ICOON -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png">
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -36,14 +35,7 @@
         }
 
         .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; cursor: pointer; }
-        
-        .logo-img {
-            height: 45px;
-            width: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.4));
-        }
-
+        .logo-img { height: 45px; width: auto; object-fit: contain; filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.4)); }
         .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; }
         .nav-links { display: flex; gap: 15px; list-style: none; align-items: center; }
         .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: all 0.3s; }
@@ -130,23 +122,23 @@
 <body>
 
     <nav>
-        <div onclick="switchView('home-view'); return false;" class="brand-logo">
+        <div onclick="goHome()" class="brand-logo">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img" alt="Brecht Transport Logo">
             <div><div class="brand-title">BRECHT TRANSPORT B.V.</div></div>
         </div>
         <ul class="nav-links">
-            <li><a href="javascript:void(0);" onclick="switchView('home-view'); return false;">Home</a></li>
-            <li><a href="#gallerij-sec">Fotogalerij</a></li>
-            <li><a href="#team">Het Team</a></li>
-            <li><a href="#vloot">Vloot</a></li>
-            <li><a href="#activiteit">Onderweg</a></li>
+            <li id="nav-home-link"><a href="javascript:void(0);" onclick="goHome()">Home</a></li>
+            <li id="nav-gallery-link"><a href="#gallerij-sec">Fotogalerij</a></li>
+            <li id="nav-team-link"><a href="#team">Het Team</a></li>
+            <li id="nav-fleet-link"><a href="#vloot">Vloot</a></li>
+            <li id="nav-trips-link"><a href="#activiteit">Onderweg</a></li>
             
             <li id="nav-dashboard-tab" style="display:none;">
-                <button onclick="switchView('portal-view'); return false;" class="btn-dashboard-tab"><i class="fa-solid fa-gauge"></i> Portaal Dashboard</button>
+                <button onclick="switchView('portal-view')" class="btn-dashboard-tab"><i class="fa-solid fa-gauge"></i> Portaal Dashboard</button>
             </li>
 
             <li id="nav-login-btn">
-                <button onclick="openLoginModal()" class="btn-portal"><i class="fa-solid fa-lock"></i> Inloggen</button>
+                <button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> Inloggen</button>
             </li>
 
             <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> Solliciteer Direct</a></li>
@@ -218,7 +210,7 @@
                 </div>
                 <div>
                     <button onclick="logout()" class="btn-red" style="background:#444;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
-                    <button onclick="switchView('home-view')" class="btn-portal" style="margin-left:10px;">← Website Bekijken</button>
+                    <button onclick="goHome()" class="btn-portal" style="margin-left:10px;">← Hoofdsite Bekijken</button>
                 </div>
             </div>
 
@@ -426,8 +418,7 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden. </p>
-        <p> Ontwikkeld door ItzChaotic_ </p>
+        <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden.</p>
     </footer>
 
     <script>
@@ -435,18 +426,65 @@
         let allGalleryPhotos = [];
         let globalPortalData = null;
 
+        const PORTAL_SUBDOMAIN = "personeelsportaal.brechttransport.nl";
+        const MAIN_DOMAIN = "brechttransport.nl";
+
         document.addEventListener('DOMContentLoaded', () => {
-            const savedUser = sessionStorage.getItem('brecht_user');
-            if (savedUser) {
-                try {
-                    currentUser = JSON.parse(savedUser);
-                    updateNavForLoggedInUser();
-                } catch(e) {
-                    sessionStorage.removeItem('brecht_user');
+            const hostname = window.location.hostname;
+            const isPortalSubdomain = hostname.includes("personeelsportaal");
+
+            // Als we op het subdomein zitten, verberg hoofdsite-menuitems en open direct inlog/portaal
+            if (isPortalSubdomain) {
+                document.getElementById('nav-home-link').style.display = 'none';
+                document.getElementById('nav-gallery-link').style.display = 'none';
+                document.getElementById('nav-team-link').style.display = 'none';
+                document.getElementById('nav-fleet-link').style.display = 'none';
+                document.getElementById('nav-trips-link').style.display = 'none';
+
+                const savedUser = sessionStorage.getItem('brecht_user');
+                if (savedUser) {
+                    try {
+                        currentUser = JSON.parse(savedUser);
+                        updateNavForLoggedInUser();
+                        openPortalDashboard();
+                    } catch(e) {
+                        sessionStorage.removeItem('brecht_user');
+                        openLoginModal();
+                    }
+                } else {
+                    openLoginModal();
+                }
+            } else {
+                // Op de hoofdsite
+                const savedUser = sessionStorage.getItem('brecht_user');
+                if (savedUser) {
+                    try {
+                        currentUser = JSON.parse(savedUser);
+                        updateNavForLoggedInUser();
+                    } catch(e) {}
                 }
             }
             loadData();
         });
+
+        function goHome() {
+            const hostname = window.location.hostname;
+            if (hostname.includes("personeelsportaal")) {
+                window.location.href = `https://${MAIN_DOMAIN}`;
+            } else {
+                switchView('home-view');
+            }
+        }
+
+        function handleNavLogin() {
+            const hostname = window.location.hostname;
+            if (!hostname.includes("personeelsportaal")) {
+                // Stuur door naar het personeelsportaal subdomein
+                window.location.href = `https://${PORTAL_SUBDOMAIN}`;
+            } else {
+                openLoginModal();
+            }
+        }
 
         function switchView(viewId) {
             document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
@@ -504,7 +542,12 @@
             currentUser = null;
             sessionStorage.removeItem('brecht_user');
             updateNavForLoggedInUser();
-            switchView('home-view');
+            const hostname = window.location.hostname;
+            if (hostname.includes("personeelsportaal")) {
+                openLoginModal();
+            } else {
+                switchView('home-view');
+            }
         }
 
         function openPortalDashboard() {
@@ -552,55 +595,59 @@
                 allGalleryPhotos = data.gallery || [];
 
                 const pubGallery = document.getElementById('public-gallery-container');
-                pubGallery.innerHTML = '';
-                if (allGalleryPhotos.length > 0) {
-                    allGalleryPhotos.slice(0, 3).forEach(p => {
-                        pubGallery.insertAdjacentHTML('beforeend', `
-                            <div class="gallery-card" onclick="openLightbox('${p.url}', '${p.uploadedBy}', '${p.date || 'Recent'}')" style="cursor:pointer;">
-                                <img src="${p.url}" class="gallery-img">
-                                <div style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div>
-                            </div>
-                        `);
-                    });
+                if (pubGallery) {
+                    pubGallery.innerHTML = '';
+                    if (allGalleryPhotos.length > 0) {
+                        allGalleryPhotos.slice(0, 3).forEach(p => {
+                            pubGallery.insertAdjacentHTML('beforeend', `
+                                <div class="gallery-card" onclick="openLightbox('${p.url}', '${p.uploadedBy}', '${p.date || 'Recent'}')" style="cursor:pointer;">
+                                    <img src="${p.url}" class="gallery-img">
+                                    <div style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div>
+                                </div>
+                            `);
+                        });
+                    }
                 }
 
                 renderFullGallery(allGalleryPhotos);
 
                 if (Array.isArray(data.drivers_list)) {
                     const teamContainer = document.getElementById('team-container');
-                    teamContainer.innerHTML = '';
-                    data.drivers_list.forEach(m => {
-                        let roleClass = 'role-' + (m.color || 'gray');
-                        teamContainer.insertAdjacentHTML('beforeend', `
-                            <div class="member-card">
-                                <div style="display:flex; align-items:center; gap:16px;">
-                                    <div class="member-avatar"><i class="fa-solid fa-user"></i></div>
-                                    <div>
-                                        <div style="font-weight:bold;">${m.username}</div>
-                                        <span class="member-role ${roleClass}">${m.role}</span>
+                    if (teamContainer) {
+                        teamContainer.innerHTML = '';
+                        data.drivers_list.forEach(m => {
+                            let roleClass = 'role-' + (m.color || 'gray');
+                            teamContainer.insertAdjacentHTML('beforeend', `
+                                <div class="member-card">
+                                    <div style="display:flex; align-items:center; gap:16px;">
+                                        <div class="member-avatar"><i class="fa-solid fa-user"></i></div>
+                                        <div>
+                                            <div style="font-weight:bold;">${m.username}</div>
+                                            <span class="member-role ${roleClass}">${m.role}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `);
-                    });
+                            `);
+                        });
+                    }
                 }
 
                 if (Array.isArray(data.recent_jobs) && data.recent_jobs.length > 0) {
                     const container = document.getElementById('trips-container');
-                    container.innerHTML = '';
-                    data.recent_jobs.slice(0, 10).forEach(job => {
-                        container.insertAdjacentHTML('beforeend', `
-                            <div class="trip-item">
-                                <div>
-                                    <div class="trip-route">${job.from} → ${job.to}</div>
-                                    <div class="trip-details">Bestuurder: <b>${job.driver}</b> • Vracht: ${job.cargo}</div>
+                    if (container) {
+                        container.innerHTML = '';
+                        data.recent_jobs.slice(0, 10).forEach(job => {
+                            container.insertAdjacentHTML('beforeend', `
+                                <div class="trip-item">
+                                    <div>
+                                        <div class="trip-route">${job.from} → ${job.to}</div>
+                                        <div class="trip-details">Bestuurder: <b>${job.driver}</b> • Vracht: ${job.cargo}</div>
+                                    </div>
+                                    <div style="background:rgba(204,0,0,0.2); color:var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold; font-size:0.85rem;">${job.distance}</div>
                                 </div>
-                                <div style="background:rgba(204,0,0,0.2); color:var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold; font-size:0.85rem;">${job.distance}</div>
-                            </div>
-                        `);
-                    });
-                } else {
-                    document.getElementById('trips-container').innerHTML = '<p style="text-align:center; color:var(--text-muted);">Er zijn momenteel nog geen ritten gesynchroniseerd uit Discord.</p>';
+                            `);
+                        });
+                    }
                 }
 
             } catch (err) {
@@ -610,6 +657,7 @@
 
         function renderFullGallery(photos) {
             const container = document.getElementById('full-gallery-container');
+            if (!container) return;
             container.innerHTML = '';
             photos.forEach(p => {
                 container.insertAdjacentHTML('beforeend', `
@@ -700,7 +748,6 @@
                 `);
             });
 
-            // PERSONEELSBEHEER TABEL MET JULLIE NIEUWE DROPDOWN RANGEN & ONTSLAGKNOP
             if (canManageStaff) {
                 const staffMgtTbody = document.getElementById('staff-management-table-body');
                 staffMgtTbody.innerHTML = '';
