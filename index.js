@@ -298,23 +298,16 @@ app.post('/api/badges', (req, res) => {
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
+// Betrouwbare POST route voor badge verwijderen
 app.post('/api/badges/delete', (req, res) => {
-    const { badgeId, username } = req.body;
-
-    if (username) {
-        const account = accountsDatabase.find(d => d.username.toLowerCase() === username.toLowerCase());
-        if (!account || !canManageBadges(account.role)) {
-            return res.status(403).json({ success: false, message: 'Geen rechten om badges te verwijderen.' });
-        }
-    }
-
-    const prevLength = customBadges.length;
+    const { badgeId } = req.body;
+    const initialLength = customBadges.length;
     customBadges = customBadges.filter(b => b.id !== badgeId);
 
-    if (customBadges.length < prevLength) {
+    if (customBadges.length < initialLength) {
         return res.json({ success: true, message: 'Badge succesvol ingetrokken!' });
     } else {
-        return res.status(404).json({ success: false, message: 'Badge kon niet gevonden worden.' });
+        return res.json({ success: false, message: 'Badge kon niet worden gevonden.' });
     }
 });
 
