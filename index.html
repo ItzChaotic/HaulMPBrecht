@@ -105,7 +105,6 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
-        /* INLOGSCHERM */
         #login-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, rgba(8,2,2,0.88), rgba(20,2,2,0.92)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center;
@@ -299,7 +298,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB SOLLICITATIES MET ENVELOPE KAARTEN -->
+                    <!-- TAB SOLLICITATIES -->
                     <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-file-signature"></i> Binnengekomen Sollicitaties</h3>
@@ -358,7 +357,7 @@
                             </div>
                         </div>
 
-                        <h3 style="margin-top:20px; font-size:1.1rem; color:#fff;"><i class="fa-solid fa-users-gear"></i> Personeel & Rollen Beheren</h3>
+                        <h3 style="margin-top:20px; font-size:1.1rem; color:#fff;"><i class="fa-solid fa-users-gear"></i> Personeel & Wachtwoorden Beheren</h3>
                         <div id="staff-cards-container" class="staff-card-grid"></div>
                     </div>
 
@@ -551,7 +550,8 @@
                     const teamContainer = document.getElementById('team-container');
                     if (teamContainer) {
                         teamContainer.innerHTML = '';
-                        data.drivers_list.forEach(m => {
+                        // Filter het DEV account eruit voor de publieke pagina
+                        data.drivers_list.filter(m => !m.isDev).forEach(m => {
                             teamContainer.insertAdjacentHTML('beforeend', `
                                 <div class="member-card">
                                     <div style="display:flex; align-items:center; gap:12px;">
@@ -592,7 +592,6 @@
             const data = await res.json();
             globalPortalData = data;
 
-            // RENDER AANKONDIGINGEN
             const annContainer = document.getElementById('announcements-display-container');
             annContainer.innerHTML = '';
             if (data.announcements && data.announcements.length > 0) {
@@ -609,7 +608,6 @@
                 });
             }
 
-            // RENDER SOLLICITATIES MEER-INFORMATIE KAARTEN
             const appsContainer = document.getElementById('applications-list-container');
             if (appsContainer) {
                 appsContainer.innerHTML = '';
@@ -686,7 +684,7 @@
                     const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
                     cardGrid.insertAdjacentHTML('beforeend', `
                         <div class="staff-card">
-                            <div style="display:flex; justify-size:space-between; align-items:center; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                 <b style="color:#fff;">${m.username}</b>
                                 <span class="member-role role-${m.color}">${m.role}</span>
                             </div>
@@ -835,6 +833,7 @@
             });
             const data = await res.json();
             alert(data.message);
+            document.getElementById(`pass-input-${targetUser}`).value = '';
         }
 
         async function updateStaffRole(targetUser) {
