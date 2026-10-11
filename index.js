@@ -26,11 +26,9 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
-// Bestanden voor persistente opslag
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 const GALLERY_FILE = path.join(__dirname, 'gallery.json');
 
-// Laad accounts uit bestand of gebruik standaardwaarden
 let accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
@@ -46,7 +44,7 @@ if (fs.existsSync(ACCOUNTS_FILE)) {
         const data = fs.readFileSync(ACCOUNTS_FILE, 'utf8');
         accountsDatabase = JSON.parse(data);
     } catch (e) {
-        console.log('Fout bij laden accounts.json, standaardwaarden worden gebruikt.');
+        console.log('Fout bij laden accounts.json');
     }
 }
 
@@ -54,7 +52,6 @@ function saveAccounts() {
     fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2));
 }
 
-// Laad galerij foto's uit bestand of gebruik standaardwaarden
 let galleryPhotos = [
     { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" },
     { id: "photo-2", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png", uploadedBy: "ItzChaotic_", date: "10-10-2026" }
@@ -65,7 +62,7 @@ if (fs.existsSync(GALLERY_FILE)) {
         const data = fs.readFileSync(GALLERY_FILE, 'utf8');
         galleryPhotos = JSON.parse(data);
     } catch (e) {
-        console.log('Fout bij laden gallery.json, standaardwaarden worden gebruikt.');
+        console.log('Fout bij laden gallery.json');
     }
 }
 
@@ -375,7 +372,7 @@ app.post('/api/staff/add', (req, res) => {
         role: role.trim()
     });
 
-    saveAccounts(); // Opslaan in bestand
+    saveAccounts();
     res.json({ success: true, message: `Personeelslid ${username} toegevoegd! Tijdelijk wachtwoord: ${generatedPassword}` });
 });
 
@@ -397,7 +394,7 @@ app.post('/api/staff/update-role', (req, res) => {
     }
 
     targetAcc.role = newRole.trim();
-    saveAccounts(); // Opslaan in bestand
+    saveAccounts();
     res.json({ success: true, message: `Rol van ${targetAcc.username} succesvol gewijzigd naar '${newRole}'!` });
 });
 
@@ -415,7 +412,7 @@ app.delete('/api/staff/:targetUser', (req, res) => {
     }
 
     accountsDatabase = accountsDatabase.filter(d => d.username.toLowerCase() !== targetUser.toLowerCase());
-    saveAccounts(); // Opslaan in bestand
+    saveAccounts();
     res.json({ success: true, message: `Personeelslid ${targetUser} is succesvol ontslagen.` });
 });
 
@@ -437,7 +434,7 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     };
 
     galleryPhotos.unshift(newPhoto);
-    saveGallery(); // Opslaan in bestand
+    saveGallery();
     res.json({ success: true, message: 'Foto geüpload en direct zichtbaar!' });
 });
 
@@ -452,7 +449,7 @@ app.delete('/api/gallery/:id', (req, res) => {
     }
 
     galleryPhotos = galleryPhotos.filter(p => p.id !== photoId);
-    saveGallery(); // Opslaan in bestand
+    saveGallery();
     res.json({ success: true, message: 'Foto succesvol verwijderd.' });
 });
 
