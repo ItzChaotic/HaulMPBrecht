@@ -108,15 +108,15 @@ function parseAndAddJob(message, isLiveNew = false) {
             to = cleanText(parts[1]);
         }
 
-        // Haal vrachtnaam uit beschrijving (eerste regel van description)
+        // Haal vrachtnaam uit beschrijving
         if (description) {
             const descLines = description.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if (descLines.length > 0 && !descLines[0].includes('delivery completed')) {
+            if (descLines.length > 0 && !descLines[0].toLowerCase().includes('delivery completed')) {
                 cargo = cleanText(descLines[0]);
             }
         }
 
-        // Uitlezen van Driver en Distance velden
+        // Haal Driver en Distance uit de embed fields (zoals 'Driver' -> 'mjgamernl')
         embed.fields?.forEach(f => {
             const fieldName = (f.name || '').toLowerCase();
             if (fieldName.includes('driver')) {
@@ -140,10 +140,13 @@ function parseAndAddJob(message, isLiveNew = false) {
         return; // Geen geldige rit
     }
 
-    // Valideer of we ten minste een van/naar locatie hebben
+    // Valideer of we ten minste een route hebben
     if (!from || !to) return;
 
-    if (!driver) driver = cleanText(message.author.username);
+    // Als driver nog niet uit embed veld is gehaald, gebruik de author
+    if (!driver) {
+        driver = cleanText(message.author.username);
+    }
 
     const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
 
@@ -158,15 +161,9 @@ function parseAndAddJob(message, isLiveNew = false) {
         timestamp
     };
 
-    // Controleer op dubbele invoer
+    // Voorkom dubbele invoer op basis van bericht ID
     if (!allJobsHistory.some(j => j.id === jobObj.id)) {
-        allJobsHistory.unshift(jobObj);
-        totalDeliveries = allJobsHistory.length;
-        totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
-
-        if (isLiveNew) {
-            console.log(`[LIVE RIT] Toegevoegd: ${from} -> ${to} (${kmAmount} km) door ${driver}`);
-        }
+        allJobsHistory.push(jobObj); // Voeg toe aan geschiedenis
     }
 }
 
@@ -176,11 +173,13 @@ async function fetchAllHistoricalDiscordLogs() {
         if (!channel) return;
         
         let lastId = undefined;
-        let fetchedTotal = 0;
+        let totalFetched = 0;
+        allJobsHistory = []; // Reset geschiedenis bij een schone fetch
         
-        console.log("Start ophalen van historische HaulMP ritten...");
+        console.log("Start grondig ophalen van historische Discord ritten...");
 
-        while (fetchedTotal < 500) {
+        // Loop om tot wel 1000 oude berichten op te halen via pagination
+        while (totalFetched < 1000) {
             const options = { limit: 100 };
             if (lastId) options.before = lastId;
             
@@ -189,12 +188,18 @@ async function fetchAllHistoricalDiscordLogs() {
             
             messages.forEach(msg => parseAndAddJob(msg, false));
             lastId = messages.last().id;
-            fetchedTotal += messages.size;
+            totalFetched += messages.size;
             
             if (messages.size < 100) break;
         }
 
-        console.log(`[HISTORIE] Synchronisatie voltooid! Totaal ${allJobsHistory.length} ritten geladen (${totalDistanceKm.toLocaleString('nl-NL')} km).`);
+        // Sorteer ritten van nieuw naar oud
+        allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
+
+        totalDeliveries = allJobsHistory.length;
+        totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+
+        console.log(`[HISTORIE] Synchronisatie voltooid! Totaal ${allJobsHistory.length} ritten gevonden (${totalDistanceKm.toLocaleString('nl-NL')} km).`);
     } catch (err) {
         console.error('Fout bij ophalen Discord historie:', err.message);
     }
