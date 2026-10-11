@@ -25,7 +25,7 @@ const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
 let accountsDatabase = [
-    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
+    { username: "MJGamerNL", password: "Brecht123456", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
