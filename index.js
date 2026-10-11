@@ -41,12 +41,9 @@ let galleryPhotos = [
     { id: "photo-2", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png", uploadedBy: "ItzChaotic_", date: "10-10-2026" }
 ];
 
-let totalDeliveries = 19;
-let totalDistanceKm = 16200;
-let allJobsHistory = [
-    { id: "demo-1", from: "Rennes", to: "Bordeaux", driver: "MJGamerNL", cargo: "Benzine", distance: "478 km", kmAmount: 478, timestamp: Date.now() },
-    { id: "demo-2", from: "Amsterdam", to: "Eindhoven", driver: "JoeyKj", cargo: "Chemische Sorbens", distance: "146 km", kmAmount: 146, timestamp: Date.now() }
-];
+let totalDeliveries = 0;
+let totalDistanceKm = 0;
+let allJobsHistory = [];
 
 function cleanText(text) {
     if (!text) return '';
@@ -76,7 +73,6 @@ const client = new Client({
     ]
 });
 
-// Aangepast naar clientReady om deprecation warning te voorkomen
 client.on('clientReady', () => {
     console.log(`Discord Bot ingelogd als ${client.user.tag}`);
     fetchAllHistoricalDiscordLogs();
@@ -84,50 +80,75 @@ client.on('clientReady', () => {
 
 client.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) {
-        console.log(`Nieuw Discord bericht ontvangen van: ${message.author.username}`);
+        console.log(`Nieuw Discord bericht ontvangen in rittenkanaal van: ${message.author.username}`);
         parseAndAddJob(message, true);
     }
 });
 
 function parseAndAddJob(message, isLiveNew = false) {
-    let from = 'Onbekend', to = 'Onbekend', driver = 'Chauffeur', cargo = 'Vracht', distanceStr = '0';
+    let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km';
     let timestamp = message.createdTimestamp || Date.now();
 
+    // 1. Verwerk HaulMP Embed-berichten
     if (message.embeds && message.embeds.length > 0) {
         const embed = message.embeds[0];
         const title = embed.title || '';
         const description = embed.description || '';
         
-        if (title.includes('→') || description.includes('→')) {
-            const routeStr = title.includes('→') ? title : description;
-            const parts = routeStr.split('→');
+        // Check op pijl in titel of beschrijving (bijv. Sassari → L'Île-Rousse)
+        if (title.includes('→') || title.includes('->')) {
+            const separator = title.includes('→') ? '→' : '->';
+            const parts = title.split(separator);
+            from = cleanText(parts[0]);
+            to = cleanText(parts[1]);
+        } else if (description.includes('→') || description.includes('->')) {
+            const separator = description.includes('→') ? '→' : '->';
+            const parts = description.split(separator);
             from = cleanText(parts[0]);
             to = cleanText(parts[1]);
         }
 
-        embed.fields?.forEach(f => {
-            if (f.name.toLowerCase().includes('driver')) driver = cleanText(f.value);
-            if (f.name.toLowerCase().includes('distance')) distanceStr = cleanText(f.value);
-        });
-
-        if (description && !description.includes('→')) {
-            cargo = cleanText(description.split('\n')[0]);
+        // Haal vrachtnaam uit beschrijving (eerste regel van description)
+        if (description) {
+            const descLines = description.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (descLines.length > 0 && !descLines[0].includes('delivery completed')) {
+                cargo = cleanText(descLines[0]);
+            }
         }
-    } else if (message.content && message.content.includes('→')) {
-        const parts = message.content.split('→');
+
+        // Uitlezen van Driver en Distance velden
+        embed.fields?.forEach(f => {
+            const fieldName = (f.name || '').toLowerCase();
+            if (fieldName.includes('driver')) {
+                driver = cleanText(f.value);
+            }
+            if (fieldName.includes('distance')) {
+                distanceStr = cleanText(f.value);
+            }
+        });
+    } 
+    // 2. Fallback voor gewone tekstberichten
+    else if (message.content && (message.content.includes('→') || message.content.includes('->'))) {
+        const separator = message.content.includes('→') ? '→' : '->';
+        const parts = message.content.split(separator);
         from = cleanText(parts[0]);
         to = cleanText(parts[1]);
         driver = cleanText(message.author.username);
         cargo = "Standaard Vracht";
         distanceStr = "250 km";
     } else {
-        return;
+        return; // Geen geldige rit
     }
+
+    // Valideer of we ten minste een van/naar locatie hebben
+    if (!from || !to) return;
+
+    if (!driver) driver = cleanText(message.author.username);
 
     const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
 
     const jobObj = {
-        id: message.id || "job-" + Date.now(),
+        id: message.id || "job-" + Date.now() + "-" + Math.random(),
         from,
         to,
         driver,
@@ -137,12 +158,14 @@ function parseAndAddJob(message, isLiveNew = false) {
         timestamp
     };
 
+    // Controleer op dubbele invoer
     if (!allJobsHistory.some(j => j.id === jobObj.id)) {
         allJobsHistory.unshift(jobObj);
+        totalDeliveries = allJobsHistory.length;
+        totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+
         if (isLiveNew) {
-            totalDeliveries += 1;
-            totalDistanceKm += kmAmount;
-            console.log(`Nieuwe rit live toegevoegd: ${from} -> ${to} door ${driver}`);
+            console.log(`[LIVE RIT] Toegevoegd: ${from} -> ${to} (${kmAmount} km) door ${driver}`);
         }
     }
 }
@@ -155,7 +178,9 @@ async function fetchAllHistoricalDiscordLogs() {
         let lastId = undefined;
         let fetchedTotal = 0;
         
-        while (fetchedTotal < 300) {
+        console.log("Start ophalen van historische HaulMP ritten...");
+
+        while (fetchedTotal < 500) {
             const options = { limit: 100 };
             if (lastId) options.before = lastId;
             
@@ -169,9 +194,7 @@ async function fetchAllHistoricalDiscordLogs() {
             if (messages.size < 100) break;
         }
 
-        totalDeliveries = allJobsHistory.length;
-        totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
-        console.log(`Historie gesynchroniseerd: ${totalDeliveries} ritten gevonden.`);
+        console.log(`[HISTORIE] Synchronisatie voltooid! Totaal ${allJobsHistory.length} ritten geladen (${totalDistanceKm.toLocaleString('nl-NL')} km).`);
     } catch (err) {
         console.error('Fout bij ophalen Discord historie:', err.message);
     }
