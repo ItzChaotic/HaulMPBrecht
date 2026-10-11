@@ -26,7 +26,7 @@ const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '155807470319580783
 
 let accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
@@ -52,6 +52,7 @@ function cleanText(text) {
 
 function getRoleColor(role) {
     const r = (role || '').toLowerCase();
+    if (r.includes('chauffeur in opleiding')) return 'gray';
     if (r.includes('onder directeur')) return 'orange';
     if (r.includes('directeur')) return 'red';
     if (r.includes('management')) return 'yellow';
@@ -291,7 +292,7 @@ app.post('/api/absence/status', (req, res) => {
     const { absenceId, newStatus, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
-    if (!account || !account.role.toLowerCase().includes('directeur')) {
+    if (!account || !canManageStaff(account.role)) {
         return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directie kunnen dit wijzigen.' });
     }
 
@@ -351,6 +352,10 @@ app.post('/api/staff/update-role', (req, res) => {
         return res.status(403).json({ success: false, message: 'Geen rechten om rollen aan te passen.' });
     }
 
+    if (targetUser.toLowerCase() === adminUser.toLowerCase()) {
+        return res.status(400).json({ success: false, message: 'Je kunt je eigen rol niet aanpassen!' });
+    }
+
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
     if (!targetAcc) {
         return res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
@@ -358,6 +363,23 @@ app.post('/api/staff/update-role', (req, res) => {
 
     targetAcc.role = newRole.trim();
     res.json({ success: true, message: `Rol van ${targetAcc.username} succesvol gewijzigd naar '${newRole}'!` });
+});
+
+app.delete('/api/staff/:targetUser', (req, res) => {
+    const targetUser = req.params.targetUser;
+    const adminUser = req.query.adminUser;
+    const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
+
+    if (!adminAcc || !canManageStaff(adminAcc.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om personeel te ontslaan.' });
+    }
+
+    if (targetUser.toLowerCase() === adminUser.toLowerCase()) {
+        return res.status(400).json({ success: false, message: 'Je kunt jezelf niet ontslaan!' });
+    }
+
+    accountsDatabase = accountsDatabase.filter(d => d.username.toLowerCase() !== targetUser.toLowerCase());
+    res.json({ success: true, message: `Personeelslid ${targetUser} is succesvol ontslagen.` });
 });
 
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
