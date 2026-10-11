@@ -25,11 +25,9 @@ app.use((req, res, next) => {
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
-const DISCORD_APPLICATIONS_CHANNEL_ID = '1558075393729363968';
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 const GALLERY_FILE = path.join(__dirname, 'gallery.json');
-const APPLICATIONS_FILE = path.join(__dirname, 'applications.json');
 
 let accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
@@ -43,8 +41,7 @@ let accountsDatabase = [
 
 if (fs.existsSync(ACCOUNTS_FILE)) {
     try {
-        const data = fs.readFileSync(ACCOUNTS_FILE, 'utf8');
-        accountsDatabase = JSON.parse(data);
+        accountsDatabase = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
     } catch (e) {
         console.log('Fout bij laden accounts.json');
     }
@@ -61,8 +58,7 @@ let galleryPhotos = [
 
 if (fs.existsSync(GALLERY_FILE)) {
     try {
-        const data = fs.readFileSync(GALLERY_FILE, 'utf8');
-        galleryPhotos = JSON.parse(data);
+        galleryPhotos = JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8'));
     } catch (e) {
         console.log('Fout bij laden gallery.json');
     }
@@ -72,28 +68,19 @@ function saveGallery() {
     fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryPhotos, null, 2));
 }
 
-let applicationsList = [];
-if (fs.existsSync(APPLICATIONS_FILE)) {
-    try {
-        applicationsList = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8'));
-    } catch (e) {
-        console.log('Fout bij laden applications.json');
-    }
-}
-
-function saveApplications() {
-    fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applicationsList, null, 2));
-}
-
 let absenceList = [];
 let customBadges = []; 
-let totalDeliveries = 0;
-let totalDistanceKm = 0;
 let allJobsHistory = [];
 
 function cleanText(text) {
     if (!text) return '';
     return text.replace(/[\*\_\`]/g, '').trim();
+}
+
+function parseCurrency(str) {
+    if (!str) return 0;
+    const clean = str.replace(/[^0-9\,\.]/g, '').replace(',', '.');
+    return parseFloat(clean) || 0;
 }
 
 function getRoleColor(role) {
@@ -118,12 +105,6 @@ function canManageStaff(role) {
     return r.includes('directeur') || r.includes('onder directeur');
 }
 
-function canReviewApplications(role) {
-    if (!role) return false;
-    const r = role.toLowerCase();
-    return r.includes('directeur') || r.includes('management');
-}
-
 function isDriverMatch(jobDriver, accountUsername) {
     if (!jobDriver || !accountUsername) return false;
     const j = jobDriver.toLowerCase().trim();
@@ -131,14 +112,13 @@ function isDriverMatch(jobDriver, accountUsername) {
     return j === a || j.includes(a) || a.includes(j);
 }
 
-function cleanupExpiredAbsences() {
-    const today = new Date().toISOString().split('T')[0];
-    absenceList = absenceList.filter(a => {
-        if (a.status === 'Goedgekeurd' && a.toDate < today) {
-            return false;
-        }
-        return true;
-    });
+function getISOWeekKey(timestamp) {
+    const d = new Date(timestamp);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return `Wk ${weekNo}`;
 }
 
 const client = new Client({
@@ -151,30 +131,17 @@ const client = new Client({
 
 client.on('clientReady', () => {
     console.log(`Discord Bot ingelogd als ${client.user.tag}`);
-    fetchAllHistoricalDiscordLogs();
+    setTimeout(fetchAllHistoricalDiscordLogs, 1000);
 });
 
 client.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) {
-        parseAndAddJob(message, true);
-    } else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) {
-        // Automatisch sollicitaties inlezen uit het opgegeven Discord kanaal
-        const appObj = {
-            id: "app-" + message.id,
-            applicant: message.author.username,
-            content: message.content || (message.embeds[0] ? message.embeds[0].description : "Sollicitatie via Discord"),
-            status: "In behandeling",
-            date: new Date(message.createdTimestamp).toLocaleDateString('nl-NL')
-        };
-        if (!applicationsList.some(a => a.id === appObj.id)) {
-            applicationsList.unshift(appObj);
-            saveApplications();
-        }
+        parseAndAddJob(message);
     }
 });
 
-function parseAndAddJob(message, isLiveNew = false) {
-    let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km';
+function parseAndAddJob(message) {
+    let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km', paidAmount = 0;
     let timestamp = message.createdTimestamp || Date.now();
 
     if (message.embeds && message.embeds.length > 0) {
@@ -205,23 +172,17 @@ function parseAndAddJob(message, isLiveNew = false) {
             const fieldName = (f.name || '').toLowerCase();
             if (fieldName.includes('driver')) driver = cleanText(f.value);
             if (fieldName.includes('distance')) distanceStr = cleanText(f.value);
+            if (fieldName.includes('paid')) paidAmount = parseCurrency(f.value);
         });
-    } else if (message.content && (message.content.includes('→') || message.content.includes('->'))) {
-        const separator = message.content.includes('→') ? '→' : '->';
-        const parts = message.content.split(separator);
-        from = cleanText(parts[0]);
-        to = cleanText(parts[1]);
-        driver = cleanText(message.author.username);
-        cargo = "Standaard Vracht";
-        distanceStr = "250 km";
-    } else {
-        return;
     }
 
     if (!from || !to) return;
     if (!driver) driver = cleanText(message.author.username);
 
     const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
+    if (paidAmount === 0 && kmAmount > 0) {
+        paidAmount = kmAmount * 35;
+    }
 
     const jobObj = {
         id: message.id || "job-" + Date.now() + "-" + Math.random(),
@@ -231,7 +192,9 @@ function parseAndAddJob(message, isLiveNew = false) {
         cargo,
         distance: `${kmAmount.toLocaleString('nl-NL')} km`,
         kmAmount,
+        paidAmount,
         timestamp,
+        weekKey: getISOWeekKey(timestamp),
         dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL')
     };
 
@@ -243,43 +206,24 @@ function parseAndAddJob(message, isLiveNew = false) {
 async function fetchAllHistoricalDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
-        if (channel) {
-            let lastId = undefined;
-            let totalFetched = 0;
-            allJobsHistory = [];
-            while (totalFetched < 1000) {
-                const options = { limit: 100 };
-                if (lastId) options.before = lastId;
-                const messages = await channel.messages.fetch(options);
-                if (messages.size === 0) break;
-                messages.forEach(msg => parseAndAddJob(msg, false));
-                lastId = messages.last().id;
-                totalFetched += messages.size;
-                if (messages.size < 100) break;
-            }
-            allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
-            totalDeliveries = allJobsHistory.length;
-            totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+        if (!channel) return;
+        
+        let lastId = undefined;
+        let totalFetched = 0;
+        allJobsHistory = [];
+        
+        while (totalFetched < 500) {
+            const options = { limit: 100 };
+            if (lastId) options.before = lastId;
+            const messages = await channel.messages.fetch(options);
+            if (messages.size === 0) break;
+            messages.forEach(msg => parseAndAddJob(msg));
+            lastId = messages.last().id;
+            totalFetched += messages.size;
+            if (messages.size < 100) break;
         }
 
-        // Ook historische sollicitaties ophalen uit kanaal 1558075393729363968
-        const appChannel = await client.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
-        if (appChannel) {
-            const appMessages = await appChannel.messages.fetch({ limit: 50 });
-            appMessages.forEach(msg => {
-                const appObj = {
-                    id: "app-" + msg.id,
-                    applicant: msg.author.username,
-                    content: msg.content || (msg.embeds[0] ? msg.embeds[0].description : "Sollicitatie via Discord"),
-                    status: "In behandeling",
-                    date: new Date(msg.createdTimestamp).toLocaleDateString('nl-NL')
-                };
-                if (!applicationsList.some(a => a.id === appObj.id)) {
-                    applicationsList.push(appObj);
-                }
-            });
-            saveApplications();
-        }
+        allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
     } catch (err) {
         console.error('Fout bij ophalen Discord historie:', err.message);
     }
@@ -295,38 +239,25 @@ app.post('/api/login', (req, res) => {
         return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
     }
 
-    const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
-    const userJobsLast10Days = allJobsHistory.filter(j => 
-        isDriverMatch(j.driver, account.username) && j.timestamp >= tenDaysAgo
-    );
-
-    const driverKm = userJobsLast10Days.reduce((acc, curr) => acc + curr.kmAmount, 0);
-    const driverEarnings = driverKm * 3.50; // €3.50 per km
-
     res.json({
         success: true,
         username: account.username,
         role: account.role,
         color: getRoleColor(account.role),
         canManageBadges: canManageBadges(account.role),
-        canManageStaff: canManageStaff(account.role),
-        canReviewApps: canReviewApplications(account.role),
-        stats: {
-            deliveries: userJobsLast10Days.length,
-            distance: `${driverKm.toLocaleString('nl-NL')} km`,
-            earnings: `€ ${driverEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-        }
+        canManageStaff: canManageStaff(account.role)
     });
 });
 
 app.get('/api/haulmp', (req, res) => {
-    cleanupExpiredAbsences();
-    const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+    const totalDeliveries = allJobsHistory.length;
+    const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+    const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
 
     const formattedDrivers = accountsDatabase.map(m => {
-        const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username) && j.timestamp >= tenDaysAgo);
+        const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
         const userKm = userJobs.reduce((acc, curr) => acc + curr.kmAmount, 0);
-        const userEarnings = userKm * 3.50;
+        const userEarnings = userJobs.reduce((acc, curr) => acc + curr.paidAmount, 0);
         
         return {
             username: m.username,
@@ -334,43 +265,36 @@ app.get('/api/haulmp', (req, res) => {
             color: getRoleColor(m.role),
             deliveries: userJobs.length,
             distance: `${userKm.toLocaleString('nl-NL')} km`,
-            earnings: `€ ${userEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-            userJobs: userJobs,
+            earnings: `€ ${userEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
+            rawEarnings: userEarnings,
+            userJobs: userJobs.slice(0, 15),
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
     });
 
-    const totalCompanyEarnings = totalDistanceKm * 3.50;
+    const weeklyChartData = {};
+    allJobsHistory.forEach(j => {
+        const w = j.weekKey || 'Week';
+        if (!weeklyChartData[w]) weeklyChartData[w] = { week: w, company: 0, drivers: {} };
+        weeklyChartData[w].company += j.paidAmount;
+        
+        const driverName = j.driver.toLowerCase();
+        if (!weeklyChartData[w].drivers[driverName]) weeklyChartData[w].drivers[driverName] = 0;
+        weeklyChartData[w].drivers[driverName] += j.paidAmount;
+    });
 
     res.json({
         deliveries: totalDeliveries.toString(),
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
-        companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
         drivers: formattedDrivers.length.toString(),
         drivers_list: formattedDrivers,
         recent_jobs: allJobsHistory.slice(0, 10),
         absence: absenceList,
         gallery: galleryPhotos,
         badges: customBadges,
-        applications: applicationsList
+        weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
     });
-});
-
-app.post('/api/applications/status', (req, res) => {
-    const { appId, newStatus, username } = req.body;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account || !canReviewApplications(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om sollicitaties te beoordelen.' });
-    }
-
-    const appItem = applicationsList.find(a => a.id === appId);
-    if (appItem) {
-        appItem.status = newStatus;
-        saveApplications();
-        return res.json({ success: true, message: `Sollicitatie status gewijzigd naar '${newStatus}'` });
-    }
-    res.status(404).json({ success: false, message: 'Sollicitatie niet gevonden.' });
 });
 
 app.post('/api/staff/update-password', (req, res) => {
@@ -388,7 +312,7 @@ app.post('/api/staff/update-password', (req, res) => {
 
     targetAcc.password = newPassword.trim();
     saveAccounts();
-    res.json({ success: true, message: `Wachtwoord voor ${targetAcc.username} succesvol gewijzigd!` });
+    res.json({ success: true, message: `Wachtwoord voor ${targetAcc.username} succesvol aangepast!` });
 });
 
 app.post('/api/absence', (req, res) => {
@@ -402,13 +326,13 @@ app.post('/api/absence', (req, res) => {
         username,
         fromDate,
         toDate,
-        reason: reason || "Geen reden opgegeven",
+        reason: reason || "Vakantie / Afwezigheid",
         status: "In behandeling",
         dateSubmitted: new Date().toLocaleDateString('nl-NL')
     };
 
     absenceList.unshift(newAbsence);
-    res.json({ success: true, message: 'Afwezigheid succesvol ingediend!' });
+    res.json({ success: true, message: 'Afwezigheid ingediend!' });
 });
 
 app.post('/api/absence/status', (req, res) => {
@@ -416,7 +340,7 @@ app.post('/api/absence/status', (req, res) => {
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account || !canManageStaff(account.role)) {
-        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directeur kunnen dit wijzigen.' });
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     const item = absenceList.find(a => a.id === absenceId);
@@ -424,8 +348,7 @@ app.post('/api/absence/status', (req, res) => {
         item.status = newStatus;
         return res.json({ success: true, message: `Status gewijzigd naar '${newStatus}'` });
     }
-
-    res.status(404).json({ success: false, message: 'Afwezigheidsverzoek niet gevonden.' });
+    res.status(404).json({ success: false, message: 'Niet gevonden.' });
 });
 
 app.delete('/api/absence/:id', (req, res) => {
@@ -434,11 +357,11 @@ app.delete('/api/absence/:id', (req, res) => {
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account || !canManageStaff(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om verzoeken te verwijderen.' });
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     absenceList = absenceList.filter(a => a.id !== absenceId);
-    res.json({ success: true, message: 'Afwezigheidsverzoek succesvol verwijderd.' });
+    res.json({ success: true, message: 'Verwijderd.' });
 });
 
 app.post('/api/staff/add', (req, res) => {
@@ -446,15 +369,11 @@ app.post('/api/staff/add', (req, res) => {
     const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
 
     if (!adminAcc || !canManageStaff(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om personeel toe te voegen.' });
-    }
-
-    if (!username || !role) {
-        return res.status(400).json({ success: false, message: 'Vul een gebruikersnaam en functie in.' });
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     if (accountsDatabase.some(d => d.username.toLowerCase() === username.toLowerCase().trim())) {
-        return res.status(400).json({ success: false, message: 'Deze gebruikersnaam bestaat al.' });
+        return res.status(400).json({ success: false, message: 'Gebruiker bestaat al.' });
     }
 
     const generatedPassword = "Brecht" + Math.floor(1000 + Math.random() * 9000);
@@ -465,7 +384,7 @@ app.post('/api/staff/add', (req, res) => {
     });
 
     saveAccounts();
-    res.json({ success: true, message: `Personeelslid ${username} toegevoegd! Tijdelijk wachtwoord: ${generatedPassword}` });
+    res.json({ success: true, message: `Personeelslid ${username} toegevoegd! Wachtwoord: ${generatedPassword}` });
 });
 
 app.post('/api/staff/update-role', (req, res) => {
@@ -473,21 +392,16 @@ app.post('/api/staff/update-role', (req, res) => {
     const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
 
     if (!adminAcc || !canManageStaff(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om rollen aan te passen.' });
-    }
-
-    if (targetUser.toLowerCase() === adminUser.toLowerCase()) {
-        return res.status(400).json({ success: false, message: 'Je kunt je eigen rol niet aanpassen!' });
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
-    if (!targetAcc) {
-        return res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
+    if (targetAcc) {
+        targetAcc.role = newRole.trim();
+        saveAccounts();
+        return res.json({ success: true, message: `Rol van ${targetAcc.username} gewijzigd!` });
     }
-
-    targetAcc.role = newRole.trim();
-    saveAccounts();
-    res.json({ success: true, message: `Rol van ${targetAcc.username} succesvol gewijzigd naar '${newRole}'!` });
+    res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
 });
 
 app.delete('/api/staff/:targetUser', (req, res) => {
@@ -496,24 +410,17 @@ app.delete('/api/staff/:targetUser', (req, res) => {
     const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
 
     if (!adminAcc || !canManageStaff(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om personeel te ontslaan.' });
-    }
-
-    if (targetUser.toLowerCase() === adminUser.toLowerCase()) {
-        return res.status(400).json({ success: false, message: 'Je kunt jezelf niet ontslaan!' });
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     accountsDatabase = accountsDatabase.filter(d => d.username.toLowerCase() !== targetUser.toLowerCase());
     saveAccounts();
-    res.json({ success: true, message: `Personeelslid ${targetUser} is succesvol ontslagen.` });
+    res.json({ success: true, message: `Personeelslid ${targetUser} is ontslagen.` });
 });
 
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const username = req.body.username;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account) return res.status(403).json({ success: false, message: 'Geen geldig account.' });
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand.' });
 
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
@@ -527,62 +434,39 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
 
     galleryPhotos.unshift(newPhoto);
     saveGallery();
-    res.json({ success: true, message: 'Foto geüpload en direct zichtbaar!' });
+    res.json({ success: true, message: 'Foto geüpload!' });
 });
 
 app.delete('/api/gallery/:id', (req, res) => {
     const photoId = req.params.id;
-    const username = req.query.username;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-    const role = account ? account.role.toLowerCase() : '';
-
-    if (!account || (!role.includes('directeur') && !role.includes('management'))) {
-        return res.status(403).json({ success: false, message: 'Geen rechten.' });
-    }
-
     galleryPhotos = galleryPhotos.filter(p => p.id !== photoId);
     saveGallery();
-    res.json({ success: true, message: 'Foto succesvol verwijderd.' });
+    res.json({ success: true, message: 'Foto verwijderd.' });
 });
 
 app.post('/api/badges', (req, res) => {
     const { title, targetUser, username } = req.body;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account || !canManageBadges(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om badges toe te kennen.' });
-    }
-
     const newBadge = { 
-        id: "badge-" + Date.now() + "-" + Math.floor(Math.random() * 10000), 
+        id: "badge-" + Date.now(), 
         title: title.trim(), 
         targetUser: targetUser.trim(), 
         awardedBy: username,
         date: new Date().toLocaleDateString('nl-NL')
     };
-
     customBadges.push(newBadge);
-    res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
+    res.json({ success: true, message: `Badge "${title}" gegeven aan ${targetUser}!` });
 });
 
 app.post('/api/badges/delete', (req, res) => {
     const { badgeId } = req.body;
-    const beforeCount = customBadges.length;
     customBadges = customBadges.filter(b => b.id !== badgeId);
-
-    if (customBadges.length < beforeCount) {
-        return res.json({ success: true, message: 'Badge succesvol ingetrokken!' });
-    } else {
-        return res.status(404).json({ success: false, message: 'Badge kon niet worden gevonden.' });
-    }
+    res.json({ success: true, message: 'Badge ingetrokken!' });
 });
 
 if (DISCORD_BOT_TOKEN) {
     client.login(DISCORD_BOT_TOKEN);
-} else {
-    console.log("Wachten op DISCORD_BOT_TOKEN in Render...");
 }
 
 app.listen(PORT, () => {
-    console.log(`Portaal-server actief op poort ${PORT}`);
+    console.log(`Server gestart op poort ${PORT}`);
 });
