@@ -25,10 +25,12 @@ app.use((req, res, next) => {
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
+const DISCORD_APPLICATIONS_CHANNEL_ID = '1558075393729363968';
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 const GALLERY_FILE = path.join(__dirname, 'gallery.json');
 const ANNOUNCEMENTS_FILE = path.join(__dirname, 'announcements.json');
+const APPLICATIONS_FILE = path.join(__dirname, 'applications.json');
 
 let accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
@@ -41,9 +43,7 @@ let accountsDatabase = [
 ];
 
 if (fs.existsSync(ACCOUNTS_FILE)) {
-    try {
-        accountsDatabase = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
-    } catch (e) { console.log('Fout bij laden accounts.json'); }
+    try { accountsDatabase = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8')); } catch (e) {}
 }
 
 function saveAccounts() {
@@ -56,9 +56,7 @@ let galleryPhotos = [
 ];
 
 if (fs.existsSync(GALLERY_FILE)) {
-    try {
-        galleryPhotos = JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8'));
-    } catch (e) { console.log('Fout bij laden gallery.json'); }
+    try { galleryPhotos = JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8')); } catch (e) {}
 }
 
 function saveGallery() {
@@ -70,13 +68,20 @@ let announcementsList = [
 ];
 
 if (fs.existsSync(ANNOUNCEMENTS_FILE)) {
-    try {
-        announcementsList = JSON.parse(fs.readFileSync(ANNOUNCEMENTS_FILE, 'utf8'));
-    } catch (e) { console.log('Fout bij laden announcements.json'); }
+    try { announcementsList = JSON.parse(fs.readFileSync(ANNOUNCEMENTS_FILE, 'utf8')); } catch (e) {}
 }
 
 function saveAnnouncements() {
     fs.writeFileSync(ANNOUNCEMENTS_FILE, JSON.stringify(announcementsList, null, 2));
+}
+
+let applicationsList = [];
+if (fs.existsSync(APPLICATIONS_FILE)) {
+    try { applicationsList = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8')); } catch (e) {}
+}
+
+function saveApplications() {
+    fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applicationsList, null, 2));
 }
 
 let absenceList = [];
@@ -118,8 +123,8 @@ function canManageStaff(role) {
 
 function isDriverMatch(jobDriver, accountUsername) {
     if (!jobDriver || !accountUsername) return false;
-    const j = jobDriver.toLowerCase().trim();
-    const a = accountUsername.toLowerCase().trim();
+    const j = jobDriver.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const a = accountUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
     return j === a || j.includes(a) || a.includes(j);
 }
 
@@ -148,8 +153,31 @@ client.on('clientReady', () => {
 client.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) {
         parseAndAddJob(message);
+    } else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) {
+        parseAndAddApplication(message);
     }
 });
+
+function parseAndAddApplication(message) {
+    const applicantName = message.author ? message.author.username : "Sollicitant";
+    let contentText = message.content || "Nieuwe sollicitatie ingediend via Discord.";
+    if (message.embeds && message.embeds.length > 0) {
+        contentText = message.embeds[0].description || message.embeds[0].title || contentText;
+    }
+
+    const appObj = {
+        id: "app-" + message.id,
+        applicant: applicantName,
+        content: contentText,
+        date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL'),
+        link: "https://vtc.haulmp.com/Brecht#applications"
+    };
+
+    if (!applicationsList.some(a => a.id === appObj.id)) {
+        applicationsList.unshift(appObj);
+        saveApplications();
+    }
+}
 
 function parseAndAddJob(message) {
     let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km', paidAmount = 0;
@@ -208,24 +236,28 @@ function parseAndAddJob(message) {
 async function fetchAllHistoricalDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
-        if (!channel) return;
-        
-        let lastId = undefined;
-        let totalFetched = 0;
-        allJobsHistory = [];
-        
-        while (totalFetched < 500) {
-            const options = { limit: 100 };
-            if (lastId) options.before = lastId;
-            const messages = await channel.messages.fetch(options);
-            if (messages.size === 0) break;
-            messages.forEach(msg => parseAndAddJob(msg));
-            lastId = messages.last().id;
-            totalFetched += messages.size;
-            if (messages.size < 100) break;
+        if (channel) {
+            let lastId = undefined;
+            let totalFetched = 0;
+            allJobsHistory = [];
+            while (totalFetched < 500) {
+                const options = { limit: 100 };
+                if (lastId) options.before = lastId;
+                const messages = await channel.messages.fetch(options);
+                if (messages.size === 0) break;
+                messages.forEach(msg => parseAndAddJob(msg));
+                lastId = messages.last().id;
+                totalFetched += messages.size;
+                if (messages.size < 100) break;
+            }
+            allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
         }
 
-        allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
+        const appChannel = await client.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
+        if (appChannel) {
+            const appMessages = await appChannel.messages.fetch({ limit: 30 });
+            appMessages.forEach(msg => parseAndAddApplication(msg));
+        }
     } catch (err) {
         console.error('Fout bij ophalen Discord historie:', err.message);
     }
@@ -279,9 +311,9 @@ app.get('/api/haulmp', (req, res) => {
         if (!weeklyChartData[w]) weeklyChartData[w] = { week: w, company: 0, drivers: {} };
         weeklyChartData[w].company += j.paidAmount;
         
-        const driverName = j.driver.toLowerCase();
-        if (!weeklyChartData[w].drivers[driverName]) weeklyChartData[w].drivers[driverName] = 0;
-        weeklyChartData[w].drivers[driverName] += j.paidAmount;
+        const driverClean = j.driver.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!weeklyChartData[w].drivers[driverClean]) weeklyChartData[w].drivers[driverClean] = 0;
+        weeklyChartData[w].drivers[driverClean] += j.paidAmount;
     });
 
     res.json({
@@ -295,17 +327,17 @@ app.get('/api/haulmp', (req, res) => {
         gallery: galleryPhotos,
         badges: customBadges,
         announcements: announcementsList,
+        applications: applicationsList,
         weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
     });
 });
 
-/* AANKONDIGINGEN API */
 app.post('/api/announcements', (req, res) => {
     const { title, content, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account || !canManageStaff(account.role)) {
-        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directie kunnen aankondigingen plaatsen.' });
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     if (!title || !content) return res.status(400).json({ success: false, message: 'Vul titel en inhoud in.' });
@@ -324,15 +356,7 @@ app.post('/api/announcements', (req, res) => {
 });
 
 app.delete('/api/announcements/:id', (req, res) => {
-    const annId = req.params.id;
-    const username = req.query.username;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account || !canManageStaff(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten.' });
-    }
-
-    announcementsList = announcementsList.filter(a => a.id !== annId);
+    announcementsList = announcementsList.filter(a => a.id !== req.params.id);
     saveAnnouncements();
     res.json({ success: true, message: 'Aankondiging verwijderd.' });
 });
@@ -366,9 +390,8 @@ app.post('/api/absence', (req, res) => {
 });
 
 app.post('/api/absence/status', (req, res) => {
-    const { absenceId, newStatus, username } = req.body;
-    const item = absenceList.find(a => a.id === absenceId);
-    if (item) { item.status = newStatus; return res.json({ success: true, message: 'Status bijgewerkt.' }); }
+    const item = absenceList.find(a => a.id === req.body.absenceId);
+    if (item) { item.status = req.body.newStatus; return res.json({ success: true, message: 'Status bijgewerkt.' }); }
     res.status(404).json({ success: false, message: 'Niet gevonden.' });
 });
 
@@ -378,7 +401,7 @@ app.delete('/api/absence/:id', (req, res) => {
 });
 
 app.post('/api/staff/add', (req, res) => {
-    const { username, role, adminUser } = req.body;
+    const { username, role } = req.body;
     if (accountsDatabase.some(d => d.username.toLowerCase() === username.toLowerCase().trim())) {
         return res.status(400).json({ success: false, message: 'Bestaat al.' });
     }
@@ -403,11 +426,18 @@ app.delete('/api/staff/:targetUser', (req, res) => {
 });
 
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
     const b64 = Buffer.from(req.file.buffer).toString('base64');
-    galleryPhotos.unshift({ id: "photo-" + Date.now(), url: `data:${req.file.mimetype};base64,${b64}`, uploadedBy: req.body.username, date: new Date().toLocaleDateString('nl-NL') });
+    const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
+    
+    galleryPhotos.unshift({ 
+        id: "photo-" + Date.now(), 
+        url: dataUrl, 
+        uploadedBy: req.body.username || "Chauffeur", 
+        date: new Date().toLocaleDateString('nl-NL') 
+    });
     saveGallery();
-    res.json({ success: true, message: 'Foto geüpload!' });
+    res.json({ success: true, message: 'Foto succesvol geüpload en opgeslagen!' });
 });
 
 app.delete('/api/gallery/:id', (req, res) => {
