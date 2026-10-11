@@ -105,7 +105,7 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
-        /* PROFESSIONEEL EN MODERN INLOGSCHERM */
+        /* INLOGSCHERM */
         #login-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, rgba(8,2,2,0.88), rgba(20,2,2,0.92)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center;
@@ -125,6 +125,11 @@
 
         .staff-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 15px; }
         .staff-card { background: rgba(25, 4, 4, 0.6); border: 1px solid var(--border-red); border-radius: 12px; padding: 16px; }
+
+        .app-card {
+            background: rgba(35, 6, 6, 0.7); border: 1px solid var(--border-red);
+            border-radius: 14px; padding: 18px; margin-bottom: 14px;
+        }
 
         .announcement-box { background: rgba(255,51,51,0.08); border-left: 4px solid var(--accent-red); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
 
@@ -226,7 +231,7 @@
                             <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button></li>
                             <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
                             <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
-                            <li><a href="https://vtc.haulmp.com/Brecht#applications" target="_blank" style="color:var(--text-muted); text-decoration:none; padding:11px 14px; display:flex; align-items:center; gap:12px; font-size:0.88rem; font-weight:600;"><i class="fa-solid fa-external-link"></i> Sollicitaties <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem; margin-left:auto;"></i></a></li>
+                            <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
                             <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges & Overzicht</button></li>
                             <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
                         </ul>
@@ -245,12 +250,10 @@
                         </div>
                     </div>
 
-                    <!-- TAB 1: DASHBOARD MET VLOEIENDE LIJNGRAFIEK EN MEDEDELINGEN -->
+                    <!-- TAB 1: DASHBOARD -->
                     <div id="p-tab-stats" class="portal-tab-content">
-                        <!-- MEDEDELINGEN/AANKONDIGINGEN SECTIE -->
                         <div id="announcements-display-container"></div>
 
-                        <!-- AANKONDIGING MAKEN (Directie & Onder Directie) -->
                         <div id="announcement-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
                             <h3><i class="fa-solid fa-bullhorn"></i> Nieuwe Aankondiging Plaatsen</h3>
                             <input type="text" id="ann-title" placeholder="Titel van het bericht..." class="form-input">
@@ -277,7 +280,6 @@
                             </div>
                         </div>
 
-                        <!-- VLOEIENDE LIJN-GRAFIEK (Global Cargo Stijl) -->
                         <div class="gallery-card" style="margin-bottom:20px; background:#120404;">
                             <h3 style="margin-bottom:15px; color:#fff;"><i class="fa-solid fa-chart-line"></i> Brecht Transport Wekelijkse Inkomsten</h3>
                             <div style="height: 280px;">
@@ -294,6 +296,15 @@
                                 <h3><i class="fa-solid fa-award"></i> Mijn Badges</h3>
                                 <div id="my-badges-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB SOLLICITATIES MET ENVELOPE KAARTEN -->
+                    <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-file-signature"></i> Binnengekomen Sollicitaties</h3>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Overzicht van sollicitaties ingediend via Discord / HaulMP.</p>
+                            <div id="applications-list-container"></div>
                         </div>
                     </div>
 
@@ -320,7 +331,7 @@
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-upload"></i> Foto Uploaden</h3>
                             <input type="file" id="photo-file" accept="image/*" class="form-input">
-                            <button onclick="uploadPhoto()" class="btn-red">Uploaden</button>
+                            <button onclick="uploadPhoto()" class="btn-red">Uploaden & Bewaren</button>
                         </div>
                         <div class="gallery-card" style="margin-top:16px;">
                             <h3><i class="fa-solid fa-images"></i> Beheer Foto's</h3>
@@ -372,7 +383,7 @@
         </div>
     </div>
 
-    <!-- CLEAN & PROFESSIONEEL INLOGSCHERM -->
+    <!-- INLOGSCHERM -->
     <div id="login-modal">
         <div class="login-box">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;" alt="Logo">
@@ -523,6 +534,19 @@
                 if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
                 if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
 
+                const pubGallery = document.getElementById('public-gallery-container');
+                if (pubGallery && data.gallery) {
+                    pubGallery.innerHTML = '';
+                    data.gallery.slice(0, 3).forEach(p => {
+                        pubGallery.insertAdjacentHTML('beforeend', `
+                            <div class="gallery-card" style="margin-bottom:0;">
+                                <img src="${p.url}" class="gallery-img">
+                                <div style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div>
+                            </div>
+                        `);
+                    });
+                }
+
                 if (Array.isArray(data.drivers_list)) {
                     const teamContainer = document.getElementById('team-container');
                     if (teamContainer) {
@@ -585,6 +609,34 @@
                 });
             }
 
+            // RENDER SOLLICITATIES MEER-INFORMATIE KAARTEN
+            const appsContainer = document.getElementById('applications-list-container');
+            if (appsContainer) {
+                appsContainer.innerHTML = '';
+                if (data.applications && data.applications.length > 0) {
+                    data.applications.forEach(app => {
+                        appsContainer.insertAdjacentHTML('beforeend', `
+                            <div class="app-card">
+                                <div style="font-size:1rem; font-weight:bold; color:#fff; margin-bottom:6px;">
+                                    <i class="fa-solid fa-user-pen" style="color:var(--accent-red);"></i> ${app.applicant} heeft gesolliciteerd!
+                                </div>
+                                <div style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px; line-height:1.4; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
+                                    "${app.content}"
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.75rem; color:#888;"><i class="fa-regular fa-clock"></i> ${app.date}</span>
+                                    <a href="${app.link}" target="_blank" class="btn-portal" style="padding:6px 14px; font-size:0.8rem; background:rgba(255,51,51,0.15); border-color:var(--accent-red);">
+                                        Bekijk sollicitatie →
+                                    </a>
+                                </div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    appsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen recente sollicitaties gevonden.</p>';
+                }
+            }
+
             const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
             
             if (myStats) {
@@ -611,6 +663,22 @@
                 myJobsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen recente ritten.</p>';
             }
 
+            const galleryManage = document.getElementById('gallery-manage-container');
+            if (galleryManage) {
+                galleryManage.innerHTML = '';
+                if (data.gallery) {
+                    data.gallery.forEach(p => {
+                        galleryManage.insertAdjacentHTML('beforeend', `
+                            <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:8px; border:1px solid var(--border-red);">
+                                <img src="${p.url}" style="width:100%; height:100px; object-fit:cover; border-radius:6px;">
+                                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">${p.uploadedBy}</div>
+                                ${currentUser.canManageStaff ? `<button onclick="deletePhoto('${p.id}')" class="btn-red" style="margin-top:6px; width:100%; padding:4px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Wissen</button>` : ''}
+                            </div>
+                        `);
+                    });
+                }
+            }
+
             if (currentUser.canManageStaff) {
                 const cardGrid = document.getElementById('staff-cards-container');
                 cardGrid.innerHTML = '';
@@ -618,7 +686,7 @@
                     const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
                     cardGrid.insertAdjacentHTML('beforeend', `
                         <div class="staff-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div style="display:flex; justify-size:space-between; align-items:center; margin-bottom:10px;">
                                 <b style="color:#fff;">${m.username}</b>
                                 <span class="member-role role-${m.color}">${m.role}</span>
                             </div>
@@ -649,14 +717,14 @@
             }
         }
 
-        /* VLOEIENDE LIJNGRAFIEK ZOALS GLOBAL CARGO (Met afgeronde golven & glowing blauwe lijn) */
         function renderChart(weeklyData, username) {
             const ctx = document.getElementById('earningsChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
 
             const labels = weeklyData.map(w => w.week);
             const companyData = weeklyData.map(w => w.company);
-            const userData = weeklyData.map(w => w.drivers[username.toLowerCase()] || 0);
+            const userCleanKey = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const userData = weeklyData.map(w => w.drivers[userCleanKey] || 0);
 
             const gradientCompany = ctx.createLinearGradient(0, 0, 0, 280);
             gradientCompany.addColorStop(0, 'rgba(51, 153, 255, 0.35)');
@@ -676,8 +744,7 @@
                             backgroundColor: gradientCompany,
                             tension: 0.45,
                             pointRadius: 5,
-                            pointBackgroundColor: '#3399ff',
-                            pointHoverRadius: 7
+                            pointBackgroundColor: '#3399ff'
                         },
                         {
                             label: 'Mijn Inkomsten (€)',
@@ -686,7 +753,7 @@
                             borderWidth: 3,
                             fill: false,
                             tension: 0.45,
-                            pointRadius: 4,
+                            pointRadius: 5,
                             pointBackgroundColor: '#68d391'
                         }
                     ]
@@ -701,6 +768,35 @@
                     }
                 }
             });
+        }
+
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photo-file');
+            if (fileInput.files.length === 0) return alert('Selecteer eerst een foto!');
+
+            const formData = new FormData();
+            formData.append('photo', fileInput.files[0]);
+            formData.append('username', currentUser.username);
+
+            try {
+                const res = await fetch('/api/gallery', { method: 'POST', body: formData });
+                const data = await res.json();
+                alert(data.message);
+                fileInput.value = '';
+                refreshPortalData();
+                loadData();
+            } catch (err) {
+                alert('Upload mislukt.');
+            }
+        }
+
+        async function deletePhoto(photoId) {
+            if (!confirm('Foto verwijderen?')) return;
+            const res = await fetch(`/api/gallery/${photoId}?username=${currentUser.username}`, { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+            loadData();
         }
 
         async function postAnnouncement() {
@@ -786,20 +882,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: currentUser.username, fromDate, toDate, reason })
             });
-            const data = await res.json();
-            alert(data.message);
-            refreshPortalData();
-        }
-
-        async function uploadPhoto() {
-            const fileInput = document.getElementById('photo-file');
-            if (fileInput.files.length === 0) return alert('Selecteer een bestand!');
-
-            const formData = new FormData();
-            formData.append('photo', fileInput.files[0]);
-            formData.append('username', currentUser.username);
-
-            const res = await fetch('/api/gallery', { method: 'POST', body: formData });
             const data = await res.json();
             alert(data.message);
             refreshPortalData();
