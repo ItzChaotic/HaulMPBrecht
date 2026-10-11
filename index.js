@@ -76,13 +76,15 @@ const client = new Client({
     ]
 });
 
-client.on('ready', () => {
+// Aangepast naar clientReady om deprecation warning te voorkomen
+client.on('clientReady', () => {
     console.log(`Discord Bot ingelogd als ${client.user.tag}`);
     fetchAllHistoricalDiscordLogs();
 });
 
 client.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) {
+        console.log(`Nieuw Discord bericht ontvangen van: ${message.author.username}`);
         parseAndAddJob(message, true);
     }
 });
@@ -140,6 +142,7 @@ function parseAndAddJob(message, isLiveNew = false) {
         if (isLiveNew) {
             totalDeliveries += 1;
             totalDistanceKm += kmAmount;
+            console.log(`Nieuwe rit live toegevoegd: ${from} -> ${to} door ${driver}`);
         }
     }
 }
@@ -325,7 +328,6 @@ app.post('/api/badges', (req, res) => {
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
-// Gegarandeerd werkende route voor het intrekken van badges
 app.post('/api/badges/delete', (req, res) => {
     const { badgeId } = req.body;
     const beforeCount = customBadges.length;
