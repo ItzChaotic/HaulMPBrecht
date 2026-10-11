@@ -65,7 +65,6 @@ function canManageBadges(role) {
     return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
 }
 
-// Vergelijk gebruikersnamen flexibel (hoofdletter-onafhankelijk & gedeeltelijke match)
 function isDriverMatch(jobDriver, accountUsername) {
     if (!jobDriver || !accountUsername) return false;
     const j = jobDriver.toLowerCase().trim();
@@ -97,7 +96,6 @@ function parseAndAddJob(message, isLiveNew = false) {
     let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km';
     let timestamp = message.createdTimestamp || Date.now();
 
-    // 1. Verwerk HaulMP Embed-berichten
     if (message.embeds && message.embeds.length > 0) {
         const embed = message.embeds[0];
         const title = embed.title || '';
@@ -132,7 +130,6 @@ function parseAndAddJob(message, isLiveNew = false) {
             }
         });
     } 
-    // 2. Fallback voor gewone tekstberichten
     else if (message.content && (message.content.includes('→') || message.content.includes('->'))) {
         const separator = message.content.includes('→') ? '→' : '->';
         const parts = message.content.split(separator);
@@ -158,7 +155,8 @@ function parseAndAddJob(message, isLiveNew = false) {
         cargo,
         distance: `${kmAmount.toLocaleString('nl-NL')} km`,
         kmAmount,
-        timestamp
+        timestamp,
+        dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL')
     };
 
     if (!allJobsHistory.some(j => j.id === jobObj.id)) {
@@ -228,7 +226,8 @@ app.post('/api/login', (req, res) => {
         stats: {
             deliveries: userJobsLast10Days.length,
             distance: `${driverKm.toLocaleString('nl-NL')} km`
-        }
+        },
+        myRecentJobs: userJobsLast10Days
     });
 });
 
@@ -245,6 +244,7 @@ app.get('/api/haulmp', (req, res) => {
             color: getRoleColor(m.role),
             deliveries: userJobs.length,
             distance: `${userKm.toLocaleString('nl-NL')} km`,
+            userJobs: userJobs,
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
     });
@@ -303,7 +303,7 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account) return res.status(403).json({ success: false, message: 'Geen geldig account.' });
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteer.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
 
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
