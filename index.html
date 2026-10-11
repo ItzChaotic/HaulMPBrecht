@@ -578,6 +578,13 @@
 
             const isDirectie = currentUser.role.toLowerCase().includes('directeur');
 
+            // Update statistieken in personeelsportaal van de ingelogde gebruiker
+            const loggedInUserStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
+            if (loggedInUserStats) {
+                document.getElementById('user-stat-deliveries').innerText = loggedInUserStats.deliveries || 0;
+                document.getElementById('user-stat-distance').innerText = loggedInUserStats.distance || "0 km";
+            }
+
             // Mijn Badges
             const myBadgesContainer = document.getElementById('my-badges-container');
             myBadgesContainer.innerHTML = '';
