@@ -1,6 +1,8 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,23 +26,55 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
+// Bestanden voor persistente opslag
+const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
+const GALLERY_FILE = path.join(__dirname, 'gallery.json');
+
+// Laad accounts uit bestand of gebruik standaardwaarden
 let accountsDatabase = [
-    { username: "MJGamerNL", password: "Brecht123456", role: "Directeur" },
+    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "Sylveon2002!08", role: "Leidinggevende" }
+    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
-let absenceList = [];
-let customBadges = []; 
+if (fs.existsSync(ACCOUNTS_FILE)) {
+    try {
+        const data = fs.readFileSync(ACCOUNTS_FILE, 'utf8');
+        accountsDatabase = JSON.parse(data);
+    } catch (e) {
+        console.log('Fout bij laden accounts.json, standaardwaarden worden gebruikt.');
+    }
+}
+
+function saveAccounts() {
+    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2));
+}
+
+// Laad galerij foto's uit bestand of gebruik standaardwaarden
 let galleryPhotos = [
     { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" },
     { id: "photo-2", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png", uploadedBy: "ItzChaotic_", date: "10-10-2026" }
 ];
 
+if (fs.existsSync(GALLERY_FILE)) {
+    try {
+        const data = fs.readFileSync(GALLERY_FILE, 'utf8');
+        galleryPhotos = JSON.parse(data);
+    } catch (e) {
+        console.log('Fout bij laden gallery.json, standaardwaarden worden gebruikt.');
+    }
+}
+
+function saveGallery() {
+    fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryPhotos, null, 2));
+}
+
+let absenceList = [];
+let customBadges = []; 
 let totalDeliveries = 0;
 let totalDistanceKm = 0;
 let allJobsHistory = [];
@@ -293,7 +327,7 @@ app.post('/api/absence/status', (req, res) => {
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account || !canManageStaff(account.role)) {
-        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directie kunnen dit wijzigen.' });
+        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directeur kunnen dit wijzigen.' });
     }
 
     const item = absenceList.find(a => a.id === absenceId);
@@ -341,6 +375,7 @@ app.post('/api/staff/add', (req, res) => {
         role: role.trim()
     });
 
+    saveAccounts(); // Opslaan in bestand
     res.json({ success: true, message: `Personeelslid ${username} toegevoegd! Tijdelijk wachtwoord: ${generatedPassword}` });
 });
 
@@ -362,6 +397,7 @@ app.post('/api/staff/update-role', (req, res) => {
     }
 
     targetAcc.role = newRole.trim();
+    saveAccounts(); // Opslaan in bestand
     res.json({ success: true, message: `Rol van ${targetAcc.username} succesvol gewijzigd naar '${newRole}'!` });
 });
 
@@ -379,6 +415,7 @@ app.delete('/api/staff/:targetUser', (req, res) => {
     }
 
     accountsDatabase = accountsDatabase.filter(d => d.username.toLowerCase() !== targetUser.toLowerCase());
+    saveAccounts(); // Opslaan in bestand
     res.json({ success: true, message: `Personeelslid ${targetUser} is succesvol ontslagen.` });
 });
 
@@ -400,6 +437,7 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     };
 
     galleryPhotos.unshift(newPhoto);
+    saveGallery(); // Opslaan in bestand
     res.json({ success: true, message: 'Foto geüpload en direct zichtbaar!' });
 });
 
@@ -414,6 +452,7 @@ app.delete('/api/gallery/:id', (req, res) => {
     }
 
     galleryPhotos = galleryPhotos.filter(p => p.id !== photoId);
+    saveGallery(); // Opslaan in bestand
     res.json({ success: true, message: 'Foto succesvol verwijderd.' });
 });
 
