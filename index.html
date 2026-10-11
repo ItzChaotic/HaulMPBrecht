@@ -89,7 +89,6 @@
         .role-orange { background: rgba(221, 107, 32, 0.2); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.4); }
         .role-yellow { background: rgba(214, 158, 46, 0.2); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
         .role-green { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.4); }
-        .role-gray { background: rgba(255, 255, 255, 0.1); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.2); }
 
         .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(204,0,0,0.15); }
         .trip-route { font-weight: bold; font-size: 1rem; color: #fff; }
@@ -211,5 +210,743 @@
                     <p style="color:var(--text-muted);" id="user-role-display">Ingelogd op het personeelsportaal</p>
                 </div>
                 <div>
-                    <button onclick="logout()" class="btn-red" style="background:#444;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button
-                                                                                                                                                    
+                    <button onclick="logout()" class="btn-red" style="background:#444;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                    <button onclick="switchView('home-view')" class="btn-portal" style="margin-left:10px;">← Website Bekijken</button>
+                </div>
+            </div>
+
+            <div class="dash-nav">
+                <button class="tab-btn active" onclick="switchPortalTab('p-tab-stats')"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+                <button class="tab-btn" onclick="switchPortalTab('p-tab-absence')"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid Doorgeven</button>
+                <button class="tab-btn" onclick="switchPortalTab('p-tab-upload')"><i class="fa-solid fa-file-arrow-up"></i> Foto Uploaden</button>
+                <button class="tab-btn" id="mgt-tab-btn" style="display:none;" onclick="switchPortalTab('p-tab-mgt')"><i class="fa-solid fa-user-gear"></i> Management & Badges</button>
+                <button class="tab-btn" id="staff-tab-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff')"><i class="fa-solid fa-user-plus"></i> Personeel Beheren</button>
+            </div>
+
+            <div id="p-tab-stats" class="portal-tab-content">
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-truck-fast"></i> Jouw Statistieken (Afgelopen 10 Dagen)</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px;">
+                        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; border:1px solid var(--border-red);">
+                            <span style="color:var(--text-muted); font-size:0.85rem;">GEREDEN RITTEN (10D)</span>
+                            <h2 id="user-stat-deliveries" style="color:#fff; margin-top:5px;">0</h2>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; border:1px solid var(--border-red);">
+                            <span style="color:var(--text-muted); font-size:0.85rem;">GEREDEN AFSTAND (10D)</span>
+                            <h2 id="user-stat-distance" style="color:#fff; margin-top:5px;">0 km</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-route"></i> Mijn Gereden Ritten (Afgelopen 10 Dagen)</h3>
+                    <div id="my-jobs-list-container" style="margin-top:15px;">
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Geen gereden ritten gevonden in de afgelopen 10 dagen.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-award"></i> Mijn Behaalde Badges</h3>
+                    <div id="my-badges-container" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                        <span style="color:var(--text-muted); font-size:0.9rem;">Nog geen badges behaald.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="p-tab-absence" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-pen-to-square"></i> Afwezigheid Melden</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:10px;">
+                        <div><label style="font-size:0.85rem; color:var(--text-muted);">Van:</label><input type="date" id="abs-from" class="form-input"></div>
+                        <div><label style="font-size:0.85rem; color:var(--text-muted);">Tot:</label><input type="date" id="abs-to" class="form-input"></div>
+                    </div>
+                    <input type="text" id="abs-reason" placeholder="Reden (bijv. Vakantie)" class="form-input">
+                    <button onclick="submitAbsence()" class="btn-red">Aanvraag Indienen</button>
+                </div>
+
+                <div class="gallery-card" style="margin-top:20px;">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Afwezigheidsverzoeken & Status</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Naam</th>
+                                <th>Periode</th>
+                                <th>Reden</th>
+                                <th>Status</th>
+                                <th id="th-admin-actions" style="display:none;">Acties (Directie)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="absence-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="p-tab-upload" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-upload"></i> Foto Uploaden</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin:10px 0;">Kies een foto vanaf je pc of telefoon. Deze komt direct live in de galerij.</p>
+                    <input type="file" id="photo-file" accept="image/*" class="form-input">
+                    <button onclick="uploadPhoto()" class="btn-red">Foto Uploaden</button>
+                </div>
+
+                <div class="gallery-card" style="margin-top:20px;">
+                    <h3><i class="fa-solid fa-images"></i> Beheer Geüploade Foto's</h3>
+                    <div id="gallery-manage-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:15px; margin-top:15px;"></div>
+                </div>
+            </div>
+
+            <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-user-plus"></i> Nieuw Personeelslid Toevoegen</h3>
+                    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                        <input type="text" id="new-staff-user" placeholder="Discord / Gebruikersnaam" class="form-input" style="flex:1; margin:0;">
+                        <select id="new-staff-role" class="form-input" style="flex:1; margin:0; background:#220505; color:white;">
+                            <option value="Chauffeur">Chauffeur</option>
+                            <option value="Leidinggevende">Leidinggevende</option>
+                            <option value="Management">Management</option>
+                            <option value="Onder Directeur">Onder Directeur</option>
+                            <option value="Directeur">Directeur</option>
+                        </select>
+                        <button onclick="addNewStaff()" class="btn-red" style="white-space:nowrap;">Toevoegen</button>
+                    </div>
+                    <div id="staff-add-result" style="margin-top:10px; font-size:0.9rem; color:#68d391; font-weight:bold;"></div>
+                </div>
+
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-user-shield"></i> Promoties & Functies Beheren</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Gebruikersnaam</th>
+                                <th>Huidige Functie</th>
+                                <th>Nieuwe Functie / Promotie</th>
+                                <th>Actie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staff-management-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card" id="badge-box" style="display:none; margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-award"></i> Badge Toekennen</h3>
+                    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                        <input type="text" id="badge-title" placeholder="Badge Naam (bijv. Nachtrakker)" class="form-input" style="flex:1; margin:0;">
+                        <input type="text" id="badge-user" placeholder="Voor Gebruiker (bijv. MJGamerNL)" class="form-input" style="flex:1; margin:0;">
+                        <button onclick="awardBadge()" class="btn-red" style="white-space:nowrap;">Badge Geven</button>
+                    </div>
+                </div>
+
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-shield-halved"></i> Actieve Badges Beheren</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Badge Naam</th>
+                                <th>Gebruiker</th>
+                                <th>Toegekend Door</th>
+                                <th>Actie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-badges-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-users"></i> Management & Personeelsoverzicht (Klik op beheer voor popup)</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Gebruikersnaam</th><th>Rol</th><th>Actie</th></tr>
+                        </thead>
+                        <tbody id="members-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DRIVER MANAGEMENT MODAL POPUP -->
+    <div id="driver-modal">
+        <div class="gallery-card" style="max-width:550px; width:90%; padding:30px; border-color:var(--accent-red); position:relative;">
+            <span onclick="closeDriverModal()" style="position:absolute; top:20px; right:25px; color:#fff; font-size:2rem; cursor:pointer;">&times;</span>
+            <h2 id="modal-driver-name" style="color:var(--accent-red); margin-bottom:15px;"><i class="fa-solid fa-user-gear"></i> Chauffeur Beheren</h2>
+            
+            <div style="margin-bottom:15px; font-size:0.95rem; line-height:1.6;">
+                <p><b>Rang / Rol:</b> <span id="modal-driver-role"></span></p>
+                <p><b>Gereden Kilometers (10D):</b> <span id="modal-driver-distance"></span></p>
+                <p><b>Voltooide Ritten (10D):</b> <span id="modal-driver-deliveries"></span></p>
+            </div>
+
+            <div style="margin-top:20px;">
+                <h4 style="color:#fff; margin-bottom:8px;"><i class="fa-solid fa-award"></i> Actieve Badges van deze Chauffeur</h4>
+                <div id="modal-driver-badges" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
+            </div>
+
+            <div style="margin-top:20px;">
+                <h4 style="color:#fff; margin-bottom:8px;"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid van deze Chauffeur</h4>
+                <div id="modal-driver-absence" style="font-size:0.9rem; color:var(--text-muted);">Geen actieve afwezigheid.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INLOG MODAL -->
+    <div id="login-modal">
+        <div class="gallery-card" style="max-width:400px; width:90%; padding:30px; border-color:var(--accent-red);">
+            <h2 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-lock"></i> Personeel Inloggen</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Meld je aan met je personeelsaccount.</p>
+            
+            <input type="text" id="login-user" placeholder="Gebruikersnaam" class="form-input">
+            <input type="password" id="login-pass" placeholder="Wachtwoord" class="form-input">
+
+            <button onclick="handleLogin()" class="btn-red" style="width:100%; margin-top:10px;">Inloggen</button>
+            <button onclick="closeLoginModal()" style="background:transparent; color:#aaa; border:none; width:100%; margin-top:10px; cursor:pointer;">Annuleren</button>
+            <div id="login-error" style="color:#ff4d4d; font-size:0.85rem; margin-top:10px; text-align:center;"></div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN LIGHTBOX -->
+    <div id="lightbox-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:3000; justify-content:center; align-items:center; flex-direction:column;">
+        <span onclick="closeLightbox()" style="position:absolute; top:25px; right:35px; color:#fff; font-size:2.5rem; cursor:pointer;">&times;</span>
+        <img id="lightbox-img" src="" style="max-width:90%; max-height:80vh; border-radius:12px; border:2px solid var(--border-red);">
+        <div id="lightbox-caption" style="margin-top:15px; color:var(--text-muted); font-size:1.1rem;"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden.</p>
+    </footer>
+
+    <script>
+        let currentUser = null;
+        let allGalleryPhotos = [];
+        let globalPortalData = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = sessionStorage.getItem('brecht_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    updateNavForLoggedInUser();
+                } catch(e) {
+                    sessionStorage.removeItem('brecht_user');
+                }
+            }
+            loadData();
+        });
+
+        function switchView(viewId) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openLoginModal() {
+            document.getElementById('login-modal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').style.display = 'none';
+        }
+
+        function updateNavForLoggedInUser() {
+            if (currentUser) {
+                document.getElementById('nav-dashboard-tab').style.display = 'inline-block';
+                document.getElementById('nav-login-btn').style.display = 'none';
+            } else {
+                document.getElementById('nav-dashboard-tab').style.display = 'none';
+                document.getElementById('nav-login-btn').style.display = 'inline-block';
+            }
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.innerText = "Bezig met inloggen...";
+
+            try {
+                // GEOPTIMALISEERD: Gebruik relatieve URL '/api/login' i.p.v. hardcoded domain
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    currentUser = data;
+                    sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                    closeLoginModal();
+                    updateNavForLoggedInUser();
+                    openPortalDashboard();
+                } else {
+                    errorDiv.innerText = data.message || 'Onjuiste gegevens.';
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Kan geen verbinding maken met de server.';
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('brecht_user');
+            updateNavForLoggedInUser();
+            switchView('home-view');
+        }
+
+        function openPortalDashboard() {
+            if (!currentUser) return openLoginModal();
+
+            document.getElementById('welcome-title').innerText = `Hallo ${currentUser.username}!`;
+            document.getElementById('user-role-display').innerText = `Rol: ${currentUser.role}`;
+
+            const isDirectie = currentUser.role.toLowerCase().includes('directeur');
+            const canManageBadges = currentUser.canManageBadges;
+            const canManageStaff = currentUser.canManageStaff;
+
+            if (canManageBadges) {
+                document.getElementById('mgt-tab-btn').style.display = 'inline-block';
+                document.getElementById('badge-box').style.display = 'block';
+            }
+            if (canManageStaff) {
+                document.getElementById('staff-tab-btn').style.display = 'inline-block';
+            }
+            if (isDirectie) {
+                document.getElementById('th-admin-actions').style.display = 'table-cell';
+            }
+
+            refreshPortalData();
+            switchView('portal-view');
+        }
+
+        function switchPortalTab(tabId) {
+            document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        async function loadData() {
+            try {
+                // GEOPTIMALISEERD: Relatieve URL '/api/haulmp'
+                const res = await fetch('/api/haulmp');
+                const data = await res.json();
+                globalPortalData = data;
+
+                if (data.distance) document.getElementById('stat-distance').innerText = data.distance;
+                if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
+                if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
+
+                allGalleryPhotos = data.gallery || [];
+
+                const pubGallery = document.getElementById('public-gallery-container');
+                pubGallery.innerHTML = '';
+                if (allGalleryPhotos.length > 0) {
+                    allGalleryPhotos.slice(0, 3).forEach(p => {
+                        pubGallery.insertAdjacentHTML('beforeend', `
+                            <div class="gallery-card" onclick="openLightbox('${p.url}', '${p.uploadedBy}', '${p.date || 'Recent'}')" style="cursor:pointer;">
+                                <img src="${p.url}" class="gallery-img">
+                                <div style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div>
+                            </div>
+                        `);
+                    });
+                }
+
+                renderFullGallery(allGalleryPhotos);
+
+                if (Array.isArray(data.drivers_list)) {
+                    const teamContainer = document.getElementById('team-container');
+                    teamContainer.innerHTML = '';
+                    data.drivers_list.forEach(m => {
+                        let roleClass = 'role-' + (m.color || 'gray');
+                        teamContainer.insertAdjacentHTML('beforeend', `
+                            <div class="member-card">
+                                <div style="display:flex; align-items:center; gap:16px;">
+                                    <div class="member-avatar"><i class="fa-solid fa-user"></i></div>
+                                    <div>
+                                        <div style="font-weight:bold;">${m.username}</div>
+                                        <span class="member-role ${roleClass}">${m.role}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    });
+                }
+
+                if (Array.isArray(data.recent_jobs) && data.recent_jobs.length > 0) {
+                    const container = document.getElementById('trips-container');
+                    container.innerHTML = '';
+                    data.recent_jobs.slice(0, 10).forEach(job => {
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="trip-item">
+                                <div>
+                                    <div class="trip-route">${job.from} → ${job.to}</div>
+                                    <div class="trip-details">Bestuurder: <b>${job.driver}</b> • Vracht: ${job.cargo}</div>
+                                </div>
+                                <div style="background:rgba(204,0,0,0.2); color:var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold; font-size:0.85rem;">${job.distance}</div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    document.getElementById('trips-container').innerHTML = '<p style="text-align:center; color:var(--text-muted);">Er zijn momenteel nog geen ritten gesynchroniseerd uit Discord.</p>';
+                }
+
+            } catch (err) {
+                console.log('API niet bereikbaar');
+            }
+        }
+
+        function renderFullGallery(photos) {
+            const container = document.getElementById('full-gallery-container');
+            container.innerHTML = '';
+            photos.forEach(p => {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="gallery-card" onclick="openLightbox('${p.url}', '${p.uploadedBy}', '${p.date || 'Recent'}')" style="cursor:pointer;">
+                        <img src="${p.url}" class="gallery-img">
+                        <div style="font-size:0.85rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy} • ${p.date || 'Recent'}</div>
+                    </div>
+                `);
+            });
+        }
+
+        function filterFullGallery() {
+            const q = document.getElementById('search-gallery').value.toLowerCase();
+            const filtered = allGalleryPhotos.filter(p => p.uploadedBy.toLowerCase().includes(q));
+            renderFullGallery(filtered);
+        }
+
+        async function refreshPortalData() {
+            // GEOPTIMALISEERD: Relatieve URL '/api/haulmp'
+            const res = await fetch('/api/haulmp');
+            const data = await res.json();
+            globalPortalData = data;
+
+            const isDirectie = currentUser.role.toLowerCase().includes('directeur');
+            const canManageStaff = currentUser.canManageStaff;
+
+            const loggedInUserStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
+            
+            if (loggedInUserStats) {
+                document.getElementById('user-stat-deliveries').innerText = loggedInUserStats.deliveries || 0;
+                document.getElementById('user-stat-distance').innerText = loggedInUserStats.distance || "0 km";
+
+                const myJobsContainer = document.getElementById('my-jobs-list-container');
+                myJobsContainer.innerHTML = '';
+
+                if (loggedInUserStats.userJobs && loggedInUserStats.userJobs.length > 0) {
+                    loggedInUserStats.userJobs.forEach(j => {
+                        myJobsContainer.insertAdjacentHTML('beforeend', `
+                            <div class="trip-item">
+                                <div>
+                                    <div class="trip-route">${j.from} → ${j.to}</div>
+                                    <div class="trip-details">Vracht: <b>${j.cargo}</b> • Datum: ${j.dateFormatted || 'Recent'}</div>
+                                </div>
+                                <div style="background:rgba(204,0,0,0.2); color:var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold; font-size:0.85rem;">${j.distance}</div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    myJobsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Geen gereden ritten geregistreerd in de afgelopen 10 dagen.</p>';
+                }
+            }
+
+            const myBadgesContainer = document.getElementById('my-badges-container');
+            myBadgesContainer.innerHTML = '';
+            const myBadges = (data.badges || []).filter(b => b.targetUser.toLowerCase() === currentUser.username.toLowerCase());
+            
+            if (myBadges.length > 0) {
+                myBadges.forEach(b => {
+                    myBadgesContainer.insertAdjacentHTML('beforeend', `<span class="badge-tag"><i class="fa-solid fa-award"></i> ${b.title}</span>`);
+                });
+            } else {
+                myBadgesContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">Nog geen badges behaald.</span>';
+            }
+
+            const absTbody = document.getElementById('absence-table-body');
+            absTbody.innerHTML = '';
+            data.absence.forEach(a => {
+                let statusBadge = `<span class="badge-status status-pending">In behandeling</span>`;
+                if (a.status === 'Goedgekeurd') statusBadge = `<span class="badge-status status-approved">Goedgekeurd</span>`;
+                if (a.status === 'Afgewezen') statusBadge = `<span class="badge-status status-rejected">Afgewezen</span>`;
+
+                let actionBtns = '';
+                if (isDirectie) {
+                    actionBtns = `<td>
+                        <button onclick="changeAbsenceStatus('${a.id}', 'Goedgekeurd')" class="admin-btn" style="background:#28a745; color:white;" title="Goedkeuren">✓</button> 
+                        <button onclick="changeAbsenceStatus('${a.id}', 'Afgewezen')" class="admin-btn" style="background:#dc3545; color:white;" title="Afwijzen">✗</button>
+                        <button onclick="deleteAbsence('${a.id}')" class="admin-btn" style="background:#444; color:white; margin-left:4px;" title="Verwijderen"><i class="fa-solid fa-trash"></i></button>
+                    </td>`;
+                }
+
+                absTbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${a.username}</b></td>
+                        <td>${a.fromDate} t/m ${a.toDate}</td>
+                        <td>${a.reason}</td>
+                        <td>${statusBadge}</td>
+                        ${actionBtns}
+                    </tr>
+                `);
+            });
+
+            if (canManageStaff) {
+                const staffMgtTbody = document.getElementById('staff-management-table-body');
+                staffMgtTbody.innerHTML = '';
+                data.drivers_list.forEach(m => {
+                    staffMgtTbody.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td><b>${m.username}</b></td>
+                            <td><span class="member-role role-${m.color}">${m.role}</span></td>
+                            <td>
+                                <select id="role-select-${m.username}" class="form-input" style="padding:4px; margin:0; background:#220505; color:white; font-size:0.85rem;">
+                                    <option value="Chauffeur" ${m.role === 'Chauffeur' ? 'selected' : ''}>Chauffeur</option>
+                                    <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
+                                    <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
+                                    <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
+                                    <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
+                                </select>
+                            </td>
+                            <td><button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="padding:4px 10px; font-size:0.8rem;">Opslaan</button></td>
+                        </tr>
+                    `);
+                });
+            }
+
+            const galleryManage = document.getElementById('gallery-manage-container');
+            galleryManage.innerHTML = '';
+            const isManagement = currentUser.role.toLowerCase().includes('directeur') || currentUser.role.toLowerCase().includes('management');
+
+            data.gallery.forEach(p => {
+                let deleteBtn = isManagement ? `<button onclick="deletePhoto('${p.id}')" class="btn-red" style="margin-top:8px; width:100%; padding:4px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Wissen</button>` : '';
+                galleryManage.insertAdjacentHTML('beforeend', `
+                    <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:8px; border:1px solid var(--border-red);">
+                        <img src="${p.url}" style="width:100%; height:100px; object-fit:cover; border-radius:6px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">${p.uploadedBy}</div>
+                        ${deleteBtn}
+                    </div>
+                `);
+            });
+
+            const activeBadgesTbody = document.getElementById('active-badges-table-body');
+            activeBadgesTbody.innerHTML = '';
+            if (data.badges && data.badges.length > 0) {
+                data.badges.forEach(b => {
+                    activeBadgesTbody.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td><span class="badge-tag"><i class="fa-solid fa-award"></i> ${b.title}</span></td>
+                            <td><b>${b.targetUser}</b></td>
+                            <td>${b.awardedBy}</td>
+                            <td><button type="button" onclick="deleteBadge('${b.id}')" class="btn-red" style="padding:4px 10px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Intrekken</button></td>
+                        </tr>
+                    `);
+                });
+            } else {
+                activeBadgesTbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-muted);">Er zijn momenteel geen actieve badges toegekend.</td></tr>';
+            }
+
+            const membersTbody = document.getElementById('members-table-body');
+            membersTbody.innerHTML = '';
+            data.drivers_list.forEach(m => {
+                membersTbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${m.username}</b></td>
+                        <td>${m.role}</td>
+                        <td><button onclick="openDriverModal('${m.username}')" class="btn-portal" style="padding:4px 12px; font-size:0.8rem;"><i class="fa-solid fa-gear"></i> Beheer</button></td>
+                    </tr>
+                `);
+            });
+        }
+
+        async function addNewStaff() {
+            const username = document.getElementById('new-staff-user').value;
+            const role = document.getElementById('new-staff-role').value;
+            const resDiv = document.getElementById('staff-add-result');
+
+            if (!username) return alert('Vul een gebruikersnaam in!');
+
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch('/api/staff/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, role, adminUser: currentUser.username })
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                resDiv.innerText = data.message;
+                document.getElementById('new-staff-user').value = '';
+                refreshPortalData();
+                loadData();
+            } else {
+                alert(data.message || 'Fout bij toevoegen.');
+            }
+        }
+
+        async function updateStaffRole(targetUser) {
+            const selectEl = document.getElementById(`role-select-${targetUser}`);
+            const newRole = selectEl.value;
+
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch('/api/staff/update-role', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUser, newRole, adminUser: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+            loadData();
+        }
+
+        function openDriverModal(username) {
+            if (!globalPortalData) return;
+            const driver = globalPortalData.drivers_list.find(d => d.username.toLowerCase() === username.toLowerCase());
+            if (!driver) return;
+
+            document.getElementById('modal-driver-name').innerHTML = `<i class="fa-solid fa-user-gear"></i> ${driver.username}`;
+            document.getElementById('modal-driver-role').innerText = driver.role;
+            document.getElementById('modal-driver-distance').innerText = driver.distance || '0 km';
+            document.getElementById('modal-driver-deliveries').innerText = (driver.deliveries || 0) + " ritten";
+
+            const badgeContainer = document.getElementById('modal-driver-badges');
+            badgeContainer.innerHTML = '';
+            if (driver.badges && driver.badges.length > 0) {
+                driver.badges.forEach(b => {
+                    badgeContainer.insertAdjacentHTML('beforeend', `<span class="badge-tag"><i class="fa-solid fa-award"></i> ${b.title}</span>`);
+                });
+            } else {
+                badgeContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Geen badges toegekend.</span>';
+            }
+
+            const userAbsence = globalPortalData.absence.filter(a => a.username.toLowerCase() === driver.username.toLowerCase());
+            const absContainer = document.getElementById('modal-driver-absence');
+            absContainer.innerHTML = '';
+            if (userAbsence.length > 0) {
+                userAbsence.forEach(a => {
+                    absContainer.insertAdjacentHTML('beforeend', `<div style="margin-bottom:4px;">• ${a.fromDate} t/m ${a.toDate} (${a.reason}) - <b>${a.status}</b></div>`);
+                });
+            } else {
+                absContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Geen afwezigheid geregistreerd.</span>';
+            }
+
+            document.getElementById('driver-modal').style.display = 'flex';
+        }
+
+        function closeDriverModal() {
+            document.getElementById('driver-modal').style.display = 'none';
+        }
+
+        async function submitAbsence() {
+            const fromDate = document.getElementById('abs-from').value;
+            const toDate = document.getElementById('abs-to').value;
+            const reason = document.getElementById('abs-reason').value;
+            if (!fromDate || !toDate) return alert('Selecteer datums!');
+
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch('/api/absence', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser.username, fromDate, toDate, reason })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+        }
+
+        async function changeAbsenceStatus(absenceId, newStatus) {
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch('/api/absence/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ absenceId, newStatus, username: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+        }
+
+        async function deleteAbsence(absenceId) {
+            if (!confirm('Weet je zeker dat je dit afwezigheidsverzoek wilt verwijderen?')) return;
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch(`/api/absence/${absenceId}?username=${currentUser.username}`, { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+        }
+
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photo-file');
+            if (fileInput.files.length === 0) return alert('Selecteer een bestand!');
+
+            const formData = new FormData();
+            formData.append('photo', fileInput.files[0]);
+            formData.append('username', currentUser.username);
+
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch('/api/gallery', { method: 'POST', body: formData });
+            const data = await res.json();
+            alert(data.message);
+            fileInput.value = '';
+            refreshPortalData();
+            loadData();
+        }
+
+        async function deletePhoto(photoId) {
+            if (!confirm('Weet je zeker dat je deze foto wilt verwijderen?')) return;
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch(`/api/gallery/${photoId}?username=${currentUser.username}`, { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+            loadData();
+        }
+
+        async function awardBadge() {
+            const title = document.getElementById('badge-title').value;
+            const targetUser = document.getElementById('badge-user').value;
+            if (!title || !targetUser) return alert('Vul zowel badge naam als gebruikersnaam in!');
+
+            // GEOPTIMALISEERD: Relatieve URL
+            const res = await fetch('/api/badges', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, targetUser, username: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            document.getElementById('badge-title').value = '';
+            document.getElementById('badge-user').value = '';
+            refreshPortalData();
+        }
+
+        async function deleteBadge(badgeId) {
+            if (!confirm('Weet je zeker dat je deze badge wilt intrekken?')) return;
+            
+            try {
+                // GEOPTIMALISEERD: Relatieve URL
+                const res = await fetch('/api/badges/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ badgeId: badgeId })
+                });
+                const data = await res.json();
+                alert(data.message);
+                refreshPortalData();
+            } catch (err) {
+                alert('Er is een fout opgetreden.');
+            }
+        }
+
+        function openLightbox(url, author, date) {
+            document.getElementById('lightbox-img').src = url;
+            document.getElementById('lightbox-caption').innerHTML = `<i class="fa-solid fa-camera"></i> Gemaakt door <b>${author}</b> op ${date}`;
+            document.getElementById('lightbox-modal').style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
