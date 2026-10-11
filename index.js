@@ -65,6 +65,14 @@ function canManageBadges(role) {
     return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
 }
 
+// Vergelijk gebruikersnamen flexibel (hoofdletter-onafhankelijk & gedeeltelijke match)
+function isDriverMatch(jobDriver, accountUsername) {
+    if (!jobDriver || !accountUsername) return false;
+    const j = jobDriver.toLowerCase().trim();
+    const a = accountUsername.toLowerCase().trim();
+    return j === a || j.includes(a) || a.includes(j);
+}
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -95,7 +103,6 @@ function parseAndAddJob(message, isLiveNew = false) {
         const title = embed.title || '';
         const description = embed.description || '';
         
-        // Check op pijl in titel of beschrijving (bijv. Sassari → L'Île-Rousse)
         if (title.includes('→') || title.includes('->')) {
             const separator = title.includes('→') ? '→' : '->';
             const parts = title.split(separator);
@@ -108,7 +115,6 @@ function parseAndAddJob(message, isLiveNew = false) {
             to = cleanText(parts[1]);
         }
 
-        // Haal vrachtnaam uit beschrijving
         if (description) {
             const descLines = description.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             if (descLines.length > 0 && !descLines[0].toLowerCase().includes('delivery completed')) {
@@ -116,7 +122,6 @@ function parseAndAddJob(message, isLiveNew = false) {
             }
         }
 
-        // Haal Driver en Distance uit de embed fields (zoals 'Driver' -> 'mjgamernl')
         embed.fields?.forEach(f => {
             const fieldName = (f.name || '').toLowerCase();
             if (fieldName.includes('driver')) {
@@ -137,16 +142,11 @@ function parseAndAddJob(message, isLiveNew = false) {
         cargo = "Standaard Vracht";
         distanceStr = "250 km";
     } else {
-        return; // Geen geldige rit
+        return;
     }
 
-    // Valideer of we ten minste een route hebben
     if (!from || !to) return;
-
-    // Als driver nog niet uit embed veld is gehaald, gebruik de author
-    if (!driver) {
-        driver = cleanText(message.author.username);
-    }
+    if (!driver) driver = cleanText(message.author.username);
 
     const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
 
@@ -161,9 +161,8 @@ function parseAndAddJob(message, isLiveNew = false) {
         timestamp
     };
 
-    // Voorkom dubbele invoer op basis van bericht ID
     if (!allJobsHistory.some(j => j.id === jobObj.id)) {
-        allJobsHistory.push(jobObj); // Voeg toe aan geschiedenis
+        allJobsHistory.push(jobObj);
     }
 }
 
@@ -174,11 +173,10 @@ async function fetchAllHistoricalDiscordLogs() {
         
         let lastId = undefined;
         let totalFetched = 0;
-        allJobsHistory = []; // Reset geschiedenis bij een schone fetch
+        allJobsHistory = [];
         
         console.log("Start grondig ophalen van historische Discord ritten...");
 
-        // Loop om tot wel 1000 oude berichten op te halen via pagination
         while (totalFetched < 1000) {
             const options = { limit: 100 };
             if (lastId) options.before = lastId;
@@ -193,7 +191,6 @@ async function fetchAllHistoricalDiscordLogs() {
             if (messages.size < 100) break;
         }
 
-        // Sorteer ritten van nieuw naar oud
         allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
 
         totalDeliveries = allJobsHistory.length;
@@ -217,7 +214,7 @@ app.post('/api/login', (req, res) => {
 
     const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
     const userJobsLast10Days = allJobsHistory.filter(j => 
-        j.driver.toLowerCase() === account.username.toLowerCase() && j.timestamp >= tenDaysAgo
+        isDriverMatch(j.driver, account.username) && j.timestamp >= tenDaysAgo
     );
 
     const driverKm = userJobsLast10Days.reduce((acc, curr) => acc + curr.kmAmount, 0);
@@ -239,7 +236,7 @@ app.get('/api/haulmp', (req, res) => {
     const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
 
     const formattedDrivers = accountsDatabase.map(m => {
-        const userJobs = allJobsHistory.filter(j => j.driver.toLowerCase() === m.username.toLowerCase() && j.timestamp >= tenDaysAgo);
+        const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username) && j.timestamp >= tenDaysAgo);
         const userKm = userJobs.reduce((acc, curr) => acc + curr.kmAmount, 0);
         
         return {
@@ -306,7 +303,7 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
     if (!account) return res.status(403).json({ success: false, message: 'Geen geldig account.' });
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteer.' });
 
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
