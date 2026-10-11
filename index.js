@@ -32,30 +32,43 @@ const GALLERY_FILE = path.join(__dirname, 'gallery.json');
 const ANNOUNCEMENTS_FILE = path.join(__dirname, 'announcements.json');
 const APPLICATIONS_FILE = path.join(__dirname, 'applications.json');
 
-let accountsDatabase = [
-    { username: "DEV", password: "DEVACC123", role: "Directeur", isDev: true },
-    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
+let defaultAccounts = [
+    { username: "GB", password: "DEVACC123", role: "Directeur", isDev: true },
+    { username: "MJGamerNL", password: "Brecht123456", role: "Directeur" },
+    { username: "ItzChaotic_", password: "ItzChaoticChaos", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "Zinnorax", password: "Sylveon2002!08", role: "Leidinggevende" }
 ];
 
+let accountsDatabase = defaultAccounts;
+
+// Laad accounts uit accounts.json met absolute prioriteit
 if (fs.existsSync(ACCOUNTS_FILE)) {
     try { 
         const loaded = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
-        // Zorg dat het dev account er altijd in staat
-        if (!loaded.some(a => a.username === "DEV")) {
-            loaded.unshift({ username: "DEV", password: "DEVACC123", role: "Directeur", isDev: true });
+        if (Array.isArray(loaded) && loaded.length > 0) {
+            accountsDatabase = loaded;
+            // Zorg altijd dat het dev account aanwezig blijft
+            if (!accountsDatabase.some(a => a.username === "GB")) {
+                accountsDatabase.unshift({ username: "GB", password: "DEVACC123", role: "Directeur", isDev: true });
+            }
         }
-        accountsDatabase = loaded;
-    } catch (e) {}
+    } catch (e) {
+        console.log("Fout bij inlezen accounts.json, val terug op standaard");
+    }
+} else {
+    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(defaultAccounts, null, 2));
 }
 
 function saveAccounts() {
-    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2));
+    try {
+        fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2));
+    } catch (e) {
+        console.error("Fout bij opslaan accounts.json:", e);
+    }
 }
 
 let galleryPhotos = [
@@ -381,8 +394,8 @@ app.post('/api/staff/update-password', (req, res) => {
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
     if (targetAcc) {
         targetAcc.password = newPassword.trim();
-        saveAccounts();
-        return res.json({ success: true, message: `Wachtwoord voor ${targetAcc.username} succesvol opgeslagen!` });
+        saveAccounts(); // Slaat direct persistent op in accounts.json!
+        return res.json({ success: true, message: `Wachtwoord voor ${targetAcc.username} succesvol gewijzigd en opgeslagen!` });
     }
     res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
 });
@@ -424,7 +437,11 @@ app.post('/api/staff/add', (req, res) => {
 app.post('/api/staff/update-role', (req, res) => {
     const { targetUser, newRole } = req.body;
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === targetUser.toLowerCase());
-    if (targetAcc) { targetAcc.role = newRole.trim(); saveAccounts(); return res.json({ success: true, message: 'Rol gewijzigd!' }); }
+    if (targetAcc) { 
+        targetAcc.role = newRole.trim(); 
+        saveAccounts(); 
+        return res.json({ success: true, message: 'Rol gewijzigd!' }); 
+    }
     res.status(404).json({ success: false, message: 'Niet gevonden.' });
 });
 
