@@ -24,10 +24,9 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
-// Database met aangepaste rollen
 let accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
@@ -60,26 +59,13 @@ function getRoleColor(role) {
     return 'gray';
 }
 
-// PERMISSIE CHECKERS
 function canManageBadges(role) {
     if (!role) return false;
     const r = role.toLowerCase();
     return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
 }
 
-function canManagePhotos(role) {
-    if (!role) return false;
-    const r = role.toLowerCase();
-    return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
-}
-
-function canManageAbsence(role) {
-    if (!role) return false;
-    const r = role.toLowerCase();
-    return r.includes('directeur') || r.includes('management');
-}
-
-function canHireAndFire(role) {
+function canManageStaff(role) {
     if (!role) return false;
     const r = role.toLowerCase();
     return r.includes('directeur') || r.includes('onder directeur');
@@ -241,12 +227,8 @@ app.post('/api/login', (req, res) => {
         username: account.username,
         role: account.role,
         color: getRoleColor(account.role),
-        permissions: {
-            canManageBadges: canManageBadges(account.role),
-            canManagePhotos: canManagePhotos(account.role),
-            canManageAbsence: canManageAbsence(account.role),
-            canHireAndFire: canHireAndFire(account.role)
-        },
+        canManageBadges: canManageBadges(account.role),
+        canManageStaff: canManageStaff(account.role),
         stats: {
             deliveries: userJobsLast10Days.length,
             distance: `${driverKm.toLocaleString('nl-NL')} km`
@@ -309,8 +291,8 @@ app.post('/api/absence/status', (req, res) => {
     const { absenceId, newStatus, username } = req.body;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
-    if (!account || !canManageAbsence(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om afwezigheid te beheren.' });
+    if (!account || !account.role.toLowerCase().includes('directeur')) {
+        return res.status(403).json({ success: false, message: 'Alleen Directie & Onder Directie kunnen dit wijzigen.' });
     }
 
     const item = absenceList.find(a => a.id === absenceId);
@@ -327,7 +309,7 @@ app.delete('/api/absence/:id', (req, res) => {
     const username = req.query.username;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
 
-    if (!account || !canManageAbsence(account.role)) {
+    if (!account || !canManageStaff(account.role)) {
         return res.status(403).json({ success: false, message: 'Geen rechten om verzoeken te verwijderen.' });
     }
 
@@ -335,13 +317,12 @@ app.delete('/api/absence/:id', (req, res) => {
     res.json({ success: true, message: 'Afwezigheidsverzoek succesvol verwijderd.' });
 });
 
-// Aannemen nieuw personeel (Directeur & Onder Directeur)
 app.post('/api/staff/add', (req, res) => {
     const { username, role, adminUser } = req.body;
     const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
 
-    if (!adminAcc || !canHireAndFire(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om personeel aan te nemen.' });
+    if (!adminAcc || !canManageStaff(adminAcc.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om personeel toe te voegen.' });
     }
 
     if (!username || !role) {
@@ -359,39 +340,15 @@ app.post('/api/staff/add', (req, res) => {
         role: role.trim()
     });
 
-    res.json({ success: true, message: `Personeelslid ${username} aangenomen! Wachtwoord: ${generatedPassword}` });
+    res.json({ success: true, message: `Personeelslid ${username} toegevoegd! Tijdelijk wachtwoord: ${generatedPassword}` });
 });
 
-// Ontslaan personeel (Directeur & Onder Directeur)
-app.post('/api/staff/fire', (req, res) => {
-    const { targetUser, adminUser } = req.body;
-    const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
-
-    if (!adminAcc || !canHireAndFire(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om personeel te ontslaan.' });
-    }
-
-    if (targetUser.toLowerCase() === adminUser.toLowerCase()) {
-        return res.status(400).json({ success: false, message: 'Je kunt jezelf niet ontslaan.' });
-    }
-
-    const beforeLength = accountsDatabase.length;
-    accountsDatabase = accountsDatabase.filter(d => d.username.toLowerCase() !== targetUser.toLowerCase());
-
-    if (accountsDatabase.length < beforeLength) {
-        res.json({ success: true, message: `${targetUser} is succesvol ontslagen en verwijderd uit het systeem.` });
-    } else {
-        res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
-    }
-});
-
-// Promotie / Rol Aanpassen (Directeur & Onder Directeur)
 app.post('/api/staff/update-role', (req, res) => {
     const { targetUser, newRole, adminUser } = req.body;
     const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
 
-    if (!adminAcc || !canHireAndFire(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om rollen/promoties aan te passen.' });
+    if (!adminAcc || !canManageStaff(adminAcc.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om rollen aan te passen.' });
     }
 
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
@@ -400,7 +357,7 @@ app.post('/api/staff/update-role', (req, res) => {
     }
 
     targetAcc.role = newRole.trim();
-    res.json({ success: true, message: `Functie van ${targetAcc.username} gewijzigd naar '${newRole}'!` });
+    res.json({ success: true, message: `Rol van ${targetAcc.username} succesvol gewijzigd naar '${newRole}'!` });
 });
 
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
@@ -428,9 +385,10 @@ app.delete('/api/gallery/:id', (req, res) => {
     const photoId = req.params.id;
     const username = req.query.username;
     const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+    const role = account ? account.role.toLowerCase() : '';
 
-    if (!account || !canManagePhotos(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om foto\'s te verwijderen.' });
+    if (!account || (!role.includes('directeur') && !role.includes('management'))) {
+        return res.status(403).json({ success: false, message: 'Geen rechten.' });
     }
 
     galleryPhotos = galleryPhotos.filter(p => p.id !== photoId);
@@ -458,13 +416,7 @@ app.post('/api/badges', (req, res) => {
 });
 
 app.post('/api/badges/delete', (req, res) => {
-    const { badgeId, username } = req.body;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account || !canManageBadges(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om badges in te trekken.' });
-    }
-
+    const { badgeId } = req.body;
     const beforeCount = customBadges.length;
     customBadges = customBadges.filter(b => b.id !== badgeId);
 
