@@ -156,7 +156,7 @@
             </section>
 
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-num" id="stat-distance">0 km</div><div class="stat-label">Gereden Afstand (30D)</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-distance">0 km</div><div class="stat-label">Gereden Afstand (Totaal)</div></div>
                 <div class="stat-card"><div class="stat-num" id="stat-deliveries">0</div><div class="stat-label">Leveringen Volbracht</div></div>
                 <div class="stat-card"><div class="stat-num" id="stat-drivers">0</div><div class="stat-label">Actieve Chauffeurs</div></div>
             </div>
@@ -182,7 +182,7 @@
 
             <div class="section-header" id="activiteit">
                 <h2>Onderweg</h2>
-                <p style="color:var(--text-muted);">De 10 meest recente ritten van onze chauffeurs live uit Discord</p>
+                <p style="color:var(--text-muted);">De meest recente ritten van onze chauffeurs live vanuit HaulMP</p>
             </div>
             <div class="trips-card" id="trips-container" style="margin-bottom:50px;">
                 <p style="text-align:center; color:var(--text-muted);">Laden van recente ritten...</p>
@@ -334,8 +334,8 @@
             
             <div style="margin-bottom:15px; font-size:0.95rem; line-height:1.6;">
                 <p><b>Rang / Rol:</b> <span id="modal-driver-role"></span></p>
-                <p><b>Gereden Kilometers (30D):</b> <span id="modal-driver-distance"></span></p>
-                <p><b>Voltooide Ritten (30D):</b> <span id="modal-driver-deliveries"></span></p>
+                <p><b>Gereden Kilometers (10D):</b> <span id="modal-driver-distance"></span></p>
+                <p><b>Voltooide Ritten (10D):</b> <span id="modal-driver-deliveries"></span></p>
             </div>
 
             <div style="margin-top:20px;">
@@ -529,7 +529,7 @@
                     });
                 }
 
-                if (Array.isArray(data.recent_jobs)) {
+                if (Array.isArray(data.recent_jobs) && data.recent_jobs.length > 0) {
                     const container = document.getElementById('trips-container');
                     container.innerHTML = '';
                     data.recent_jobs.slice(0, 10).forEach(job => {
@@ -543,6 +543,8 @@
                             </div>
                         `);
                     });
+                } else {
+                    document.getElementById('trips-container').innerHTML = '<p style="text-align:center; color:var(--text-muted);">Er zijn momenteel nog geen ritten gesynchroniseerd uit Discord.</p>';
                 }
 
             } catch (err) {
