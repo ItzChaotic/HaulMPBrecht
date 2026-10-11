@@ -25,9 +25,11 @@ app.use((req, res, next) => {
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
+const DISCORD_APPLICATIONS_CHANNEL_ID = '1558075393729363968';
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 const GALLERY_FILE = path.join(__dirname, 'gallery.json');
+const APPLICATIONS_FILE = path.join(__dirname, 'applications.json');
 
 let accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
@@ -70,6 +72,19 @@ function saveGallery() {
     fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryPhotos, null, 2));
 }
 
+let applicationsList = [];
+if (fs.existsSync(APPLICATIONS_FILE)) {
+    try {
+        applicationsList = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8'));
+    } catch (e) {
+        console.log('Fout bij laden applications.json');
+    }
+}
+
+function saveApplications() {
+    fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applicationsList, null, 2));
+}
+
 let absenceList = [];
 let customBadges = []; 
 let totalDeliveries = 0;
@@ -101,6 +116,12 @@ function canManageStaff(role) {
     if (!role) return false;
     const r = role.toLowerCase();
     return r.includes('directeur') || r.includes('onder directeur');
+}
+
+function canReviewApplications(role) {
+    if (!role) return false;
+    const r = role.toLowerCase();
+    return r.includes('directeur') || r.includes('management');
 }
 
 function isDriverMatch(jobDriver, accountUsername) {
@@ -136,6 +157,19 @@ client.on('clientReady', () => {
 client.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) {
         parseAndAddJob(message, true);
+    } else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) {
+        // Automatisch sollicitaties inlezen uit het opgegeven Discord kanaal
+        const appObj = {
+            id: "app-" + message.id,
+            applicant: message.author.username,
+            content: message.content || (message.embeds[0] ? message.embeds[0].description : "Sollicitatie via Discord"),
+            status: "In behandeling",
+            date: new Date(message.createdTimestamp).toLocaleDateString('nl-NL')
+        };
+        if (!applicationsList.some(a => a.id === appObj.id)) {
+            applicationsList.unshift(appObj);
+            saveApplications();
+        }
     }
 });
 
@@ -209,29 +243,43 @@ function parseAndAddJob(message, isLiveNew = false) {
 async function fetchAllHistoricalDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
-        if (!channel) return;
-        
-        let lastId = undefined;
-        let totalFetched = 0;
-        allJobsHistory = [];
-        
-        while (totalFetched < 1000) {
-            const options = { limit: 100 };
-            if (lastId) options.before = lastId;
-            
-            const messages = await channel.messages.fetch(options);
-            if (messages.size === 0) break;
-            
-            messages.forEach(msg => parseAndAddJob(msg, false));
-            lastId = messages.last().id;
-            totalFetched += messages.size;
-            
-            if (messages.size < 100) break;
+        if (channel) {
+            let lastId = undefined;
+            let totalFetched = 0;
+            allJobsHistory = [];
+            while (totalFetched < 1000) {
+                const options = { limit: 100 };
+                if (lastId) options.before = lastId;
+                const messages = await channel.messages.fetch(options);
+                if (messages.size === 0) break;
+                messages.forEach(msg => parseAndAddJob(msg, false));
+                lastId = messages.last().id;
+                totalFetched += messages.size;
+                if (messages.size < 100) break;
+            }
+            allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
+            totalDeliveries = allJobsHistory.length;
+            totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
         }
 
-        allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
-        totalDeliveries = allJobsHistory.length;
-        totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+        // Ook historische sollicitaties ophalen uit kanaal 1558075393729363968
+        const appChannel = await client.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
+        if (appChannel) {
+            const appMessages = await appChannel.messages.fetch({ limit: 50 });
+            appMessages.forEach(msg => {
+                const appObj = {
+                    id: "app-" + msg.id,
+                    applicant: msg.author.username,
+                    content: msg.content || (msg.embeds[0] ? msg.embeds[0].description : "Sollicitatie via Discord"),
+                    status: "In behandeling",
+                    date: new Date(msg.createdTimestamp).toLocaleDateString('nl-NL')
+                };
+                if (!applicationsList.some(a => a.id === appObj.id)) {
+                    applicationsList.push(appObj);
+                }
+            });
+            saveApplications();
+        }
     } catch (err) {
         console.error('Fout bij ophalen Discord historie:', err.message);
     }
@@ -253,6 +301,7 @@ app.post('/api/login', (req, res) => {
     );
 
     const driverKm = userJobsLast10Days.reduce((acc, curr) => acc + curr.kmAmount, 0);
+    const driverEarnings = driverKm * 3.50; // €3.50 per km
 
     res.json({
         success: true,
@@ -261,9 +310,11 @@ app.post('/api/login', (req, res) => {
         color: getRoleColor(account.role),
         canManageBadges: canManageBadges(account.role),
         canManageStaff: canManageStaff(account.role),
+        canReviewApps: canReviewApplications(account.role),
         stats: {
             deliveries: userJobsLast10Days.length,
-            distance: `${driverKm.toLocaleString('nl-NL')} km`
+            distance: `${driverKm.toLocaleString('nl-NL')} km`,
+            earnings: `€ ${driverEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         }
     });
 });
@@ -275,6 +326,7 @@ app.get('/api/haulmp', (req, res) => {
     const formattedDrivers = accountsDatabase.map(m => {
         const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username) && j.timestamp >= tenDaysAgo);
         const userKm = userJobs.reduce((acc, curr) => acc + curr.kmAmount, 0);
+        const userEarnings = userKm * 3.50;
         
         return {
             username: m.username,
@@ -282,21 +334,61 @@ app.get('/api/haulmp', (req, res) => {
             color: getRoleColor(m.role),
             deliveries: userJobs.length,
             distance: `${userKm.toLocaleString('nl-NL')} km`,
+            earnings: `€ ${userEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             userJobs: userJobs,
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
     });
 
+    const totalCompanyEarnings = totalDistanceKm * 3.50;
+
     res.json({
         deliveries: totalDeliveries.toString(),
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
+        companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         drivers: formattedDrivers.length.toString(),
         drivers_list: formattedDrivers,
         recent_jobs: allJobsHistory.slice(0, 10),
         absence: absenceList,
         gallery: galleryPhotos,
-        badges: customBadges
+        badges: customBadges,
+        applications: applicationsList
     });
+});
+
+app.post('/api/applications/status', (req, res) => {
+    const { appId, newStatus, username } = req.body;
+    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+
+    if (!account || !canReviewApplications(account.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om sollicitaties te beoordelen.' });
+    }
+
+    const appItem = applicationsList.find(a => a.id === appId);
+    if (appItem) {
+        appItem.status = newStatus;
+        saveApplications();
+        return res.json({ success: true, message: `Sollicitatie status gewijzigd naar '${newStatus}'` });
+    }
+    res.status(404).json({ success: false, message: 'Sollicitatie niet gevonden.' });
+});
+
+app.post('/api/staff/update-password', (req, res) => {
+    const { targetUser, newPassword, adminUser } = req.body;
+    const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
+
+    if (!adminAcc || !canManageStaff(adminAcc.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om wachtwoorden aan te passen.' });
+    }
+
+    const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
+    if (!targetAcc) {
+        return res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
+    }
+
+    targetAcc.password = newPassword.trim();
+    saveAccounts();
+    res.json({ success: true, message: `Wachtwoord voor ${targetAcc.username} succesvol gewijzigd!` });
 });
 
 app.post('/api/absence', (req, res) => {
