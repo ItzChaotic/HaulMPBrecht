@@ -298,7 +298,6 @@ app.post('/api/badges', (req, res) => {
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
-// Betrouwbare POST route voor badge verwijderen
 app.post('/api/badges/delete', (req, res) => {
     const { badgeId } = req.body;
     const initialLength = customBadges.length;
