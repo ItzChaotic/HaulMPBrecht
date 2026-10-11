@@ -33,6 +33,7 @@ const ANNOUNCEMENTS_FILE = path.join(__dirname, 'announcements.json');
 const APPLICATIONS_FILE = path.join(__dirname, 'applications.json');
 
 let accountsDatabase = [
+    { username: "DEV", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
@@ -43,7 +44,14 @@ let accountsDatabase = [
 ];
 
 if (fs.existsSync(ACCOUNTS_FILE)) {
-    try { accountsDatabase = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8')); } catch (e) {}
+    try { 
+        const loaded = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
+        // Zorg dat het dev account er altijd in staat
+        if (!loaded.some(a => a.username === "DEV")) {
+            loaded.unshift({ username: "DEV", password: "DEVACC123", role: "Directeur", isDev: true });
+        }
+        accountsDatabase = loaded;
+    } catch (e) {}
 }
 
 function saveAccounts() {
@@ -297,6 +305,7 @@ app.get('/api/haulmp', (req, res) => {
             username: m.username,
             role: m.role,
             color: getRoleColor(m.role),
+            isDev: !!m.isDev,
             deliveries: userJobs.length,
             distance: `${userKm.toLocaleString('nl-NL')} km`,
             earnings: `€ ${userEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
@@ -366,14 +375,14 @@ app.post('/api/staff/update-password', (req, res) => {
     const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
 
     if (!adminAcc || !canManageStaff(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten.' });
+        return res.status(403).json({ success: false, message: 'Geen rechten om wachtwoorden aan te passen.' });
     }
 
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
     if (targetAcc) {
         targetAcc.password = newPassword.trim();
         saveAccounts();
-        return res.json({ success: true, message: `Wachtwoord gewijzigd!` });
+        return res.json({ success: true, message: `Wachtwoord voor ${targetAcc.username} succesvol opgeslagen!` });
     }
     res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
 });
