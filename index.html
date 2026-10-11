@@ -6,7 +6,6 @@
     <title>Brecht Transport B.V. | ETS2 VTC</title>
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png">
-    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     
@@ -14,16 +13,16 @@
 
     <style>
         :root {
-            --bg-base: #0a0303;
-            --bg-sidebar: #110404;
-            --bg-card: rgba(30, 6, 6, 0.7);
+            --bg-base: #090202;
+            --bg-sidebar: #100303;
+            --bg-card: rgba(28, 5, 5, 0.75);
             --primary: #800000;
             --primary-light: #cc0000;
             --accent-red: #ff3333;
-            --border-red: rgba(204, 0, 0, 0.2);
+            --border-red: rgba(204, 0, 0, 0.22);
             --text-main: #ffffff;
-            --text-muted: #cbb8b8;
-            --glass-blur: blur(12px);
+            --text-muted: #caa8a8;
+            --glass-blur: blur(14px);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -31,7 +30,7 @@
 
         nav {
             position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1200px; width: 95%;
-            background: rgba(25, 4, 4, 0.9); backdrop-filter: var(--glass-blur);
+            background: rgba(22, 4, 4, 0.88); backdrop-filter: var(--glass-blur);
             border: 1px solid var(--border-red); border-radius: 16px; padding: 12px 24px;
             display: flex; justify-content: space-between; align-items: center;
         }
@@ -40,7 +39,8 @@
         .logo-img { height: 42px; width: auto; object-fit: contain; }
         .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; }
         .nav-links { display: flex; gap: 15px; list-style: none; align-items: center; }
-        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; background: none; border: none; cursor: pointer; }
+        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; }
+        .nav-links a:hover { color: #fff; }
 
         .btn-apply {
             background: linear-gradient(135deg, var(--primary-light), var(--primary));
@@ -73,7 +73,7 @@
             color: var(--text-muted); text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; transition: 0.2s; text-align: left;
         }
         .sidebar-menu li button:hover, .sidebar-menu li.active button {
-            background: rgba(204, 0, 0, 0.15); color: #fff; border-left: 3px solid var(--accent-red);
+            background: rgba(204, 0, 0, 0.18); color: #fff; border-left: 3px solid var(--accent-red);
         }
 
         .portal-content { margin-left: 250px; flex: 1; padding: 35px; }
@@ -100,28 +100,33 @@
         .trip-route { font-weight: bold; font-size: 0.9rem; color: #fff; }
         .trip-details { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
 
-        .badge-tag { background: rgba(255, 51, 51, 0.15); border: 1px solid var(--accent-red); color: #ff9999; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
-
         .form-input { width: 100%; padding: 10px 14px; margin: 6px 0 14px 0; background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); color: white; border-radius: 8px; font-size: 0.9rem; }
         .form-input:focus { outline: none; border-color: var(--accent-red); }
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
-        /* CLEAN MODAL INLOGGEN */
+        /* PROFESSIONEEL EN MODERN INLOGSCHERM */
         #login-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(10,3,3,0.75), rgba(10,3,3,0.85)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center;
+            background: linear-gradient(135deg, rgba(8,2,2,0.88), rgba(20,2,2,0.92)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center;
             background-size: cover; z-index: 2000; justify-content: center; align-items: center;
         }
 
         .login-box {
-            background: rgba(18, 4, 4, 0.85); backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 51, 51, 0.3); border-radius: 16px;
-            max-width: 380px; width: 90%; padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            background: rgba(18, 4, 4, 0.85); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 51, 51, 0.3); border-radius: 20px;
+            max-width: 400px; width: 90%; padding: 36px; box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .login-box::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent-red));
         }
 
         .staff-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 15px; }
         .staff-card { background: rgba(25, 4, 4, 0.6); border: 1px solid var(--border-red); border-radius: 12px; padding: 16px; }
+
+        .announcement-box { background: rgba(255,51,51,0.08); border-left: 4px solid var(--accent-red); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
 
         .hero { text-align: center; padding: 35px 0 25px 0; }
         .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; margin-bottom: 12px; color: #fff; }
@@ -145,6 +150,7 @@
             <li><a href="#gallerij-sec">Fotogalerij</a></li>
             <li><a href="#team">Het Team</a></li>
             <li><a href="#vloot">Vloot</a></li>
+            <li><a href="#livemap-sec">Live Map</a></li>
             <li><a href="#activiteit">Onderweg</a></li>
             <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> Inloggen</button></li>
             <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> Solliciteer Direct</a></li>
@@ -165,9 +171,17 @@
                 <div class="stat-card"><div class="stat-label">Actieve Chauffeurs</div><div class="stat-num" id="stat-drivers">0</div></div>
             </div>
 
-            <div class="section-header" id="gallerij-sec">
-                <h2>Fotogalerij Preview</h2>
+            <!-- LIVE MAP SECTIE -->
+            <div class="section-header" id="livemap-sec">
+                <h2>Live Map / GPS Tracking</h2>
+                <p style="color:var(--text-muted); font-size:0.9rem;">Bekijk al onze vrachtwagens live onderweg in ETS2</p>
             </div>
+            <div class="gallery-card" style="text-align:center; padding:25px;">
+                <p style="margin-bottom:15px; color:var(--text-muted);">Volg al onze actieve chauffeurs realtime via de HaulMP Live Map.</p>
+                <a href="https://vtc.haulmp.com/Brecht#map" target="_blank" class="btn-apply" style="font-size:1rem; padding:12px 24px;"><i class="fa-solid fa-map-location-dot"></i> Open HaulMP Live Map</a>
+            </div>
+
+            <div class="section-header" id="gallerij-sec"><h2>Fotogalerij Preview</h2></div>
             <div class="gallery-grid" id="public-gallery-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;"></div>
             <div style="text-align:center; margin:25px 0 40px 0;">
                 <button onclick="switchView('gallery-view')" class="btn-portal"><i class="fa-solid fa-images"></i> Bekijk Volledig Foto-Archief</button>
@@ -231,8 +245,19 @@
                         </div>
                     </div>
 
-                    <!-- TAB 1: DASHBOARD MET GRAFIEK EN INKOMSTEN -->
+                    <!-- TAB 1: DASHBOARD MET VLOEIENDE LIJNGRAFIEK EN MEDEDELINGEN -->
                     <div id="p-tab-stats" class="portal-tab-content">
+                        <!-- MEDEDELINGEN/AANKONDIGINGEN SECTIE -->
+                        <div id="announcements-display-container"></div>
+
+                        <!-- AANKONDIGING MAKEN (Directie & Onder Directie) -->
+                        <div id="announcement-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-bullhorn"></i> Nieuwe Aankondiging Plaatsen</h3>
+                            <input type="text" id="ann-title" placeholder="Titel van het bericht..." class="form-input">
+                            <textarea id="ann-content" placeholder="Inhoud van de mededeling..." class="form-input" style="height:70px; resize:vertical;"></textarea>
+                            <button onclick="postAnnouncement()" class="btn-red"><i class="fa-solid fa-paper-plane"></i> Bericht Publiceren</button>
+                        </div>
+
                         <div class="stats-grid" style="margin-top:0;">
                             <div class="stat-card">
                                 <div class="stat-label">MIJN RITTEN</div>
@@ -252,10 +277,10 @@
                             </div>
                         </div>
 
-                        <!-- GRAFIEK SECTIE -->
-                        <div class="gallery-card" style="margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-chart-column"></i> Inkomsten Overzicht per Week</h3>
-                            <div style="height: 260px; margin-top:15px;">
+                        <!-- VLOEIENDE LIJN-GRAFIEK (Global Cargo Stijl) -->
+                        <div class="gallery-card" style="margin-bottom:20px; background:#120404;">
+                            <h3 style="margin-bottom:15px; color:#fff;"><i class="fa-solid fa-chart-line"></i> Brecht Transport Wekelijkse Inkomsten</h3>
+                            <div style="height: 280px;">
                                 <canvas id="earningsChart"></canvas>
                             </div>
                         </div>
@@ -303,7 +328,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 4: PERSONEEL BEHEREN (RUSTIGER ONTWERP) -->
+                    <!-- TAB 4: PERSONEEL BEHEREN -->
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-user-plus"></i> Nieuw Personeelslid Toevoegen</h3>
@@ -320,7 +345,6 @@
                                 </select>
                                 <button onclick="addNewStaff()" class="btn-red">Toevoegen</button>
                             </div>
-                            <div id="staff-add-result" style="margin-top:8px; font-size:0.85rem; color:#68d391;"></div>
                         </div>
 
                         <h3 style="margin-top:20px; font-size:1.1rem; color:#fff;"><i class="fa-solid fa-users-gear"></i> Personeel & Rollen Beheren</h3>
@@ -348,17 +372,23 @@
         </div>
     </div>
 
-    <!-- CLEAN INLOG MODAL -->
+    <!-- CLEAN & PROFESSIONEEL INLOGSCHERM -->
     <div id="login-modal">
         <div class="login-box">
-            <h2 style="color:var(--accent-red); margin-bottom:6px;"><i class="fa-solid fa-lock"></i> Personeel Inloggen</h2>
-            <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:18px;">Brecht Transport B.V. Portaal</p>
+            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;" alt="Logo">
+            <h2 style="color:#fff; font-size:1.4rem; font-family:'Space Grotesk', sans-serif;">Personeel Inloggen</h2>
+            <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:20px;">Brecht Transport B.V. Portaal</p>
             
-            <input type="text" id="login-user" placeholder="Gebruikersnaam" class="form-input">
-            <input type="password" id="login-pass" placeholder="Wachtwoord" class="form-input">
+            <div style="text-align:left;">
+                <label style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:bold;">Gebruikersnaam</label>
+                <input type="text" id="login-user" placeholder="Vul je gebruikersnaam in" class="form-input" style="margin-top:4px;">
+                
+                <label style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:bold;">Wachtwoord</label>
+                <input type="password" id="login-pass" placeholder="••••••••" class="form-input" style="margin-top:4px;">
+            </div>
 
-            <button onclick="handleLogin()" class="btn-red" style="width:100%; margin-top:8px;">Inloggen</button>
-            <button onclick="closeLoginModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:10px; cursor:pointer; font-size:0.85rem;">Annuleren</button>
+            <button onclick="handleLogin()" class="btn-red" style="width:100%; margin-top:10px; padding:12px; font-size:0.95rem; border-radius:10px;"><i class="fa-solid fa-right-to-bracket"></i> Inloggen</button>
+            <button onclick="closeLoginModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:12px; cursor:pointer; font-size:0.85rem;">Terug naar hoofdsite</button>
             <div id="login-error" style="color:#ff4d4d; font-size:0.82rem; margin-top:10px; text-align:center;"></div>
         </div>
     </div>
@@ -389,9 +419,7 @@
                     try {
                         currentUser = JSON.parse(savedUser);
                         openPortalDashboard();
-                    } catch(e) {
-                        openLoginModal();
-                    }
+                    } catch(e) { openLoginModal(); }
                 } else {
                     openLoginModal();
                 }
@@ -469,7 +497,10 @@
             document.getElementById('user-role-display').innerText = `Functie: ${currentUser.role}`;
 
             if (currentUser.canManageBadges) document.getElementById('mgt-tab-btn').style.display = 'block';
-            if (currentUser.canManageStaff) document.getElementById('staff-tab-btn').style.display = 'block';
+            if (currentUser.canManageStaff) {
+                document.getElementById('staff-tab-btn').style.display = 'block';
+                document.getElementById('announcement-create-box').style.display = 'block';
+            }
 
             refreshPortalData();
             switchView('portal-view');
@@ -537,6 +568,23 @@
             const data = await res.json();
             globalPortalData = data;
 
+            // RENDER AANKONDIGINGEN
+            const annContainer = document.getElementById('announcements-display-container');
+            annContainer.innerHTML = '';
+            if (data.announcements && data.announcements.length > 0) {
+                data.announcements.forEach(a => {
+                    let deleteBtn = currentUser.canManageStaff ? `<button onclick="deleteAnnouncement('${a.id}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; float:right;"><i class="fa-solid fa-trash"></i></button>` : '';
+                    annContainer.insertAdjacentHTML('beforeend', `
+                        <div class="announcement-box">
+                            ${deleteBtn}
+                            <h4 style="color:#fff; font-size:1rem;"><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> ${a.title}</h4>
+                            <p style="color:var(--text-muted); font-size:0.88rem; margin-top:4px;">${a.content}</p>
+                            <small style="color:#888; font-size:0.75rem;">Geplaatst door ${a.author} op ${a.date}</small>
+                        </div>
+                    `);
+                });
+            }
+
             const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
             
             if (myStats) {
@@ -570,7 +618,7 @@
                     const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
                     cardGrid.insertAdjacentHTML('beforeend', `
                         <div class="staff-card">
-                            <div style="display:flex; justify-size:space-between; align-items:center; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                 <b style="color:#fff;">${m.username}</b>
                                 <span class="member-role role-${m.color}">${m.role}</span>
                             </div>
@@ -601,6 +649,7 @@
             }
         }
 
+        /* VLOEIENDE LIJNGRAFIEK ZOALS GLOBAL CARGO (Met afgeronde golven & glowing blauwe lijn) */
         function renderChart(weeklyData, username) {
             const ctx = document.getElementById('earningsChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
@@ -609,25 +658,74 @@
             const companyData = weeklyData.map(w => w.company);
             const userData = weeklyData.map(w => w.drivers[username.toLowerCase()] || 0);
 
+            const gradientCompany = ctx.createLinearGradient(0, 0, 0, 280);
+            gradientCompany.addColorStop(0, 'rgba(51, 153, 255, 0.35)');
+            gradientCompany.addColorStop(1, 'rgba(51, 153, 255, 0.0)');
+
             chartInstance = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Mijn Inkomsten (€)', data: userData, backgroundColor: '#68d391', borderRadius: 4 },
-                        { label: 'Bedrijf Totaal (€)', data: companyData, backgroundColor: 'rgba(255, 51, 51, 0.4)', borderRadius: 4 }
+                        {
+                            label: 'Bedrijf Totaal (€)',
+                            data: companyData,
+                            borderColor: '#3399ff',
+                            borderWidth: 3,
+                            fill: true,
+                            backgroundColor: gradientCompany,
+                            tension: 0.45,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#3399ff',
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Mijn Inkomsten (€)',
+                            data: userData,
+                            borderColor: '#68d391',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.45,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#68d391'
+                        }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#cbb8b8', font: { size: 11 } } } },
+                    plugins: { legend: { labels: { color: '#caa8a8', font: { size: 12 } } } },
                     scales: {
-                        x: { ticks: { color: '#cbb8b8' }, grid: { color: 'rgba(204,0,0,0.1)' } },
-                        y: { ticks: { color: '#cbb8b8' }, grid: { color: 'rgba(204,0,0,0.1)' } }
+                        x: { ticks: { color: '#caa8a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#caa8a8' }, grid: { color: 'rgba(255,255,255,0.05)', borderDash: [5, 5] } }
                     }
                 }
             });
+        }
+
+        async function postAnnouncement() {
+            const title = document.getElementById('ann-title').value;
+            const content = document.getElementById('ann-content').value;
+            if (!title || !content) return alert('Vul titel en inhoud in!');
+
+            const res = await fetch('/api/announcements', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content, username: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            document.getElementById('ann-title').value = '';
+            document.getElementById('ann-content').value = '';
+            refreshPortalData();
+        }
+
+        async function deleteAnnouncement(annId) {
+            if (!confirm('Bericht verwijderen?')) return;
+            const res = await fetch(`/api/announcements/${annId}?username=${currentUser.username}`, { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
         }
 
         async function updateStaffPassword(targetUser) {
