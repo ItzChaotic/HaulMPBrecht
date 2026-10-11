@@ -15,7 +15,7 @@ const upload = multer({
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 
-const accountsDatabase = [
+let accountsDatabase = [
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur / Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
@@ -65,11 +65,28 @@ function canManageBadges(role) {
     return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
 }
 
+function canManageStaff(role) {
+    if (!role) return false;
+    const r = role.toLowerCase();
+    return r.includes('directeur') || r.includes('onder directeur');
+}
+
 function isDriverMatch(jobDriver, accountUsername) {
     if (!jobDriver || !accountUsername) return false;
     const j = jobDriver.toLowerCase().trim();
     const a = accountUsername.toLowerCase().trim();
     return j === a || j.includes(a) || a.includes(j);
+}
+
+// Automatische opschonen van verlopen afwezigheidsverzoeken
+function cleanupExpiredAbsences() {
+    const today = new Date().toISOString().split('T')[0];
+    absenceList = absenceList.filter(a => {
+        if (a.status === 'Goedgekeurd' && a.toDate < today) {
+            return false; // Verwijder automatich
+        }
+        return true;
+    });
 }
 
 const client = new Client({
@@ -87,7 +104,6 @@ client.on('clientReady', () => {
 
 client.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) {
-        console.log(`Nieuw Discord bericht ontvangen in rittenkanaal van: ${message.author.username}`);
         parseAndAddJob(message, true);
     }
 });
@@ -122,15 +138,10 @@ function parseAndAddJob(message, isLiveNew = false) {
 
         embed.fields?.forEach(f => {
             const fieldName = (f.name || '').toLowerCase();
-            if (fieldName.includes('driver')) {
-                driver = cleanText(f.value);
-            }
-            if (fieldName.includes('distance')) {
-                distanceStr = cleanText(f.value);
-            }
+            if (fieldName.includes('driver')) driver = cleanText(f.value);
+            if (fieldName.includes('distance')) distanceStr = cleanText(f.value);
         });
-    } 
-    else if (message.content && (message.content.includes('→') || message.content.includes('->'))) {
+    } else if (message.content && (message.content.includes('→') || message.content.includes('->'))) {
         const separator = message.content.includes('→') ? '→' : '->';
         const parts = message.content.split(separator);
         from = cleanText(parts[0]);
@@ -173,8 +184,6 @@ async function fetchAllHistoricalDiscordLogs() {
         let totalFetched = 0;
         allJobsHistory = [];
         
-        console.log("Start grondig ophalen van historische Discord ritten...");
-
         while (totalFetched < 1000) {
             const options = { limit: 100 };
             if (lastId) options.before = lastId;
@@ -190,11 +199,8 @@ async function fetchAllHistoricalDiscordLogs() {
         }
 
         allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
-
         totalDeliveries = allJobsHistory.length;
         totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
-
-        console.log(`[HISTORIE] Synchronisatie voltooid! Totaal ${allJobsHistory.length} ritten gevonden (${totalDistanceKm.toLocaleString('nl-NL')} km).`);
     } catch (err) {
         console.error('Fout bij ophalen Discord historie:', err.message);
     }
@@ -223,15 +229,16 @@ app.post('/api/login', (req, res) => {
         role: account.role,
         color: getRoleColor(account.role),
         canManageBadges: canManageBadges(account.role),
+        canManageStaff: canManageStaff(account.role),
         stats: {
             deliveries: userJobsLast10Days.length,
             distance: `${driverKm.toLocaleString('nl-NL')} km`
-        },
-        myRecentJobs: userJobsLast10Days
+        }
     });
 });
 
 app.get('/api/haulmp', (req, res) => {
+    cleanupExpiredAbsences();
     const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
 
     const formattedDrivers = accountsDatabase.map(m => {
@@ -296,6 +303,64 @@ app.post('/api/absence/status', (req, res) => {
     }
 
     res.status(404).json({ success: false, message: 'Afwezigheidsverzoek niet gevonden.' });
+});
+
+app.delete('/api/absence/:id', (req, res) => {
+    const absenceId = req.params.id;
+    const username = req.query.username;
+    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
+
+    if (!account || !canManageStaff(account.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om verzoeken te verwijderen.' });
+    }
+
+    absenceList = absenceList.filter(a => a.id !== absenceId);
+    res.json({ success: true, message: 'Afwezigheidsverzoek succesvol verwijderd.' });
+});
+
+// Nieuw personeel toevoegen
+app.post('/api/staff/add', (req, res) => {
+    const { username, role, adminUser } = req.body;
+    const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
+
+    if (!adminAcc || !canManageStaff(adminAcc.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om personeel toe te voegen.' });
+    }
+
+    if (!username || !role) {
+        return res.status(400).json({ success: false, message: 'Vul een gebruikersnaam en functie in.' });
+    }
+
+    if (accountsDatabase.some(d => d.username.toLowerCase() === username.toLowerCase().trim())) {
+        return res.status(400).json({ success: false, message: 'Deze gebruikersnaam bestaat al.' });
+    }
+
+    const generatedPassword = "Brecht" + Math.floor(1000 + Math.random() * 9000);
+    accountsDatabase.push({
+        username: username.trim(),
+        password: generatedPassword,
+        role: role.trim()
+    });
+
+    res.json({ success: true, message: `Personeelslid ${username} toegevoegd! Tijdelijk wachtwoord: ${generatedPassword}` });
+});
+
+// Rol / Functie wijzigen (Promotie / Degrade)
+app.post('/api/staff/update-role', (req, res) => {
+    const { targetUser, newRole, adminUser } = req.body;
+    const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
+
+    if (!adminAcc || !canManageStaff(adminAcc.role)) {
+        return res.status(403).json({ success: false, message: 'Geen rechten om rollen aan te passen.' });
+    }
+
+    const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
+    if (!targetAcc) {
+        return res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
+    }
+
+    targetAcc.role = newRole.trim();
+    res.json({ success: true, message: `Rol van ${targetAcc.username} succesvol gewijzigd naar '${newRole}'!` });
 });
 
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
