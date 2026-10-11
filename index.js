@@ -31,7 +31,7 @@ let accountsDatabase = [
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "Zinnorax", password: "Sylveon2002!08", role: "Leidinggevende" }
 ];
 
 let absenceList = [];
