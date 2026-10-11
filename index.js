@@ -152,7 +152,6 @@ async function fetchAllHistoricalDiscordLogs() {
         let lastId = undefined;
         let fetchedTotal = 0;
         
-        // Loop door om alle historische berichten op te halen voor de volledigheid
         while (fetchedTotal < 300) {
             const options = { limit: 100 };
             if (lastId) options.before = lastId;
@@ -167,7 +166,6 @@ async function fetchAllHistoricalDiscordLogs() {
             if (messages.size < 100) break;
         }
 
-        // Bereken totaal van alle opgehaalde ritten opnieuw
         totalDeliveries = allJobsHistory.length;
         totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
         console.log(`Historie gesynchroniseerd: ${totalDeliveries} ritten gevonden.`);
@@ -327,6 +325,7 @@ app.post('/api/badges', (req, res) => {
     res.json({ success: true, message: `Badge "${title}" toegekend aan ${targetUser}!` });
 });
 
+// Gegarandeerd werkende route voor het intrekken van badges
 app.post('/api/badges/delete', (req, res) => {
     const { badgeId } = req.body;
     const beforeCount = customBadges.length;
