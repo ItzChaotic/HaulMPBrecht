@@ -6,7 +6,7 @@
     <title>Brecht Transport B.V. | ETS2 VTC</title>
     
     <!-- FAVICON / BROWSER TAB ICOON -->
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.jpg">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png">
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -131,7 +131,7 @@
 
     <nav>
         <div onclick="switchView('home-view'); return false;" class="brand-logo">
-            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.jpg" class="logo-img" alt="Brecht Transport Logo">
+            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img" alt="Brecht Transport Logo">
             <div><div class="brand-title">BRECHT TRANSPORT B.V.</div></div>
         </div>
         <ul class="nav-links">
@@ -310,12 +310,13 @@
                         <input type="text" id="new-staff-user" placeholder="Discord / Gebruikersnaam" class="form-input" style="flex:1; margin:0;">
                         
                         <select id="new-staff-role" class="form-input" style="flex:1; margin:0; background:#220505; color:white;">
-                            <option value="Chauffeur">Chauffeur</option>
-                            <option value="Leidinggevende">Leidinggevende</option>
-                            <option value="Management">Management</option>
-                            <option value="Onder Directeur / Development">Onder Directeur / Development</option>
-                            <option value="Onder Directeur">Onder Directeur</option>
                             <option value="Directeur">Directeur</option>
+                            <option value="Onder Directeur">Onder Directeur</option>
+                            <option value="Management">Management</option>
+                            <option value="Leidinggevende">Leidinggevende</option>
+                            <option value="Senior Werknemer">Senior Werknemer</option>
+                            <option value="Werknemer">Werknemer</option>
+                            <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
                         </select>
                         
                         <button onclick="addNewStaff()" class="btn-red" style="white-space:nowrap;">Toevoegen</button>
@@ -324,7 +325,7 @@
                 </div>
 
                 <div class="gallery-card">
-                    <h3><i class="fa-solid fa-user-shield"></i> Promoties & Functies Beheren</h3>
+                    <h3><i class="fa-solid fa-user-shield"></i> Promoties, Functies & Ontslag Beheren</h3>
                     <table>
                         <thead>
                             <tr>
@@ -698,25 +699,35 @@
                 `);
             });
 
+            // PERSONEELSBEHEER TABEL MET JULLIE NIEUWE DROPDOWN RANGEN & ONTSLAGKNOP
             if (canManageStaff) {
                 const staffMgtTbody = document.getElementById('staff-management-table-body');
                 staffMgtTbody.innerHTML = '';
                 data.drivers_list.forEach(m => {
+                    const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
+                    const disabledAttr = isSelf ? 'disabled' : '';
+                    
                     staffMgtTbody.insertAdjacentHTML('beforeend', `
                         <tr>
-                            <td><b>${m.username}</b></td>
+                            <td><b>${m.username}</b> ${isSelf ? '<small style="color:#aaa;">(Jij)</small>' : ''}</td>
                             <td><span class="member-role role-${m.color}">${m.role}</span></td>
                             <td>
-                                <select id="role-select-${m.username}" class="form-input" style="padding:4px; margin:0; background:#220505; color:white; font-size:0.85rem;">
-                                    <option value="Chauffeur" ${m.role === 'Chauffeur' ? 'selected' : ''}>Chauffeur</option>
-                                    <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
-                                    <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
-                                    <option value="Onder Directeur / Development" ${m.role === 'Onder Directeur / Development' ? 'selected' : ''}>Onder Directeur / Development</option>
-                                    <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
+                                <select id="role-select-${m.username}" class="form-input" style="padding:4px; margin:0; background:#220505; color:white; font-size:0.85rem;" ${disabledAttr}>
                                     <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
+                                    <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
+                                    <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
+                                    <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
+                                    <option value="Senior Werknemer" ${m.role === 'Senior Werknemer' ? 'selected' : ''}>Senior Werknemer</option>
+                                    <option value="Werknemer" ${m.role === 'Werknemer' ? 'selected' : ''}>Werknemer</option>
+                                    <option value="Chauffeur in opleiding" ${m.role === 'Chauffeur in opleiding' ? 'selected' : ''}>Chauffeur in opleiding</option>
                                 </select>
                             </td>
-                            <td><button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="padding:4px 10px; font-size:0.8rem;">Opslaan</button></td>
+                            <td>
+                                ${!isSelf ? `
+                                    <button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="padding:4px 10px; font-size:0.8rem;">Opslaan</button>
+                                    <button onclick="fireStaffMember('${m.username}')" class="btn-red" style="padding:4px 10px; font-size:0.8rem; background:#dc3545; margin-left:4px;"><i class="fa-solid fa-user-xmark"></i> Ontslaan</button>
+                                ` : '<span style="color:#888; font-size:0.8rem;">Eigen account</span>'}
+                            </td>
                         </tr>
                     `);
                 });
@@ -799,6 +810,18 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ targetUser, newRole, adminUser: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+            loadData();
+        }
+
+        async function fireStaffMember(targetUser) {
+            if (!confirm(`Weet je zeker dat je personeelslid ${targetUser} wilt ontslaan?`)) return;
+
+            const res = await fetch(`/api/staff/${targetUser}?adminUser=${currentUser.username}`, {
+                method: 'DELETE'
             });
             const data = await res.json();
             alert(data.message);
