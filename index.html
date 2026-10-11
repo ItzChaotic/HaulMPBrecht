@@ -220,6 +220,7 @@
                 <button class="tab-btn" onclick="switchPortalTab('p-tab-absence')"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid Doorgeven</button>
                 <button class="tab-btn" onclick="switchPortalTab('p-tab-upload')"><i class="fa-solid fa-file-arrow-up"></i> Foto Uploaden</button>
                 <button class="tab-btn" id="mgt-tab-btn" style="display:none;" onclick="switchPortalTab('p-tab-mgt')"><i class="fa-solid fa-user-gear"></i> Management & Badges</button>
+                <button class="tab-btn" id="staff-tab-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff')"><i class="fa-solid fa-user-plus"></i> Personeel Beheren</button>
             </div>
 
             <div id="p-tab-stats" class="portal-tab-content">
@@ -234,6 +235,13 @@
                             <span style="color:var(--text-muted); font-size:0.85rem;">GEREDEN AFSTAND (10D)</span>
                             <h2 id="user-stat-distance" style="color:#fff; margin-top:5px;">0 km</h2>
                         </div>
+                    </div>
+                </div>
+
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-route"></i> Mijn Gereden Ritten (Afgelopen 10 Dagen)</h3>
+                    <div id="my-jobs-list-container" style="margin-top:15px;">
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Geen gereden ritten gevonden in de afgelopen 10 dagen.</p>
                     </div>
                 </div>
 
@@ -257,7 +265,7 @@
                 </div>
 
                 <div class="gallery-card" style="margin-top:20px;">
-                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Afwezigheidsverzoeken</h3>
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Afwezigheidsverzoeken & Status</h3>
                     <table>
                         <thead>
                             <tr>
@@ -284,6 +292,40 @@
                 <div class="gallery-card" style="margin-top:20px;">
                     <h3><i class="fa-solid fa-images"></i> Beheer Geüploade Foto's</h3>
                     <div id="gallery-manage-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:15px; margin-top:15px;"></div>
+                </div>
+            </div>
+
+            <!-- PERSONEEL TOEVOEGEN & PROMOTIE TABJE -->
+            <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
+                <div class="gallery-card" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-user-plus"></i> Nieuw Personeelslid Toevoegen</h3>
+                    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                        <input type="text" id="new-staff-user" placeholder="Discord / Gebruikersnaam" class="form-input" style="flex:1; margin:0;">
+                        <select id="new-staff-role" class="form-input" style="flex:1; margin:0; background:#220505; color:white;">
+                            <option value="Chauffeur">Chauffeur</option>
+                            <option value="Leidinggevende">Leidinggevende</option>
+                            <option value="Management">Management</option>
+                            <option value="Onder Directeur">Onder Directeur</option>
+                            <option value="Directeur">Directeur</option>
+                        </select>
+                        <button onclick="addNewStaff()" class="btn-red" style="white-space:nowrap;">Toevoegen</button>
+                    </div>
+                    <div id="staff-add-result" style="margin-top:10px; font-size:0.9rem; color:#68d391; font-weight:bold;"></div>
+                </div>
+
+                <div class="gallery-card">
+                    <h3><i class="fa-solid fa-user-shield"></i> Promoties & Functies Beheren</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Gebruikersnaam</th>
+                                <th>Huidige Functie</th>
+                                <th>Nieuwe Functie / Promotie</th>
+                                <th>Actie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staff-management-table-body"></tbody>
+                    </table>
                 </div>
             </div>
 
@@ -458,15 +500,17 @@
 
             document.getElementById('welcome-title').innerText = `Hallo ${currentUser.username}!`;
             document.getElementById('user-role-display').innerText = `Rol: ${currentUser.role}`;
-            document.getElementById('user-stat-deliveries').innerText = currentUser.stats.deliveries;
-            document.getElementById('user-stat-distance').innerText = currentUser.stats.distance;
 
             const isDirectie = currentUser.role.toLowerCase().includes('directeur');
             const canManageBadges = currentUser.canManageBadges;
+            const canManageStaff = currentUser.canManageStaff;
 
             if (canManageBadges) {
                 document.getElementById('mgt-tab-btn').style.display = 'inline-block';
                 document.getElementById('badge-box').style.display = 'block';
+            }
+            if (canManageStaff) {
+                document.getElementById('staff-tab-btn').style.display = 'inline-block';
             }
             if (isDirectie) {
                 document.getElementById('th-admin-actions').style.display = 'table-cell';
@@ -577,12 +621,34 @@
             globalPortalData = data;
 
             const isDirectie = currentUser.role.toLowerCase().includes('directeur');
+            const canManageStaff = currentUser.canManageStaff;
 
-            // Update statistieken in personeelsportaal van de ingelogde gebruiker
+            // Zoek gegevens van ingelogde chauffeur
             const loggedInUserStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
+            
             if (loggedInUserStats) {
                 document.getElementById('user-stat-deliveries').innerText = loggedInUserStats.deliveries || 0;
                 document.getElementById('user-stat-distance').innerText = loggedInUserStats.distance || "0 km";
+
+                // Toon Rittenlijst
+                const myJobsContainer = document.getElementById('my-jobs-list-container');
+                myJobsContainer.innerHTML = '';
+
+                if (loggedInUserStats.userJobs && loggedInUserStats.userJobs.length > 0) {
+                    loggedInUserStats.userJobs.forEach(j => {
+                        myJobsContainer.insertAdjacentHTML('beforeend', `
+                            <div class="trip-item">
+                                <div>
+                                    <div class="trip-route">${j.from} → ${j.to}</div>
+                                    <div class="trip-details">Vracht: <b>${j.cargo}</b> • Datum: ${j.dateFormatted || 'Recent'}</div>
+                                </div>
+                                <div style="background:rgba(204,0,0,0.2); color:var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold; font-size:0.85rem;">${j.distance}</div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    myJobsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Geen gereden ritten geregistreerd in de afgelopen 10 dagen.</p>';
+                }
             }
 
             // Mijn Badges
@@ -598,7 +664,7 @@
                 myBadgesContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">Nog geen badges behaald.</span>';
             }
 
-            // Afwezigheid
+            // Afwezigheid (Inclusief verwijderknop voor directie)
             const absTbody = document.getElementById('absence-table-body');
             absTbody.innerHTML = '';
             data.absence.forEach(a => {
@@ -606,7 +672,14 @@
                 if (a.status === 'Goedgekeurd') statusBadge = `<span class="badge-status status-approved">Goedgekeurd</span>`;
                 if (a.status === 'Afgewezen') statusBadge = `<span class="badge-status status-rejected">Afgewezen</span>`;
 
-                let actionBtns = isDirectie ? `<td><button onclick="changeAbsenceStatus('${a.id}', 'Goedgekeurd')" class="admin-btn" style="background:#28a745; color:white;">✓</button> <button onclick="changeAbsenceStatus('${a.id}', 'Afgewezen')" class="admin-btn" style="background:#dc3545; color:white;">✗</button></td>` : '';
+                let actionBtns = '';
+                if (isDirectie) {
+                    actionBtns = `<td>
+                        <button onclick="changeAbsenceStatus('${a.id}', 'Goedgekeurd')" class="admin-btn" style="background:#28a745; color:white;" title="Goedkeuren">✓</button> 
+                        <button onclick="changeAbsenceStatus('${a.id}', 'Afgewezen')" class="admin-btn" style="background:#dc3545; color:white;" title="Afwijzen">✗</button>
+                        <button onclick="deleteAbsence('${a.id}')" class="admin-btn" style="background:#444; color:white; margin-left:4px;" title="Verwijderen"><i class="fa-solid fa-trash"></i></button>
+                    </td>`;
+                }
 
                 absTbody.insertAdjacentHTML('beforeend', `
                     <tr>
@@ -618,6 +691,30 @@
                     </tr>
                 `);
             });
+
+            // Personeelsbeheer / Promotie Tabel
+            if (canManageStaff) {
+                const staffMgtTbody = document.getElementById('staff-management-table-body');
+                staffMgtTbody.innerHTML = '';
+                data.drivers_list.forEach(m => {
+                    staffMgtTbody.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td><b>${m.username}</b></td>
+                            <td><span class="member-role role-${m.color}">${m.role}</span></td>
+                            <td>
+                                <select id="role-select-${m.username}" class="form-input" style="padding:4px; margin:0; background:#220505; color:white; font-size:0.85rem;">
+                                    <option value="Chauffeur" ${m.role === 'Chauffeur' ? 'selected' : ''}>Chauffeur</option>
+                                    <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
+                                    <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
+                                    <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
+                                    <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
+                                </select>
+                            </td>
+                            <td><button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="padding:4px 10px; font-size:0.8rem;">Opslaan</button></td>
+                        </tr>
+                    `);
+                });
+            }
 
             // Foto Beheer
             const galleryManage = document.getElementById('gallery-manage-container');
@@ -667,6 +764,45 @@
             });
         }
 
+        async function addNewStaff() {
+            const username = document.getElementById('new-staff-user').value;
+            const role = document.getElementById('new-staff-role').value;
+            const resDiv = document.getElementById('staff-add-result');
+
+            if (!username) return alert('Vul een gebruikersnaam in!');
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/staff/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, role, adminUser: currentUser.username })
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                resDiv.innerText = data.message;
+                document.getElementById('new-staff-user').value = '';
+                refreshPortalData();
+                loadData();
+            } else {
+                alert(data.message || 'Fout bij toevoegen.');
+            }
+        }
+
+        async function updateStaffRole(targetUser) {
+            const selectEl = document.getElementById(`role-select-${targetUser}`);
+            const newRole = selectEl.value;
+
+            const res = await fetch('https://haulmpbrecht.onrender.com/api/staff/update-role', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUser, newRole, adminUser: currentUser.username })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+            loadData();
+        }
+
         function openDriverModal(username) {
             if (!globalPortalData) return;
             const driver = globalPortalData.drivers_list.find(d => d.username.toLowerCase() === username.toLowerCase());
@@ -677,7 +813,6 @@
             document.getElementById('modal-driver-distance').innerText = driver.distance || '0 km';
             document.getElementById('modal-driver-deliveries').innerText = (driver.deliveries || 0) + " ritten";
 
-            // Badges in Modal
             const badgeContainer = document.getElementById('modal-driver-badges');
             badgeContainer.innerHTML = '';
             if (driver.badges && driver.badges.length > 0) {
@@ -688,7 +823,6 @@
                 badgeContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Geen badges toegekend.</span>';
             }
 
-            // Afwezigheid in Modal
             const userAbsence = globalPortalData.absence.filter(a => a.username.toLowerCase() === driver.username.toLowerCase());
             const absContainer = document.getElementById('modal-driver-absence');
             absContainer.innerHTML = '';
@@ -729,6 +863,14 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ absenceId, newStatus, username: currentUser.username })
             });
+            const data = await res.json();
+            alert(data.message);
+            refreshPortalData();
+        }
+
+        async function deleteAbsence(absenceId) {
+            if (!confirm('Weet je zeker dat je dit afwezigheidsverzoek wilt verwijderen?')) return;
+            const res = await fetch(`https://haulmpbrecht.onrender.com/api/absence/${absenceId}?username=${currentUser.username}`, { method: 'DELETE' });
             const data = await res.json();
             alert(data.message);
             refreshPortalData();
