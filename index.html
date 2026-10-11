@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brecht Transport B.V. | ETS2 VTC</title>
+    
+    <!-- FAVICON / BROWSER TAB ICOON -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.jpg">
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     
@@ -32,10 +36,12 @@
         }
 
         .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; cursor: pointer; }
-        .logo-badge {
-            width: 40px; height: 40px; background: linear-gradient(135deg, #cc0000, #330000);
-            border-radius: 10px; display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 20px; border: 1px solid rgba(255,255,255,0.2); color: #fff;
+        
+        .logo-img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.4));
         }
 
         .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; }
@@ -89,6 +95,7 @@
         .role-orange { background: rgba(221, 107, 32, 0.2); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.4); }
         .role-yellow { background: rgba(214, 158, 46, 0.2); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
         .role-green { background: rgba(56, 161, 105, 0.2); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.4); }
+        .role-gray { background: rgba(160, 174, 192, 0.2); color: #cbd5e0; border: 1px solid rgba(160, 174, 192, 0.4); }
 
         .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(204,0,0,0.15); }
         .trip-route { font-weight: bold; font-size: 1rem; color: #fff; }
@@ -124,7 +131,7 @@
 
     <nav>
         <div onclick="switchView('home-view'); return false;" class="brand-logo">
-            <div class="logo-badge">B</div>
+            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.jpg" class="logo-img" alt="Brecht Transport Logo">
             <div><div class="brand-title">BRECHT TRANSPORT B.V.</div></div>
         </div>
         <ul class="nav-links">
@@ -295,18 +302,22 @@
                 </div>
             </div>
 
+            <!-- PERSONEEL TOEVOEGEN & PROMOTIE TABJE -->
             <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
                 <div class="gallery-card" style="margin-bottom:20px;">
                     <h3><i class="fa-solid fa-user-plus"></i> Nieuw Personeelslid Toevoegen</h3>
                     <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                         <input type="text" id="new-staff-user" placeholder="Discord / Gebruikersnaam" class="form-input" style="flex:1; margin:0;">
+                        
                         <select id="new-staff-role" class="form-input" style="flex:1; margin:0; background:#220505; color:white;">
                             <option value="Chauffeur">Chauffeur</option>
                             <option value="Leidinggevende">Leidinggevende</option>
                             <option value="Management">Management</option>
+                            <option value="Onder Directeur / Development">Onder Directeur / Development</option>
                             <option value="Onder Directeur">Onder Directeur</option>
                             <option value="Directeur">Directeur</option>
                         </select>
+                        
                         <button onclick="addNewStaff()" class="btn-red" style="white-space:nowrap;">Toevoegen</button>
                     </div>
                     <div id="staff-add-result" style="margin-top:10px; font-size:0.9rem; color:#68d391; font-weight:bold;"></div>
@@ -466,7 +477,6 @@
             errorDiv.innerText = "Bezig met inloggen...";
 
             try {
-                // GEOPTIMALISEERD: Gebruik relatieve URL '/api/login' i.p.v. hardcoded domain
                 const res = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -529,7 +539,6 @@
 
         async function loadData() {
             try {
-                // GEOPTIMALISEERD: Relatieve URL '/api/haulmp'
                 const res = await fetch('/api/haulmp');
                 const data = await res.json();
                 globalPortalData = data;
@@ -617,7 +626,6 @@
         }
 
         async function refreshPortalData() {
-            // GEOPTIMALISEERD: Relatieve URL '/api/haulmp'
             const res = await fetch('/api/haulmp');
             const data = await res.json();
             globalPortalData = data;
@@ -703,6 +711,7 @@
                                     <option value="Chauffeur" ${m.role === 'Chauffeur' ? 'selected' : ''}>Chauffeur</option>
                                     <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
                                     <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
+                                    <option value="Onder Directeur / Development" ${m.role === 'Onder Directeur / Development' ? 'selected' : ''}>Onder Directeur / Development</option>
                                     <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
                                     <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
                                 </select>
@@ -765,7 +774,6 @@
 
             if (!username) return alert('Vul een gebruikersnaam in!');
 
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch('/api/staff/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -787,7 +795,6 @@
             const selectEl = document.getElementById(`role-select-${targetUser}`);
             const newRole = selectEl.value;
 
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch('/api/staff/update-role', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -843,7 +850,6 @@
             const reason = document.getElementById('abs-reason').value;
             if (!fromDate || !toDate) return alert('Selecteer datums!');
 
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch('/api/absence', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -855,7 +861,6 @@
         }
 
         async function changeAbsenceStatus(absenceId, newStatus) {
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch('/api/absence/status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -868,7 +873,6 @@
 
         async function deleteAbsence(absenceId) {
             if (!confirm('Weet je zeker dat je dit afwezigheidsverzoek wilt verwijderen?')) return;
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch(`/api/absence/${absenceId}?username=${currentUser.username}`, { method: 'DELETE' });
             const data = await res.json();
             alert(data.message);
@@ -883,7 +887,6 @@
             formData.append('photo', fileInput.files[0]);
             formData.append('username', currentUser.username);
 
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch('/api/gallery', { method: 'POST', body: formData });
             const data = await res.json();
             alert(data.message);
@@ -894,7 +897,6 @@
 
         async function deletePhoto(photoId) {
             if (!confirm('Weet je zeker dat je deze foto wilt verwijderen?')) return;
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch(`/api/gallery/${photoId}?username=${currentUser.username}`, { method: 'DELETE' });
             const data = await res.json();
             alert(data.message);
@@ -907,7 +909,6 @@
             const targetUser = document.getElementById('badge-user').value;
             if (!title || !targetUser) return alert('Vul zowel badge naam als gebruikersnaam in!');
 
-            // GEOPTIMALISEERD: Relatieve URL
             const res = await fetch('/api/badges', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -924,7 +925,6 @@
             if (!confirm('Weet je zeker dat je deze badge wilt intrekken?')) return;
             
             try {
-                // GEOPTIMALISEERD: Relatieve URL
                 const res = await fetch('/api/badges/delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
