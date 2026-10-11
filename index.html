@@ -26,7 +26,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; }
+        body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
         nav {
             position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1200px; width: 95%;
@@ -59,11 +59,13 @@
         .page-view { display: none; }
         .page-view.active { display: block; }
 
-        .portal-layout { display: flex; min-height: 100vh; }
+        /* PORTAL LAYOUT & RESPONSIVENESS */
+        .portal-layout { display: flex; min-height: 100vh; position: relative; }
         
         .sidebar {
             width: 250px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
-            padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; position: fixed; height: 100vh;
+            padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; 
+            position: fixed; height: 100vh; z-index: 100; transition: transform 0.3s ease;
         }
         
         .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; color: #fff; cursor: pointer; }
@@ -76,7 +78,13 @@
             background: rgba(204, 0, 0, 0.18); color: #fff; border-left: 3px solid var(--accent-red);
         }
 
-        .portal-content { margin-left: 250px; flex: 1; padding: 35px; }
+        .portal-content { margin-left: 250px; flex: 1; padding: 35px; width: calc(100% - 250px); }
+
+        /* MOBIELE MENU KNOP VOOR PORTAAL */
+        .mobile-portal-header {
+            display: none; background: var(--bg-sidebar); border-bottom: 1px solid var(--border-red);
+            padding: 15px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 101;
+        }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 20px 0; }
         .stat-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 14px; padding: 20px; backdrop-filter: var(--glass-blur); }
@@ -108,13 +116,13 @@
         #login-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, rgba(8,2,2,0.88), rgba(20,2,2,0.92)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center;
-            background-size: cover; z-index: 2000; justify-content: center; align-items: center;
+            background-size: cover; z-index: 2000; justify-content: center; align-items: center; padding: 15px;
         }
 
         .login-box {
             background: rgba(18, 4, 4, 0.85); backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 51, 51, 0.3); border-radius: 20px;
-            max-width: 400px; width: 90%; padding: 36px; box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            max-width: 400px; width: 100%; padding: 36px; box-shadow: 0 25px 60px rgba(0,0,0,0.8);
             text-align: center; position: relative; overflow: hidden;
         }
         .login-box::before {
@@ -133,13 +141,28 @@
         .announcement-box { background: rgba(255,51,51,0.08); border-left: 4px solid var(--accent-red); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
 
         .hero { text-align: center; padding: 35px 0 25px 0; }
-        .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; margin-bottom: 12px; color: #fff; }
-        .hero p { font-size: 1rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
+        .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .hero p { font-size: 1rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; padding: 0 15px; }
         
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; color: #fff; }
         
         footer { border-top: 1px solid var(--border-red); padding: 25px 0; text-align: center; color: var(--text-muted); margin-top: 40px; background: rgba(10, 2, 2, 0.9); }
+
+        /* RESPONSIVE MEDIA QUERIES VOOR TELEFOON & TABLET (< 900px) */
+        @media (max-width: 900px) {
+            .portal-layout { flex-direction: column; }
+            .sidebar { 
+                position: fixed; left: -260px; top: 0; width: 260px; height: 100vh; 
+                box-shadow: 10px 0 30px rgba(0,0,0,0.8); transition: left 0.3s ease; 
+            }
+            .sidebar.mobile-open { left: 0; }
+            .portal-content { margin-left: 0; width: 100%; padding: 20px; }
+            .mobile-portal-header { display: flex; }
+            .nav-links { display: none; } /* Kan eventueel ingeklapt worden op mobiele hoofdsite */
+            .hero h1 { font-size: 2rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -219,8 +242,16 @@
 
         <!-- PERSONEELSPORTAAL -->
         <div id="portal-view" class="page-view">
+            <div class="mobile-portal-header">
+                <div style="display:flex; align-items:center; gap:10px; font-weight:bold;">
+                    <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:26px;">
+                    <span>Brecht Portal</span>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="btn-portal" style="padding:6px 12px;"><i class="fa-solid fa-bars"></i> Menu</button>
+            </div>
+
             <div class="portal-layout">
-                <div class="sidebar">
+                <div class="sidebar" id="portal-sidebar">
                     <div>
                         <div class="sidebar-brand" onclick="goHome()">
                             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:28px;">
@@ -279,14 +310,14 @@
                             </div>
                         </div>
 
-                        <div class="gallery-card" style="margin-bottom:20px; background:#120404;">
+                        <div class="gallery-card" style="margin-bottom:20px; background:#120404; overflow-x:auto;">
                             <h3 style="margin-bottom:15px; color:#fff;"><i class="fa-solid fa-chart-line"></i> Brecht Transport Wekelijkse Inkomsten</h3>
-                            <div style="height: 280px;">
+                            <div style="height: 280px; min-width: 320px;">
                                 <canvas id="earningsChart"></canvas>
                             </div>
                         </div>
 
-                        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:16px;">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
                             <div class="gallery-card">
                                 <h3><i class="fa-solid fa-route"></i> Mijn Recent Gereden Ritten</h3>
                                 <div id="my-jobs-list-container" style="margin-top:12px; max-height:250px; overflow-y:auto;"></div>
@@ -342,9 +373,9 @@
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-user-plus"></i> Nieuw Personeelslid Toevoegen</h3>
-                            <div style="display:flex; gap:10px; margin-top:10px;">
-                                <input type="text" id="new-staff-user" placeholder="Gebruikersnaam" class="form-input" style="flex:1; margin:0;">
-                                <select id="new-staff-role" class="form-input" style="flex:1; margin:0; background:#180404; color:white;">
+                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                                <input type="text" id="new-staff-user" placeholder="Gebruikersnaam" class="form-input" style="flex:1; min-width:200px; margin:0;">
+                                <select id="new-staff-role" class="form-input" style="flex:1; min-width:200px; margin:0; background:#180404; color:white;">
                                     <option value="Directeur">Directeur</option>
                                     <option value="Onder Directeur">Onder Directeur</option>
                                     <option value="Management">Management</option>
@@ -365,9 +396,9 @@
                     <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" id="badge-box" style="margin-bottom:16px;">
                             <h3><i class="fa-solid fa-award"></i> Badge Toekennen</h3>
-                            <div style="display:flex; gap:10px; margin-top:10px;">
-                                <input type="text" id="badge-title" placeholder="Badge Naam" class="form-input" style="flex:1; margin:0;">
-                                <input type="text" id="badge-user" placeholder="Voor Gebruiker" class="form-input" style="flex:1; margin:0;">
+                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                                <input type="text" id="badge-title" placeholder="Badge Naam" class="form-input" style="flex:1; min-width:180px; margin:0;">
+                                <input type="text" id="badge-user" placeholder="Voor Gebruiker" class="form-input" style="flex:1; min-width:180px; margin:0;">
                                 <button onclick="awardBadge()" class="btn-red">Geven</button>
                             </div>
                         </div>
@@ -436,6 +467,11 @@
             }
             loadData();
         });
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('portal-sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
 
         function goHome() {
             if (window.location.hostname.includes("personeelsportaal")) {
@@ -521,6 +557,11 @@
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).style.display = 'block';
             if (btnElement && btnElement.parentElement) btnElement.parentElement.classList.add('active');
+            
+            // Sluit sidebar automatisch op mobiel na klikken op een tab
+            if (window.innerWidth <= 900) {
+                document.getElementById('portal-sidebar').classList.remove('mobile-open');
+            }
         }
 
         async function loadData() {
@@ -550,7 +591,6 @@
                     const teamContainer = document.getElementById('team-container');
                     if (teamContainer) {
                         teamContainer.innerHTML = '';
-                        // Filter het DEV account eruit voor de publieke pagina
                         data.drivers_list.filter(m => !m.isDev).forEach(m => {
                             teamContainer.insertAdjacentHTML('beforeend', `
                                 <div class="member-card">
@@ -618,10 +658,10 @@
                                 <div style="font-size:1rem; font-weight:bold; color:#fff; margin-bottom:6px;">
                                     <i class="fa-solid fa-user-pen" style="color:var(--accent-red);"></i> ${app.applicant} heeft gesolliciteerd!
                                 </div>
-                                <div style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px; line-height:1.4; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
+                                <div style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px; line-height:1.4; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; word-break:break-word;">
                                     "${app.content}"
                                 </div>
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                                     <span style="font-size:0.75rem; color:#888;"><i class="fa-regular fa-clock"></i> ${app.date}</span>
                                     <a href="${app.link}" target="_blank" class="btn-portal" style="padding:6px 14px; font-size:0.8rem; background:rgba(255,51,51,0.15); border-color:var(--accent-red);">
                                         Bekijk sollicitatie →
