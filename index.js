@@ -78,7 +78,7 @@ const client = new Client({
 
 client.on('ready', () => {
     console.log(`Discord Bot ingelogd als ${client.user.tag}`);
-    fetchDiscordLogs();
+    fetchAllHistoricalDiscordLogs();
 });
 
 client.on('messageCreate', (message) => {
@@ -124,11 +124,6 @@ function parseAndAddJob(message, isLiveNew = false) {
 
     const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
 
-    if (isLiveNew) {
-        totalDeliveries += 1;
-        totalDistanceKm += kmAmount;
-    }
-
     const jobObj = {
         id: message.id || "job-" + Date.now(),
         from,
@@ -142,17 +137,42 @@ function parseAndAddJob(message, isLiveNew = false) {
 
     if (!allJobsHistory.some(j => j.id === jobObj.id)) {
         allJobsHistory.unshift(jobObj);
+        if (isLiveNew) {
+            totalDeliveries += 1;
+            totalDistanceKm += kmAmount;
+        }
     }
 }
 
-async function fetchDiscordLogs() {
+async function fetchAllHistoricalDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-        const messages = await channel.messages.fetch({ limit: 100 });
-        messages.forEach(msg => parseAndAddJob(msg, false));
+        
+        let lastId = undefined;
+        let fetchedTotal = 0;
+        
+        // Loop door om alle historische berichten op te halen voor de volledigheid
+        while (fetchedTotal < 300) {
+            const options = { limit: 100 };
+            if (lastId) options.before = lastId;
+            
+            const messages = await channel.messages.fetch(options);
+            if (messages.size === 0) break;
+            
+            messages.forEach(msg => parseAndAddJob(msg, false));
+            lastId = messages.last().id;
+            fetchedTotal += messages.size;
+            
+            if (messages.size < 100) break;
+        }
+
+        // Bereken totaal van alle opgehaalde ritten opnieuw
+        totalDeliveries = allJobsHistory.length;
+        totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+        console.log(`Historie gesynchroniseerd: ${totalDeliveries} ritten gevonden.`);
     } catch (err) {
-        console.error('Fout bij ophalen Discord logs:', err.message);
+        console.error('Fout bij ophalen Discord historie:', err.message);
     }
 }
 
@@ -187,12 +207,21 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/haulmp', (req, res) => {
-    const formattedDrivers = accountsDatabase.map(m => ({
-        username: m.username,
-        role: m.role,
-        color: getRoleColor(m.role),
-        badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
-    }));
+    const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+
+    const formattedDrivers = accountsDatabase.map(m => {
+        const userJobs = allJobsHistory.filter(j => j.driver.toLowerCase() === m.username.toLowerCase() && j.timestamp >= tenDaysAgo);
+        const userKm = userJobs.reduce((acc, curr) => acc + curr.kmAmount, 0);
+        
+        return {
+            username: m.username,
+            role: m.role,
+            color: getRoleColor(m.role),
+            deliveries: userJobs.length,
+            distance: `${userKm.toLocaleString('nl-NL')} km`,
+            badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
+        };
+    });
 
     res.json({
         deliveries: totalDeliveries.toString(),
@@ -287,7 +316,7 @@ app.post('/api/badges', (req, res) => {
     }
 
     const newBadge = { 
-        id: "badge-" + Date.now() + "-" + Math.floor(Math.random() * 1000), 
+        id: "badge-" + Date.now() + "-" + Math.floor(Math.random() * 10000), 
         title: title.trim(), 
         targetUser: targetUser.trim(), 
         awardedBy: username,
@@ -300,13 +329,13 @@ app.post('/api/badges', (req, res) => {
 
 app.post('/api/badges/delete', (req, res) => {
     const { badgeId } = req.body;
-    const initialLength = customBadges.length;
+    const beforeCount = customBadges.length;
     customBadges = customBadges.filter(b => b.id !== badgeId);
 
-    if (customBadges.length < initialLength) {
+    if (customBadges.length < beforeCount) {
         return res.json({ success: true, message: 'Badge succesvol ingetrokken!' });
     } else {
-        return res.json({ success: false, message: 'Badge kon niet worden gevonden.' });
+        return res.status(404).json({ success: false, message: 'Badge kon niet worden gevonden.' });
     }
 });
 
