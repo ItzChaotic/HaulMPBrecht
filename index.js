@@ -33,10 +33,6 @@ const MONGO_URI = process.env.MONGO_URI;
 let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl;
 let isConnected = false;
 
-const LOCAL_ACCOUNTS = path.join(__dirname, 'accounts.json');
-const LOCAL_GALLERY = path.join(__dirname, 'gallery.json');
-const LOCAL_BADGES = path.join(__dirname, 'badges.json');
-
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
@@ -49,9 +45,13 @@ let defaultAccounts = [
 ];
 
 async function connectDB() {
-    if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld, lokale modus actief."); return; }
+    if (!MONGO_URI) {
+        console.error("❌ BELANGRIJK: Geen MONGO_URI gevonden in Environment Variables! Alles wordt lokaal opgeslagen en gereset bij een herstart.");
+        return;
+    }
     try {
-        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+        console.log("⏳ Bezig met verbinden naar MongoDB Atlas...");
+        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
         await client.connect();
         db = client.db('brecht_transport');
         
@@ -65,14 +65,16 @@ async function connectDB() {
         eotwColl = db.collection('eotw');
 
         isConnected = true;
-        console.log("Verbonden met MongoDB Atlas!");
+        console.log("✅ Succesvol verbonden met MongoDB Atlas! Data blijft nu permanent bewaard.");
 
         const count = await accountsColl.countDocuments();
         if (count === 0) {
             await accountsColl.insertMany(defaultAccounts);
+            console.log("ℹ️ Standaard accounts aangemaakt in MongoDB.");
         }
     } catch (err) {
-        console.error("MongoDB verbinding mislukt, val terug op lokale modus:", err.message);
+        console.error("❌ FOUT BIJ MONGOOSE/MONGODB VERBINDING:", err.message);
+        console.error("Controleer of je IP-adres in MongoDB Atlas openstaat (0.0.0.0/0) en je wachtwoord klopt.");
     }
 }
 connectDB();
@@ -196,8 +198,6 @@ app.post('/api/login', async (req, res) => {
     let accountsDatabase = defaultAccounts;
     if (isConnected && accountsColl) {
         accountsDatabase = await accountsColl.find({}).toArray();
-    } else if (fs.existsSync(LOCAL_ACCOUNTS)) {
-        try { accountsDatabase = JSON.parse(fs.readFileSync(LOCAL_ACCOUNTS, 'utf8')); } catch (e) {}
     }
 
     const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
@@ -231,10 +231,6 @@ app.get('/api/haulmp', async (req, res) => {
             const eotw = await eotwColl.findOne({});
             if (eotw) employeeOfTheWeek = eotw;
         } catch (e) {}
-    } else {
-        if (fs.existsSync(LOCAL_ACCOUNTS)) try { accountsDatabase = JSON.parse(fs.readFileSync(LOCAL_ACCOUNTS, 'utf8')); } catch(e){}
-        if (fs.existsSync(LOCAL_GALLERY)) try { galleryPhotos = JSON.parse(fs.readFileSync(LOCAL_GALLERY, 'utf8')); } catch(e){}
-        if (fs.existsSync(LOCAL_BADGES)) try { customBadges = JSON.parse(fs.readFileSync(LOCAL_BADGES, 'utf8')); } catch(e){}
     }
 
     const formattedDrivers = accountsDatabase.map(m => {
@@ -283,33 +279,19 @@ app.post('/api/badges', async (req, res) => {
 
     let accountsList = isConnected && accountsColl ? await accountsColl.find({}).toArray() : defaultAccounts;
     const workerExists = accountsList.some(acc => acc.username.toLowerCase() === targetUser.trim().toLowerCase());
-    if (!workerExists) {
-        return res.status(400).json({ success: false, message: 'Deze gebruiker werkt niet bij ons transportbedrijf!' });
-    }
+    if (!workerExists) return res.status(400).json({ success: false, message: 'Deze gebruiker werkt niet bij ons transportbedrijf!' });
 
     let existingBadges = isConnected && badgesColl ? await badgesColl.find({}).toArray() : [];
     const alreadyHas = existingBadges.some(b => b.title.toLowerCase() === title.trim().toLowerCase() && b.targetUser.toLowerCase() === targetUser.trim().toLowerCase());
-    if (alreadyHas) {
-        return res.status(400).json({ success: false, message: 'Deze werknemer heeft deze badge al!' });
-    }
+    if (alreadyHas) return res.status(400).json({ success: false, message: 'Deze werknemer heeft deze badge al!' });
 
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
-    if (isConnected && badgesColl) {
-        await badgesColl.insertOne(badgeObj);
-    } else {
-        existingBadges.push(badgeObj);
-        fs.writeFileSync(LOCAL_BADGES, JSON.stringify(existingBadges, null, 2));
-    }
+    if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
     res.json({ success: true });
 });
 
 app.post('/api/badges/delete', async (req, res) => {
-    if (isConnected && badgesColl) {
-        await badgesColl.deleteOne({ id: req.body.badgeId });
-    } else {
-        let list = []; if (fs.existsSync(LOCAL_BADGES)) try { list = JSON.parse(fs.readFileSync(LOCAL_BADGES, 'utf8')); } catch(e){}
-        list = list.filter(b => b.id !== req.body.badgeId); fs.writeFileSync(LOCAL_BADGES, JSON.stringify(list, null, 2));
-    }
+    if (isConnected && badgesColl) await badgesColl.deleteOne({ id: req.body.badgeId });
     res.json({ success: true });
 });
 
@@ -342,10 +324,6 @@ app.post('/api/announcements', async (req, res) => {
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
-    } else {
-        let accounts = defaultAccounts; if (fs.existsSync(LOCAL_ACCOUNTS)) try { accounts = JSON.parse(fs.readFileSync(LOCAL_ACCOUNTS, 'utf8')); } catch(e){}
-        const t = accounts.find(d => d.username.toLowerCase() === req.body.targetUser.toLowerCase());
-        if (t) { t.password = req.body.newPassword.trim(); fs.writeFileSync(LOCAL_ACCOUNTS, JSON.stringify(accounts, null, 2)); }
     }
     res.json({ success: true });
 });
@@ -357,10 +335,6 @@ app.post('/api/staff/add', async (req, res) => {
         const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
         if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
         await accountsColl.insertOne(newAcc);
-    } else {
-        let accounts = defaultAccounts; if (fs.existsSync(LOCAL_ACCOUNTS)) try { accounts = JSON.parse(fs.readFileSync(LOCAL_ACCOUNTS, 'utf8')); } catch(e){}
-        if (accounts.some(d => d.username.toLowerCase() === req.body.username.toLowerCase().trim())) return res.status(400).json({ success: false });
-        accounts.push(newAcc); fs.writeFileSync(LOCAL_ACCOUNTS, JSON.stringify(accounts, null, 2));
     }
     res.json({ success: true, message: pw });
 });
@@ -368,10 +342,6 @@ app.post('/api/staff/add', async (req, res) => {
 app.post('/api/staff/update-role', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
-    } else {
-        let accounts = defaultAccounts; if (fs.existsSync(LOCAL_ACCOUNTS)) try { accounts = JSON.parse(fs.readFileSync(LOCAL_ACCOUNTS, 'utf8')); } catch(e){}
-        const t = accounts.find(d => d.username.toLowerCase() === req.body.targetUser.toLowerCase());
-        if (t) { t.role = req.body.newRole.trim(); fs.writeFileSync(LOCAL_ACCOUNTS, JSON.stringify(accounts, null, 2)); }
     }
     res.json({ success: true });
 });
@@ -379,10 +349,6 @@ app.post('/api/staff/update-role', async (req, res) => {
 app.delete('/api/staff/:targetUser', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
-    } else {
-        let accounts = defaultAccounts; if (fs.existsSync(LOCAL_ACCOUNTS)) try { accounts = JSON.parse(fs.readFileSync(LOCAL_ACCOUNTS, 'utf8')); } catch(e){}
-        accounts = accounts.filter(d => d.username.toLowerCase() !== req.params.targetUser.toLowerCase());
-        fs.writeFileSync(LOCAL_ACCOUNTS, JSON.stringify(accounts, null, 2));
     }
     res.json({ success: true });
 });
@@ -394,17 +360,16 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     
     if (isConnected && galleryColl) {
         await galleryColl.insertOne(photoObj);
+        console.log("📸 Foto succesvol opgeslagen in MongoDB Atlas!");
     } else {
-        let gallery = []; if (fs.existsSync(LOCAL_GALLERY)) try { gallery = JSON.parse(fs.readFileSync(LOCAL_GALLERY, 'utf8')); } catch(e){}
-        gallery.unshift(photoObj); fs.writeFileSync(LOCAL_GALLERY, JSON.stringify(gallery, null, 2));
+        console.log("⚠️ Let op: Geen actieve database-verbinding, foto kon niet permanent worden opgeslagen.");
     }
     res.json({ success: true });
 });
 
-// Veilige Discord login om crashes te voorkomen
 if (DISCORD_BOT_TOKEN) {
     clientBot.login(DISCORD_BOT_TOKEN).catch(err => {
-        console.error("Kon niet inloggen bij Discord (controleer token):", err.message);
+        console.error("Kon niet inloggen bij Discord:", err.message);
     });
 }
 
