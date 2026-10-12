@@ -101,11 +101,11 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
-        /* INLOGSCHERM MET DE SFEERVOLLE 3 TRUCKS ACHTERGROND */
+        /* INLOGSCHERM MET DE 3 TRUCKS ACHTERGROND */
         #login-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(8, 2, 2, 0.82), rgba(8, 2, 2, 0.92)), 
-                        url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png');
+                        url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png');
             background-size: cover; background-position: center;
             z-index: 2000; justify-content: center; align-items: center; padding: 15px;
         }
@@ -129,6 +129,10 @@
         .mobile-header-bar { display: none; background: rgba(22, 4, 4, 0.95); padding: 12px 18px; border-bottom: 1px solid var(--border-red); position: sticky; top: 0; z-index: 1001; justify-content: space-between; align-items: center; }
         .mobile-drawer { display: none; position: fixed; top: 0; right: -280px; width: 280px; height: 100vh; background: var(--bg-sidebar); z-index: 2000; padding: 25px 20px; transition: right 0.3s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.8); color: #fff; }
         .mobile-drawer.open { right: 0; }
+
+        /* Rotatie animatie voor dropdown pijltjes */
+        .rotate-arrow { transition: transform 0.3s ease; display: inline-block; }
+        .rotate-arrow.open { transform: rotate(180deg); }
 
         @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
@@ -260,7 +264,7 @@
                         <ul class="sidebar-menu">
                             <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button></li>
                             <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-convoy"></i> Konvooien</button></li>
+                            <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-convoy"></i> 🚚 Konvooien</button></li>
                             <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
                             <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
                             <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
@@ -288,6 +292,15 @@
                             <h3 style="color:#f6e05e; font-size:1.3rem; margin-bottom:8px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
                             <h2 id="eotw-username" style="font-size:1.8rem; margin-bottom:6px;">Chauffeur</h2>
                             <p id="eotw-reason" style="color:var(--text-muted); font-style:italic;">"Uitstekende prestaties!"</p>
+                        </div>
+
+                        <!-- Eigen Wachtwoord Wijzigen (Voor IEDEREEN) -->
+                        <div class="gallery-card" style="margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-key"></i> Mijn Wachtwoord Wijzigen</h3>
+                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                                <input type="password" id="my-new-password" placeholder="Nieuw wachtwoord..." class="form-input" style="flex:1; min-width:200px; margin:0;">
+                                <button onclick="updateMyOwnPassword()" class="btn-red">Wachtwoord Opslaan</button>
+                            </div>
                         </div>
 
                         <div id="announcements-display-container"></div>
@@ -336,7 +349,7 @@
                     <!-- TAB: KONVOOIEN -->
                     <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
                         <div id="convoy-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-calendar-plus"></i> Nieuw Konvooi Inplannen</h3>
+                            <h3><i class="fa-solid fa-calendar-plus"></i> 🚚 Nieuw Konvooi Inplannen</h3>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                                 <input type="text" id="conv-title" placeholder="Titel..." class="form-input">
                                 <input type="text" id="conv-server" placeholder="Server..." class="form-input">
@@ -348,7 +361,7 @@
                             <button onclick="postConvoy()" class="btn-red">Inplannen</button>
                         </div>
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-truck-convoy"></i> Geplande Konvooien</h3>
+                            <h3><i class="fa-solid fa-truck-convoy"></i> 🚚 Geplande Konvooien</h3>
                             <div id="convoys-list-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
@@ -361,7 +374,7 @@
                             <div style="margin-top:25px; border-top:1px solid var(--border-red); padding-top:15px;">
                                 <button onclick="toggleCompletedApps()" class="btn-portal" style="width:100%; justify-content:space-between;">
                                     <span><i class="fa-solid fa-box-archive"></i> Afgeronde Sollicitaties</span>
-                                    <i id="completed-icon" class="fa-solid fa-chevron-down"></i>
+                                    <i id="completed-icon" class="fa-solid fa-chevron-down rotate-arrow"></i>
                                 </button>
                                 <div id="applications-completed-container" style="display:none; margin-top:12px;"></div>
                             </div>
@@ -437,7 +450,7 @@
         </div>
     </div>
 
-    <!-- INLOGSCHERM MET DE 3 TRUCKS ACHTERGROND -->
+    <!-- INLOGSCHERM -->
     <div id="login-modal">
         <div class="login-box">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;">
@@ -504,7 +517,10 @@
         function toggleMobileDrawer() { document.getElementById('mobileDrawer').classList.toggle('open'); }
         function toggleCompletedApps() {
             const c = document.getElementById('applications-completed-container');
-            c.style.display = c.style.display === 'none' ? 'block' : 'none';
+            const icon = document.getElementById('completed-icon');
+            const isOpen = c.style.display === 'block';
+            c.style.display = isOpen ? 'none' : 'block';
+            if (icon) icon.classList.toggle('open', !isOpen);
         }
 
         function goHome() {
@@ -697,7 +713,7 @@
                                 <b style="color:var(--accent-red); font-size:1rem;">🏆 ${badgeTitle} (${badgeList.length})</b>
                                 <div>
                                     <button onclick="event.stopPropagation(); quickAddBadgeUser('${badgeTitle}')" class="btn-portal" style="padding:2px 8px; font-size:0.75rem;">+ Voeg toe</button>
-                                    <span>▼</span>
+                                    <span id="arrow-${badgeTitle}" class="rotate-arrow">▼</span>
                                 </div>
                             </div>
                             <div id="list-${badgeTitle}" style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
@@ -742,13 +758,26 @@
 
         function toggleBadgeGroup(title) {
             const el = document.getElementById(`list-${title}`);
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            const arrow = document.getElementById(`arrow-${title}`);
+            const isOpen = el.style.display === 'block';
+            el.style.display = isOpen ? 'none' : 'block';
+            if (arrow) arrow.classList.toggle('open', !isOpen);
+        }
+
+        async function updateMyOwnPassword() {
+            const newPassword = document.getElementById('my-new-password').value;
+            if (!newPassword || newPassword.trim().length < 3) return alert('Vul een geldig nieuw wachtwoord in!');
+            const res = await fetch('/api/staff/update-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser: currentUser.username, newPassword, adminUser: currentUser.username }) });
+            if (res.ok) { alert('Je eigen wachtwoord is succesvol gewijzigd!'); document.getElementById('my-new-password').value = ''; }
+            else alert('Er ging iets mis bij het wijzigen.');
         }
 
         async function quickAddBadgeUser(title) {
             const targetUser = prompt(`Welke gebruiker wil je de badge "${title}" geven?`);
             if (!targetUser) return;
-            await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
+            const res = await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
+            const data = await res.json();
+            if (!data.success) alert(data.message || 'Kon badge niet toevoegen.');
             refreshPortalData();
         }
 
@@ -777,7 +806,9 @@
             const title = document.getElementById('badge-title').value;
             const targetUser = document.getElementById('badge-user-select').value;
             if (!title) return alert('Vul een badgenaam in!');
-            await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
+            const res = await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
+            const data = await res.json();
+            if (!data.success) alert(data.message || 'Kon badge niet toevoegen.');
             document.getElementById('badge-title').value = '';
             refreshPortalData();
         }
@@ -791,6 +822,7 @@
             const targetUser = document.getElementById('eotw-select-user').value;
             const reason = document.getElementById('eotw-input-reason').value;
             await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
+            alert('Chauffeur van de week succesvol ingesteld!');
             refreshPortalData();
         }
 
@@ -817,8 +849,13 @@
             const fileInput = document.getElementById('photo-file');
             if (fileInput.files.length === 0) return alert('Selecteer een foto!');
             const formData = new FormData(); formData.append('photo', fileInput.files[0]); formData.append('username', currentUser.username);
-            await fetch('/api/gallery', { method: 'POST', body: formData });
-            fileInput.value = ''; refreshPortalData(); loadData();
+            const res = await fetch('/api/gallery', { method: 'POST', body: formData });
+            if (res.ok) {
+                alert('📸 Foto succesvol geüpload en opgeslagen in de fotogalerij!');
+                fileInput.value = ''; refreshPortalData(); loadData();
+            } else {
+                alert('Er is een fout opgetreden bij het uploaden van de foto.');
+            }
         }
 
         async function postAnnouncement() {
