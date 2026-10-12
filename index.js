@@ -49,7 +49,7 @@ let defaultAccounts = [
 ];
 
 async function connectDB() {
-    if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld."); return; }
+    if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld, lokale modus actief."); return; }
     try {
         const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
@@ -72,7 +72,7 @@ async function connectDB() {
             await accountsColl.insertMany(defaultAccounts);
         }
     } catch (err) {
-        console.error("MongoDB verbinding mislukt:", err.message);
+        console.error("MongoDB verbinding mislukt, val terug op lokale modus:", err.message);
     }
 }
 connectDB();
@@ -401,5 +401,11 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     res.json({ success: true });
 });
 
-if (DISCORD_BOT_TOKEN) clientBot.login(DISCORD_BOT_TOKEN);
+// Veilige Discord login om crashes te voorkomen
+if (DISCORD_BOT_TOKEN) {
+    clientBot.login(DISCORD_BOT_TOKEN).catch(err => {
+        console.error("Kon niet inloggen bij Discord (controleer token):", err.message);
+    });
+}
+
 app.listen(PORT, () => console.log(`Server actief op poort ${PORT}`));
