@@ -29,33 +29,33 @@
         body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
         nav {
-            position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1200px; width: 95%;
-            background: rgba(22, 4, 4, 0.92); backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--border-red); border-radius: 16px; padding: 12px 24px;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+            position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1350px; width: 96%;
+            background: rgba(22, 4, 4, 0.94); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-red); border-radius: 16px; padding: 10px 20px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 15px;
         }
 
-        .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; cursor: pointer; }
-        .logo-img { height: 40px; width: auto; object-fit: contain; }
-        .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
-        .nav-links { display: flex; gap: 14px; list-style: none; align-items: center; flex-wrap: wrap; }
-        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; cursor: pointer; flex-shrink: 0; }
+        .logo-img { height: 38px; width: auto; object-fit: contain; }
+        .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; white-space: nowrap; }
+        .nav-links { display: flex; gap: 12px; list-style: none; align-items: center; flex-wrap: nowrap; }
+        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .nav-links a:hover { color: #fff; }
 
         .btn-apply {
             background: linear-gradient(135deg, var(--primary-light), var(--primary));
-            color: #fff !important; padding: 8px 16px; border-radius: 10px; font-weight: 700 !important;
-            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+            color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
+            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
         }
 
         .btn-portal {
-            background: rgba(255, 255, 255, 0.05); color: #fff !important; padding: 8px 14px;
-            border-radius: 10px; font-weight: 700 !important; border: 1px solid var(--border-red);
-            display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;
+            background: rgba(255, 255, 255, 0.05); color: #fff !important; padding: 7px 12px;
+            border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important; border: 1px solid var(--border-red);
+            display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap;
         }
         .btn-portal:hover { background: rgba(204, 0, 0, 0.2); border-color: var(--accent-red); }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .container { max-width: 1250px; margin: 0 auto; padding: 0 20px; }
         .page-view { display: none; }
         .page-view.active { display: block; }
 
@@ -119,7 +119,7 @@
         .mobile-drawer { display: none; position: fixed; top: 0; right: -280px; width: 280px; height: 100vh; background: var(--bg-sidebar); z-index: 2000; padding: 25px 20px; transition: right 0.3s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.8); color: #fff; }
         .mobile-drawer.open { right: 0; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
             .mobile-header-bar { display: flex; }
             .mobile-drawer { display: block; }
@@ -173,8 +173,8 @@
             <li><a href="#team" data-i18n="team">Het Team</a></li>
             <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
             <li><a href="#livemap-sec">Live Map</a></li>
-            <li><a href="#activiteit">Onderweg</a></li>
-            <li><button onclick="toggleLang()" class="btn-portal" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-globe"></i> <span id="lang-label">ENG</span></button></li>
+            <li><a href="#activiteit" data-i18n="trips">Onderweg</a></li>
+            <li><button onclick="toggleLang()" class="btn-portal"><i class="fa-solid fa-globe"></i> <span id="lang-label">ENG</span></button></li>
             <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
             <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="apply">Solliciteer Direct</span></a></li>
         </ul>
@@ -455,6 +455,8 @@
                 login: "Inloggen", apply: "Solliciteer Direct", hero_title: "Brecht Transport B.V.",
                 hero_desc: "Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.",
                 stat_dist: "Gereden Afstand", stat_deliv: "Leveringen Volbracht", stat_drivers: "Actieve Chauffeurs",
+                about_p1: "Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.",
+                about_p2: "Met ons eigen personeelsportaal, konvooi-organisatie en actieve chauffeursgroep streven wij elke dag naar kwaliteit op de Europese wegen. Of je nu houdt van rustig kilometers maken of grote konvooien rijden: bij Brecht Transport B.V. ben je aan het juiste adres!",
                 map_desc: "Volg al onze actieve chauffeurs realtime via de HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
                 gallery_full: "Bekijk Volledig Foto-Archief", loading: "Laden van recente ritten...", back: "Terug"
             },
@@ -463,6 +465,8 @@
                 login: "Login", apply: "Apply Now", hero_title: "Brecht Transport B.V.",
                 hero_desc: "Welcome to Brecht Transport B.V. We combine craftsmanship, professional convoys, and a great community on the European highways of Euro Truck Simulator 2.",
                 stat_dist: "Total Distance", stat_deliv: "Deliveries Completed", stat_drivers: "Active Drivers",
+                about_p1: "Brecht Transport B.V. is a close-knit and professional Virtual Trucking Company (VTC) operating on the Euro Truck Simulator 2 platform. Our goal is to provide realistic and enjoyable digital haulage.",
+                about_p2: "With our custom driver portal, convoy organization, and active community of truckers, we strive for quality on the European roads every day. Whether you enjoy relaxed long hauls or driving in large convoys: Brecht Transport B.V. is the right place for you!",
                 map_desc: "Track all our active drivers in real-time via the HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
                 gallery_full: "View Full Photo Archive", loading: "Loading recent jobs...", back: "Back"
             }
