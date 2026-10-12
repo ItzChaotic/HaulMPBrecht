@@ -101,8 +101,19 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
-        #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(8,2,2,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
-        .login-box { background: rgba(18, 4, 4, 0.95); border: 1px solid var(--border-red); border-radius: 20px; max-width: 400px; width: 100%; padding: 36px; text-align: center; color: #fff; }
+        /* INLOGSCHERM MET DE SFEERVOLLE 3 TRUCKS ACHTERGROND */
+        #login-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(8, 2, 2, 0.82), rgba(8, 2, 2, 0.92)), 
+                        url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png');
+            background-size: cover; background-position: center;
+            z-index: 2000; justify-content: center; align-items: center; padding: 15px;
+        }
+        .login-box {
+            background: rgba(18, 4, 4, 0.92); border: 1px solid var(--border-red); border-radius: 20px;
+            max-width: 400px; width: 100%; padding: 36px; text-align: center; color: #fff; backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
 
         .staff-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 15px; }
         .staff-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 12px; padding: 16px; }
@@ -426,7 +437,7 @@
         </div>
     </div>
 
-    <!-- INLOGSCHERM -->
+    <!-- INLOGSCHERM MET DE 3 TRUCKS ACHTERGROND -->
     <div id="login-modal">
         <div class="login-box">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;">
