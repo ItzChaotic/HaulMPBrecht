@@ -39,17 +39,16 @@ const EOTW_FILE = path.join(__dirname, 'eotw.json');
 
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
-    { username: "MJGamerNL", password: "Brecht123456", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ItzChaoticChaos", role: "Onder Directeur" },
+    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "Sylveon2002!08", role: "Leidinggevende" }
+    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
 let accountsDatabase = defaultAccounts;
-
 if (fs.existsSync(ACCOUNTS_FILE)) {
     try { 
         const loaded = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
@@ -64,13 +63,9 @@ if (fs.existsSync(ACCOUNTS_FILE)) {
     fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(defaultAccounts, null, 2));
 }
 
-function saveAccounts() {
-    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2));
-}
+function saveAccounts() { fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2)); }
 
-let galleryPhotos = [
-    { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" }
-];
+let galleryPhotos = [{ id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" }];
 if (fs.existsSync(GALLERY_FILE)) { try { galleryPhotos = JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8')); } catch (e) {} }
 function saveGallery() { fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryPhotos, null, 2)); }
 
@@ -104,8 +99,7 @@ let allJobsHistory = [];
 function cleanText(text) { return text ? text.replace(/[\*\_\`]/g, '').trim() : ''; }
 function parseCurrency(str) {
     if (!str) return 0;
-    const clean = str.replace(/[^0-9\,\.]/g, '').replace(',', '.');
-    return parseFloat(clean) || 0;
+    return parseFloat(str.replace(/[^0-9\,\.]/g, '').replace(',', '.')) || 0;
 }
 
 function getRoleColor(role) {
@@ -140,13 +134,10 @@ function getISOWeekKey(timestamp) {
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     const yearStart = new Date(d.getFullYear(), 0, 1);
-    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-    return `Wk ${weekNo}`;
+    return `Wk ${Math.ceil((((d - yearStart) / 86400000) + 1) / 7)}`;
 }
 
-const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
-});
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 client.on('clientReady', () => {
     console.log(`Discord Bot ingelogd als ${client.user.tag}`);
@@ -160,112 +151,59 @@ client.on('messageCreate', (message) => {
 
 function parseAndAddApplication(message) {
     const applicantName = message.author ? message.author.username : "Sollicitant";
-    let contentText = message.content || "Nieuwe sollicitatie ingediend via Discord.";
-    if (message.embeds && message.embeds.length > 0) {
-        contentText = message.embeds[0].description || message.embeds[0].title || contentText;
-    }
+    let contentText = message.content || "Nieuwe sollicitatie.";
+    if (message.embeds?.[0]) contentText = message.embeds[0].description || message.embeds[0].title || contentText;
 
-    const appObj = {
-        id: "app-" + message.id,
-        applicant: applicantName,
-        content: contentText,
-        status: "open",
-        date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL'),
-        link: "https://vtc.haulmp.com/Brecht#applications"
-    };
-
-    if (!applicationsList.some(a => a.id === appObj.id)) {
-        applicationsList.unshift(appObj);
-        saveApplications();
-    }
+    const appObj = { id: "app-" + message.id, applicant: applicantName, content: contentText, status: "open", date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL'), link: "https://vtc.haulmp.com/Brecht#applications" };
+    if (!applicationsList.some(a => a.id === appObj.id)) { applicationsList.unshift(appObj); saveApplications(); }
 }
 
 function parseAndAddJob(message) {
     let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km', paidAmount = 0;
     let timestamp = message.createdTimestamp || Date.now();
 
-    if (message.embeds && message.embeds.length > 0) {
+    if (message.embeds?.[0]) {
         const embed = message.embeds[0];
-        const title = embed.title || '';
-        const description = embed.description || '';
-        
-        if (title.includes('→') || title.includes('->')) {
-            const parts = title.split(title.includes('→') ? '→' : '->');
-            from = cleanText(parts[0]); to = cleanText(parts[1]);
-        } else if (description.includes('→') || description.includes('->')) {
-            const parts = description.split(description.includes('→') ? '→' : '->');
-            from = cleanText(parts[0]); to = cleanText(parts[1]);
-        }
-
+        const title = embed.title || ''; const desc = embed.description || '';
+        if (title.includes('→')) { const p = title.split('→'); from = cleanText(p[0]); to = cleanText(p[1]); }
         embed.fields?.forEach(f => {
-            const fieldName = (f.name || '').toLowerCase();
-            if (fieldName.includes('driver')) driver = cleanText(f.value);
-            if (fieldName.includes('distance')) distanceStr = cleanText(f.value);
-            if (fieldName.includes('paid')) paidAmount = parseCurrency(f.value);
+            if (f.name.toLowerCase().includes('driver')) driver = cleanText(f.value);
+            if (f.name.toLowerCase().includes('distance')) distanceStr = cleanText(f.value);
+            if (f.name.toLowerCase().includes('paid')) paidAmount = parseCurrency(f.value);
         });
     }
-
     if (!from || !to) return;
     if (!driver) driver = cleanText(message.author.username);
-
     const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
     if (paidAmount === 0 && kmAmount > 0) paidAmount = kmAmount * 35;
 
-    const jobObj = {
-        id: message.id || "job-" + Date.now() + "-" + Math.random(),
-        from, to, driver, cargo,
-        distance: `${kmAmount.toLocaleString('nl-NL')} km`,
-        kmAmount, paidAmount, timestamp,
-        weekKey: getISOWeekKey(timestamp),
-        dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL')
-    };
-
-    if (!allJobsHistory.some(j => j.id === jobObj.id)) {
-        allJobsHistory.push(jobObj);
-    }
+    const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, weekKey: getISOWeekKey(timestamp), dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
+    if (!allJobsHistory.some(j => j.id === jobObj.id)) allJobsHistory.push(jobObj);
 }
 
 async function fetchAllHistoricalDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
-            let lastId = undefined; let totalFetched = 0; allJobsHistory = [];
-            while (totalFetched < 500) {
-                const options = { limit: 100 }; if (lastId) options.before = lastId;
-                const messages = await channel.messages.fetch(options);
-                if (messages.size === 0) break;
-                messages.forEach(msg => parseAndAddJob(msg));
-                lastId = messages.last().id;
-                totalFetched += messages.size;
-                if (messages.size < 100) break;
+            let lastId = undefined; let fetched = 0; allJobsHistory = [];
+            while (fetched < 200) {
+                const opt = { limit: 100 }; if (lastId) opt.before = lastId;
+                const msgs = await channel.messages.fetch(opt);
+                if (msgs.size === 0) break;
+                msgs.forEach(msg => parseAndAddJob(msg));
+                lastId = msgs.last().id; fetched += msgs.size;
+                if (msgs.size < 100) break;
             }
             allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
         }
-
-        const appChannel = await client.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
-        if (appChannel) {
-            const appMessages = await appChannel.messages.fetch({ limit: 30 });
-            appMessages.forEach(msg => parseAndAddApplication(msg));
-        }
-    } catch (err) {}
+    } catch (e) {}
 }
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    const account = accountsDatabase.find(
-        acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
-    );
-
-    if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
-
-    res.json({
-        success: true,
-        username: account.username,
-        role: account.role,
-        color: getRoleColor(account.role),
-        canManageBadges: canManageBadges(account.role),
-        canManageStaff: canManageStaff(account.role)
-    });
+    const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
+    if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
+    res.json({ success: true, username: account.username, role: account.role, color: getRoleColor(account.role), canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) });
 });
 
 app.get('/api/haulmp', (req, res) => {
@@ -275,17 +213,11 @@ app.get('/api/haulmp', (req, res) => {
 
     const formattedDrivers = accountsDatabase.map(m => {
         const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
-        const userKm = userJobs.reduce((acc, curr) => acc + curr.kmAmount, 0);
-        const userEarnings = userJobs.reduce((acc, curr) => acc + curr.paidAmount, 0);
-        
         return {
-            username: m.username,
-            role: m.role,
-            color: getRoleColor(m.role),
-            isDev: !!m.isDev,
+            username: m.username, role: m.role, color: getRoleColor(m.role), isDev: !!m.isDev,
             deliveries: userJobs.length,
-            distance: `${userKm.toLocaleString('nl-NL')} km`,
-            earnings: `€ ${userEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
+            distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
+            earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
             userJobs: userJobs.slice(0, 15),
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
@@ -293,13 +225,11 @@ app.get('/api/haulmp', (req, res) => {
 
     const weeklyChartData = {};
     allJobsHistory.forEach(j => {
-        const w = j.weekKey || 'Week';
+        const w = j.weekKey || 'Wk 1';
         if (!weeklyChartData[w]) weeklyChartData[w] = { week: w, company: 0, drivers: {} };
         weeklyChartData[w].company += j.paidAmount;
-        
-        const driverClean = j.driver.toLowerCase().replace(/[^a-z0-9]/g, '');
-        if (!weeklyChartData[w].drivers[driverClean]) weeklyChartData[w].drivers[driverClean] = 0;
-        weeklyChartData[w].drivers[driverClean] += j.paidAmount;
+        const dc = j.driver.toLowerCase().replace(/[^a-z0-9]/g, '');
+        weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
     });
 
     res.json({
@@ -309,146 +239,77 @@ app.get('/api/haulmp', (req, res) => {
         drivers: formattedDrivers.filter(d => !d.isDev).length.toString(),
         drivers_list: formattedDrivers,
         recent_jobs: allJobsHistory.slice(0, 10),
-        absence: absenceList,
-        gallery: galleryPhotos,
-        badges: customBadges,
-        announcements: announcementsList,
-        applications: applicationsList,
-        infoList,
-        convoysList,
-        employeeOfTheWeek,
+        absence: absenceList, gallery: galleryPhotos, badges: customBadges,
+        announcements: announcementsList, applications: applicationsList,
+        infoList, convoysList, employeeOfTheWeek,
         weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
     });
 });
 
 app.post('/api/applications/complete', (req, res) => {
-    const { appId } = req.body;
-    const item = applicationsList.find(a => a.id === appId);
-    if (item) {
-        item.status = "completed";
-        saveApplications();
-        return res.json({ success: true, message: "Sollicitatie afgerond!" });
-    }
-    res.status(404).json({ success: false, message: "Sollicitatie niet gevonden." });
+    const item = applicationsList.find(a => a.id === req.body.appId);
+    if (item) { item.status = "completed"; saveApplications(); return res.json({ success: true }); }
+    res.status(404).json({ success: false });
 });
 
 app.post('/api/badges', (req, res) => {
-    const { title, targetUser, username } = req.body;
-    if (!title || !targetUser) return res.status(400).json({ success: false, message: "Vul alle velden in." });
-    customBadges.push({
-        id: "badge-" + Date.now(),
-        title: title.trim(),
-        targetUser: targetUser.trim(),
-        awardedBy: username,
-        date: new Date().toLocaleDateString('nl-NL')
-    });
+    const { title, targetUser } = req.body;
+    if (!title || !targetUser) return res.status(400).json({ success: false });
+    customBadges.push({ id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') });
     saveBadges();
-    res.json({ success: true, message: "Badge toegekend!" });
+    res.json({ success: true });
 });
 
 app.post('/api/badges/delete', (req, res) => {
-    const { badgeId } = req.body;
-    customBadges = customBadges.filter(b => b.id !== badgeId);
+    customBadges = customBadges.filter(b => b.id !== req.body.badgeId);
     saveBadges();
-    res.json({ success: true, message: "Badge ingetrokken!" });
+    res.json({ success: true });
 });
 
 app.post('/api/info', (req, res) => {
-    const { title, content, link, username } = req.body;
-    infoList.unshift({
-        id: "info-" + Date.now(), title, content, link, author: username, date: new Date().toLocaleDateString('nl-NL')
-    });
-    saveInfo();
-    res.json({ success: true, message: "Informatie gepubliceerd!" });
-});
-
-app.delete('/api/info/:id', (req, res) => {
-    infoList = infoList.filter(i => i.id !== req.params.id);
-    saveInfo();
-    res.json({ success: true, message: "Informatie verwijderd." });
+    infoList.unshift({ id: "info-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') });
+    saveInfo(); res.json({ success: true });
 });
 
 app.post('/api/convoys', (req, res) => {
-    const { title, date, time, server, route, details, username } = req.body;
-    convoysList.unshift({
-        id: "conv-" + Date.now(), title, date, time, server, route, details, author: username
-    });
-    saveConvoys();
-    res.json({ success: true, message: "Konvooi ingepland!" });
-});
-
-app.delete('/api/convoys/:id', (req, res) => {
-    convoysList = convoysList.filter(c => c.id !== req.params.id);
-    saveConvoys();
-    res.json({ success: true, message: "Konvooi verwijderd." });
+    convoysList.unshift({ id: "conv-" + Date.now(), ...req.body });
+    saveConvoys(); res.json({ success: true });
 });
 
 app.post('/api/eotw', (req, res) => {
-    const { targetUser, reason, username } = req.body;
-    employeeOfTheWeek = { username: targetUser, reason, setBy: username };
-    saveEotw();
-    res.json({ success: true, message: "Chauffeur van de week ingesteld!" });
+    employeeOfTheWeek = { username: req.body.targetUser, reason: req.body.reason, setBy: req.body.username };
+    saveEotw(); res.json({ success: true });
 });
 
 app.post('/api/staff/update-password', (req, res) => {
-    const { targetUser, newPassword, adminUser } = req.body;
-    const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
-    if (!adminAcc || !canManageStaff(adminAcc.role)) return res.status(403).json({ success: false, message: 'Geen rechten.' });
-
-    const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
-    if (targetAcc) {
-        targetAcc.password = newPassword.trim();
-        saveAccounts();
-        return res.json({ success: true, message: `Wachtwoord gewijzigd!` });
-    }
-    res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
+    const target = accountsDatabase.find(d => d.username.toLowerCase() === req.body.targetUser.toLowerCase());
+    if (target) { target.password = req.body.newPassword.trim(); saveAccounts(); return res.json({ success: true }); }
+    res.status(404).json({ success: false });
 });
 
 app.post('/api/staff/add', (req, res) => {
-    const { username, role } = req.body;
-    if (accountsDatabase.some(d => d.username.toLowerCase() === username.toLowerCase().trim())) {
-        return res.status(400).json({ success: false, message: 'Bestaat al.' });
-    }
-    const generatedPassword = "Brecht" + Math.floor(1000 + Math.random() * 9000);
-    accountsDatabase.push({ username: username.trim(), password: generatedPassword, role: role.trim() });
-    saveAccounts();
-    res.json({ success: true, message: `Toegevoegd! Wachtwoord: ${generatedPassword}` });
+    if (accountsDatabase.some(d => d.username.toLowerCase() === req.body.username.toLowerCase().trim())) return res.status(400).json({ success: false });
+    const pw = "Brecht" + Math.floor(1000 + Math.random() * 9000);
+    accountsDatabase.push({ username: req.body.username.trim(), password: pw, role: req.body.role.trim() });
+    saveAccounts(); res.json({ success: true, message: pw });
 });
 
 app.post('/api/staff/update-role', (req, res) => {
-    const { targetUser, newRole } = req.body;
-    const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === targetUser.toLowerCase());
-    if (targetAcc) { targetAcc.role = newRole.trim(); saveAccounts(); return res.json({ success: true, message: 'Rol gewijzigd!' }); }
-    res.status(404).json({ success: false, message: 'Niet gevonden.' });
+    const target = accountsDatabase.find(d => d.username.toLowerCase() === req.body.targetUser.toLowerCase());
+    if (target) { target.role = req.body.newRole.trim(); saveAccounts(); return res.json({ success: true }); }
+    res.status(404).json({ success: false });
 });
 
 app.delete('/api/staff/:targetUser', (req, res) => {
     accountsDatabase = accountsDatabase.filter(d => d.username.toLowerCase() !== req.params.targetUser.toLowerCase());
-    saveAccounts();
-    res.json({ success: true, message: 'Ontslagen.' });
+    saveAccounts(); res.json({ success: true });
 });
 
 app.post('/api/gallery', upload.single('photo'), (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand geselecteerd.' });
-    const b64 = Buffer.from(req.file.buffer).toString('base64');
-    const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
-    
-    galleryPhotos.unshift({ 
-        id: "photo-" + Date.now(), 
-        url: dataUrl, 
-        uploadedBy: req.body.username || "Chauffeur", 
-        date: new Date().toLocaleDateString('nl-NL') 
-    });
-    saveGallery();
-    res.json({ success: true, message: 'Foto succesvol geüpload!' });
-});
-
-app.delete('/api/gallery/:id', (req, res) => {
-    galleryPhotos = galleryPhotos.filter(p => p.id !== req.params.id);
-    saveGallery();
-    res.json({ success: true, message: 'Verwijderd.' });
+    if (!req.file) return res.status(400).json({ success: false });
+    galleryPhotos.unshift({ id: "photo-" + Date.now(), url: `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') });
+    saveGallery(); res.json({ success: true });
 });
 
 if (DISCORD_BOT_TOKEN) client.login(DISCORD_BOT_TOKEN);
-
 app.listen(PORT, () => console.log(`Server actief op poort ${PORT}`));
