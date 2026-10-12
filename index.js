@@ -304,5 +304,6 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     res.json({ success: true });
 });
 
+
 if (DISCORD_BOT_TOKEN) clientBot.login(DISCORD_BOT_TOKEN);
 app.listen(PORT, () => console.log(`Server actief op poort ${PORT} met MongoDB Atlas`));
