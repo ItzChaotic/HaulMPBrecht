@@ -7,12 +7,13 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }
+    limits: { fileSize: 15 * 1024 * 1024 }
 });
 
 app.use((req, res, next) => {
@@ -31,89 +32,76 @@ const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 const GALLERY_FILE = path.join(__dirname, 'gallery.json');
 const ANNOUNCEMENTS_FILE = path.join(__dirname, 'announcements.json');
 const APPLICATIONS_FILE = path.join(__dirname, 'applications.json');
+const INFO_FILE = path.join(__dirname, 'info.json');
+const CONVOYS_FILE = path.join(__dirname, 'convoys.json');
+const BADGES_FILE = path.join(__dirname, 'badges.json');
+const EOTW_FILE = path.join(__dirname, 'eotw.json');
 
 let defaultAccounts = [
-    { username: "GB", password: "DEVACC123", role: "Directeur", isDev: true },
-    { username: "MJGamerNL", password: "Brecht123456", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ItzChaoticChaos", role: "Onder Directeur" },
+    { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
+    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "Sylveon2002!08", role: "Leidinggevende" }
+    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
 let accountsDatabase = defaultAccounts;
 
-// Laad accounts uit accounts.json met absolute prioriteit
 if (fs.existsSync(ACCOUNTS_FILE)) {
     try { 
         const loaded = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
         if (Array.isArray(loaded) && loaded.length > 0) {
             accountsDatabase = loaded;
-            // Zorg altijd dat het dev account aanwezig blijft
-            if (!accountsDatabase.some(a => a.username === "GB")) {
-                accountsDatabase.unshift({ username: "GB", password: "DEVACC123", role: "Directeur", isDev: true });
+            if (!accountsDatabase.some(a => a.username === "DEV ACCOUNT")) {
+                accountsDatabase.unshift({ username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true });
             }
         }
-    } catch (e) {
-        console.log("Fout bij inlezen accounts.json, val terug op standaard");
-    }
+    } catch (e) {}
 } else {
     fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(defaultAccounts, null, 2));
 }
 
 function saveAccounts() {
-    try {
-        fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2));
-    } catch (e) {
-        console.error("Fout bij opslaan accounts.json:", e);
-    }
+    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accountsDatabase, null, 2));
 }
 
 let galleryPhotos = [
-    { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" },
-    { id: "photo-2", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png", uploadedBy: "ItzChaotic_", date: "10-10-2026" }
+    { id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" }
 ];
+if (fs.existsSync(GALLERY_FILE)) { try { galleryPhotos = JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8')); } catch (e) {} }
+function saveGallery() { fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryPhotos, null, 2)); }
 
-if (fs.existsSync(GALLERY_FILE)) {
-    try { galleryPhotos = JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8')); } catch (e) {}
-}
-
-function saveGallery() {
-    fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryPhotos, null, 2));
-}
-
-let announcementsList = [
-    { id: "ann-1", title: "Welkom op het vernieuwde personeelsportaal!", content: "Vanaf heden zijn alle functies zoals inkomsten, ritten-statistieken en foto's hier te vinden.", author: "Directie", date: "11-10-2026" }
-];
-
-if (fs.existsSync(ANNOUNCEMENTS_FILE)) {
-    try { announcementsList = JSON.parse(fs.readFileSync(ANNOUNCEMENTS_FILE, 'utf8')); } catch (e) {}
-}
-
-function saveAnnouncements() {
-    fs.writeFileSync(ANNOUNCEMENTS_FILE, JSON.stringify(announcementsList, null, 2));
-}
+let announcementsList = [];
+if (fs.existsSync(ANNOUNCEMENTS_FILE)) { try { announcementsList = JSON.parse(fs.readFileSync(ANNOUNCEMENTS_FILE, 'utf8')); } catch (e) {} }
+function saveAnnouncements() { fs.writeFileSync(ANNOUNCEMENTS_FILE, JSON.stringify(announcementsList, null, 2)); }
 
 let applicationsList = [];
-if (fs.existsSync(APPLICATIONS_FILE)) {
-    try { applicationsList = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8')); } catch (e) {}
-}
+if (fs.existsSync(APPLICATIONS_FILE)) { try { applicationsList = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8')); } catch (e) {} }
+function saveApplications() { fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applicationsList, null, 2)); }
 
-function saveApplications() {
-    fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applicationsList, null, 2));
-}
+let infoList = [];
+if (fs.existsSync(INFO_FILE)) { try { infoList = JSON.parse(fs.readFileSync(INFO_FILE, 'utf8')); } catch (e) {} }
+function saveInfo() { fs.writeFileSync(INFO_FILE, JSON.stringify(infoList, null, 2)); }
+
+let convoysList = [];
+if (fs.existsSync(CONVOYS_FILE)) { try { convoysList = JSON.parse(fs.readFileSync(CONVOYS_FILE, 'utf8')); } catch (e) {} }
+function saveConvoys() { fs.writeFileSync(CONVOYS_FILE, JSON.stringify(convoysList, null, 2)); }
+
+let customBadges = [];
+if (fs.existsSync(BADGES_FILE)) { try { customBadges = JSON.parse(fs.readFileSync(BADGES_FILE, 'utf8')); } catch (e) {} }
+function saveBadges() { fs.writeFileSync(BADGES_FILE, JSON.stringify(customBadges, null, 2)); }
+
+let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!", setBy: "Directie" };
+if (fs.existsSync(EOTW_FILE)) { try { employeeOfTheWeek = JSON.parse(fs.readFileSync(EOTW_FILE, 'utf8')); } catch (e) {} }
+function saveEotw() { fs.writeFileSync(EOTW_FILE, JSON.stringify(employeeOfTheWeek, null, 2)); }
 
 let absenceList = [];
-let customBadges = []; 
 let allJobsHistory = [];
 
-function cleanText(text) {
-    if (!text) return '';
-    return text.replace(/[\*\_\`]/g, '').trim();
-}
-
+function cleanText(text) { return text ? text.replace(/[\*\_\`]/g, '').trim() : ''; }
 function parseCurrency(str) {
     if (!str) return 0;
     const clean = str.replace(/[^0-9\,\.]/g, '').replace(',', '.');
@@ -131,14 +119,12 @@ function getRoleColor(role) {
 }
 
 function canManageBadges(role) {
-    if (!role) return false;
-    const r = role.toLowerCase();
+    const r = (role || '').toLowerCase();
     return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
 }
 
 function canManageStaff(role) {
-    if (!role) return false;
-    const r = role.toLowerCase();
+    const r = (role || '').toLowerCase();
     return r.includes('directeur') || r.includes('onder directeur');
 }
 
@@ -159,11 +145,7 @@ function getISOWeekKey(timestamp) {
 }
 
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
 client.on('clientReady', () => {
@@ -172,11 +154,8 @@ client.on('clientReady', () => {
 });
 
 client.on('messageCreate', (message) => {
-    if (message.channelId === DISCORD_CHANNEL_ID) {
-        parseAndAddJob(message);
-    } else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) {
-        parseAndAddApplication(message);
-    }
+    if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
+    else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
 
 function parseAndAddApplication(message) {
@@ -190,6 +169,7 @@ function parseAndAddApplication(message) {
         id: "app-" + message.id,
         applicant: applicantName,
         content: contentText,
+        status: "open",
         date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL'),
         link: "https://vtc.haulmp.com/Brecht#applications"
     };
@@ -211,19 +191,10 @@ function parseAndAddJob(message) {
         
         if (title.includes('→') || title.includes('->')) {
             const parts = title.split(title.includes('→') ? '→' : '->');
-            from = cleanText(parts[0]);
-            to = cleanText(parts[1]);
+            from = cleanText(parts[0]); to = cleanText(parts[1]);
         } else if (description.includes('→') || description.includes('->')) {
             const parts = description.split(description.includes('→') ? '→' : '->');
-            from = cleanText(parts[0]);
-            to = cleanText(parts[1]);
-        }
-
-        if (description) {
-            const descLines = description.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if (descLines.length > 0 && !descLines[0].toLowerCase().includes('delivery completed')) {
-                cargo = cleanText(descLines[0]);
-            }
+            from = cleanText(parts[0]); to = cleanText(parts[1]);
         }
 
         embed.fields?.forEach(f => {
@@ -258,12 +229,9 @@ async function fetchAllHistoricalDiscordLogs() {
     try {
         const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
-            let lastId = undefined;
-            let totalFetched = 0;
-            allJobsHistory = [];
+            let lastId = undefined; let totalFetched = 0; allJobsHistory = [];
             while (totalFetched < 500) {
-                const options = { limit: 100 };
-                if (lastId) options.before = lastId;
+                const options = { limit: 100 }; if (lastId) options.before = lastId;
                 const messages = await channel.messages.fetch(options);
                 if (messages.size === 0) break;
                 messages.forEach(msg => parseAndAddJob(msg));
@@ -279,9 +247,7 @@ async function fetchAllHistoricalDiscordLogs() {
             const appMessages = await appChannel.messages.fetch({ limit: 30 });
             appMessages.forEach(msg => parseAndAddApplication(msg));
         }
-    } catch (err) {
-        console.error('Fout bij ophalen Discord historie:', err.message);
-    }
+    } catch (err) {}
 }
 
 app.post('/api/login', (req, res) => {
@@ -290,9 +256,7 @@ app.post('/api/login', (req, res) => {
         acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password
     );
 
-    if (!account) {
-        return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
-    }
+    if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gebruikersnaam of wachtwoord!' });
 
     res.json({
         success: true,
@@ -342,7 +306,7 @@ app.get('/api/haulmp', (req, res) => {
         deliveries: totalDeliveries.toString(),
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
         companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
-        drivers: formattedDrivers.length.toString(),
+        drivers: formattedDrivers.filter(d => !d.isDev).length.toString(),
         drivers_list: formattedDrivers,
         recent_jobs: allJobsHistory.slice(0, 10),
         absence: absenceList,
@@ -350,76 +314,94 @@ app.get('/api/haulmp', (req, res) => {
         badges: customBadges,
         announcements: announcementsList,
         applications: applicationsList,
+        infoList,
+        convoysList,
+        employeeOfTheWeek,
         weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
     });
 });
 
-app.post('/api/announcements', (req, res) => {
-    const { title, content, username } = req.body;
-    const account = accountsDatabase.find(d => d.username.toLowerCase() === (username || '').toLowerCase());
-
-    if (!account || !canManageStaff(account.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten.' });
+app.post('/api/applications/complete', (req, res) => {
+    const { appId } = req.body;
+    const item = applicationsList.find(a => a.id === appId);
+    if (item) {
+        item.status = "completed";
+        saveApplications();
+        return res.json({ success: true, message: "Sollicitatie afgerond!" });
     }
-
-    if (!title || !content) return res.status(400).json({ success: false, message: 'Vul titel en inhoud in.' });
-
-    const newAnn = {
-        id: "ann-" + Date.now(),
-        title: title.trim(),
-        content: content.trim(),
-        author: username,
-        date: new Date().toLocaleDateString('nl-NL')
-    };
-
-    announcementsList.unshift(newAnn);
-    saveAnnouncements();
-    res.json({ success: true, message: 'Aankondiging geplaatst!' });
+    res.status(404).json({ success: false, message: "Sollicitatie niet gevonden." });
 });
 
-app.delete('/api/announcements/:id', (req, res) => {
-    announcementsList = announcementsList.filter(a => a.id !== req.params.id);
-    saveAnnouncements();
-    res.json({ success: true, message: 'Aankondiging verwijderd.' });
+app.post('/api/badges', (req, res) => {
+    const { title, targetUser, username } = req.body;
+    if (!title || !targetUser) return res.status(400).json({ success: false, message: "Vul alle velden in." });
+    customBadges.push({
+        id: "badge-" + Date.now(),
+        title: title.trim(),
+        targetUser: targetUser.trim(),
+        awardedBy: username,
+        date: new Date().toLocaleDateString('nl-NL')
+    });
+    saveBadges();
+    res.json({ success: true, message: "Badge toegekend!" });
+});
+
+app.post('/api/badges/delete', (req, res) => {
+    const { badgeId } = req.body;
+    customBadges = customBadges.filter(b => b.id !== badgeId);
+    saveBadges();
+    res.json({ success: true, message: "Badge ingetrokken!" });
+});
+
+app.post('/api/info', (req, res) => {
+    const { title, content, link, username } = req.body;
+    infoList.unshift({
+        id: "info-" + Date.now(), title, content, link, author: username, date: new Date().toLocaleDateString('nl-NL')
+    });
+    saveInfo();
+    res.json({ success: true, message: "Informatie gepubliceerd!" });
+});
+
+app.delete('/api/info/:id', (req, res) => {
+    infoList = infoList.filter(i => i.id !== req.params.id);
+    saveInfo();
+    res.json({ success: true, message: "Informatie verwijderd." });
+});
+
+app.post('/api/convoys', (req, res) => {
+    const { title, date, time, server, route, details, username } = req.body;
+    convoysList.unshift({
+        id: "conv-" + Date.now(), title, date, time, server, route, details, author: username
+    });
+    saveConvoys();
+    res.json({ success: true, message: "Konvooi ingepland!" });
+});
+
+app.delete('/api/convoys/:id', (req, res) => {
+    convoysList = convoysList.filter(c => c.id !== req.params.id);
+    saveConvoys();
+    res.json({ success: true, message: "Konvooi verwijderd." });
+});
+
+app.post('/api/eotw', (req, res) => {
+    const { targetUser, reason, username } = req.body;
+    employeeOfTheWeek = { username: targetUser, reason, setBy: username };
+    saveEotw();
+    res.json({ success: true, message: "Chauffeur van de week ingesteld!" });
 });
 
 app.post('/api/staff/update-password', (req, res) => {
     const { targetUser, newPassword, adminUser } = req.body;
     const adminAcc = accountsDatabase.find(d => d.username.toLowerCase() === (adminUser || '').toLowerCase());
-
-    if (!adminAcc || !canManageStaff(adminAcc.role)) {
-        return res.status(403).json({ success: false, message: 'Geen rechten om wachtwoorden aan te passen.' });
-    }
+    if (!adminAcc || !canManageStaff(adminAcc.role)) return res.status(403).json({ success: false, message: 'Geen rechten.' });
 
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === (targetUser || '').toLowerCase());
     if (targetAcc) {
         targetAcc.password = newPassword.trim();
-        saveAccounts(); // Slaat direct persistent op in accounts.json!
-        return res.json({ success: true, message: `Wachtwoord voor ${targetAcc.username} succesvol gewijzigd en opgeslagen!` });
+        saveAccounts();
+        return res.json({ success: true, message: `Wachtwoord gewijzigd!` });
     }
     res.status(404).json({ success: false, message: 'Gebruiker niet gevonden.' });
-});
-
-app.post('/api/absence', (req, res) => {
-    const { username, fromDate, toDate, reason } = req.body;
-    absenceList.unshift({
-        id: "abs-" + Date.now(),
-        username, fromDate, toDate,
-        reason: reason || "Vakantie", status: "In behandeling",
-        dateSubmitted: new Date().toLocaleDateString('nl-NL')
-    });
-    res.json({ success: true, message: 'Afwezigheid ingediend!' });
-});
-
-app.post('/api/absence/status', (req, res) => {
-    const item = absenceList.find(a => a.id === req.body.absenceId);
-    if (item) { item.status = req.body.newStatus; return res.json({ success: true, message: 'Status bijgewerkt.' }); }
-    res.status(404).json({ success: false, message: 'Niet gevonden.' });
-});
-
-app.delete('/api/absence/:id', (req, res) => {
-    absenceList = absenceList.filter(a => a.id !== req.params.id);
-    res.json({ success: true, message: 'Verwijderd.' });
 });
 
 app.post('/api/staff/add', (req, res) => {
@@ -427,7 +409,6 @@ app.post('/api/staff/add', (req, res) => {
     if (accountsDatabase.some(d => d.username.toLowerCase() === username.toLowerCase().trim())) {
         return res.status(400).json({ success: false, message: 'Bestaat al.' });
     }
-
     const generatedPassword = "Brecht" + Math.floor(1000 + Math.random() * 9000);
     accountsDatabase.push({ username: username.trim(), password: generatedPassword, role: role.trim() });
     saveAccounts();
@@ -437,11 +418,7 @@ app.post('/api/staff/add', (req, res) => {
 app.post('/api/staff/update-role', (req, res) => {
     const { targetUser, newRole } = req.body;
     const targetAcc = accountsDatabase.find(d => d.username.toLowerCase() === targetUser.toLowerCase());
-    if (targetAcc) { 
-        targetAcc.role = newRole.trim(); 
-        saveAccounts(); 
-        return res.json({ success: true, message: 'Rol gewijzigd!' }); 
-    }
+    if (targetAcc) { targetAcc.role = newRole.trim(); saveAccounts(); return res.json({ success: true, message: 'Rol gewijzigd!' }); }
     res.status(404).json({ success: false, message: 'Niet gevonden.' });
 });
 
@@ -463,23 +440,13 @@ app.post('/api/gallery', upload.single('photo'), (req, res) => {
         date: new Date().toLocaleDateString('nl-NL') 
     });
     saveGallery();
-    res.json({ success: true, message: 'Foto succesvol geüpload en opgeslagen!' });
+    res.json({ success: true, message: 'Foto succesvol geüpload!' });
 });
 
 app.delete('/api/gallery/:id', (req, res) => {
     galleryPhotos = galleryPhotos.filter(p => p.id !== req.params.id);
     saveGallery();
     res.json({ success: true, message: 'Verwijderd.' });
-});
-
-app.post('/api/badges', (req, res) => {
-    customBadges.push({ id: "badge-" + Date.now(), title: req.body.title.trim(), targetUser: req.body.targetUser.trim(), awardedBy: req.body.username, date: new Date().toLocaleDateString('nl-NL') });
-    res.json({ success: true, message: 'Badge toegekend!' });
-});
-
-app.post('/api/badges/delete', (req, res) => {
-    customBadges = customBadges.filter(b => b.id !== req.body.badgeId);
-    res.json({ success: true, message: 'Badge ingetrokken!' });
 });
 
 if (DISCORD_BOT_TOKEN) client.login(DISCORD_BOT_TOKEN);
