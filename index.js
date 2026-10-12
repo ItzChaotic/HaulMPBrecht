@@ -1,6 +1,6 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
 const multer = require('multer');
 
 const app = express();
@@ -26,12 +26,16 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 const DISCORD_APPLICATIONS_CHANNEL_ID = '1558075393729363968';
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
+const MONGO_URI = process.env.MONGO_URI;
 
 let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl;
 
 async function connectDB() {
     try {
+        if (!MONGO_URI) {
+            console.error("Let op: MONGO_URI ontbreekt in environment variables!");
+            return;
+        }
         const client = new MongoClient(MONGO_URI);
         await client.connect();
         db = client.db('brecht_transport');
@@ -123,6 +127,7 @@ clientBot.on('messageCreate', (message) => {
 });
 
 async function parseAndAddApplication(message) {
+    if (!applicationsColl) return;
     const applicantName = message.author ? message.author.username : "Sollicitant";
     let contentText = message.content || "Nieuwe sollicitatie.";
     if (message.embeds?.[0]) contentText = message.embeds[0].description || message.embeds[0].title || contentText;
@@ -180,6 +185,7 @@ async function fetchAllHistoricalDiscordLogs() {
 }
 
 app.post('/api/login', async (req, res) => {
+    if (!accountsColl) return res.status(500).json({ success: false, message: 'Database nog aan het verbinden...' });
     const { username, password } = req.body;
     const account = await accountsColl.findOne({ username: { $regex: new RegExp(`^${(username || '').trim()}$`, 'i') }, password });
     if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
@@ -191,14 +197,14 @@ app.get('/api/haulmp', async (req, res) => {
     const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
     const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
 
-    const accountsDatabase = await accountsColl.find({}).toArray();
-    const customBadges = await badgesColl.find({}).toArray();
-    const galleryPhotos = await galleryColl.find({}).sort({ _id: -1 }).toArray();
-    const announcementsList = await announcementsColl.find({}).sort({ _id: -1 }).toArray();
-    const applicationsList = await applicationsColl.find({}).toArray();
-    const infoList = await infoColl.find({}).sort({ _id: -1 }).toArray();
-    const convoysList = await convoysColl.find({}).sort({ _id: -1 }).toArray();
-    const employeeOfTheWeek = await eotwColl.findOne({}) || { username: "MJGamerNL", reason: "Uitstekende inzet!" };
+    const accountsDatabase = accountsColl ? await accountsColl.find({}).toArray() : [];
+    const customBadges = badgesColl ? await badgesColl.find({}).toArray() : [];
+    const galleryPhotos = galleryColl ? await galleryColl.find({}).sort({ _id: -1 }).toArray() : [];
+    const announcementsList = announcementsColl ? await announcementsColl.find({}).sort({ _id: -1 }).toArray() : [];
+    const applicationsList = applicationsColl ? await applicationsColl.find({}).toArray() : [];
+    const infoList = infoColl ? await infoColl.find({}).sort({ _id: -1 }).toArray() : [];
+    const convoysList = convoysColl ? await convoysColl.find({}).sort({ _id: -1 }).toArray() : [];
+    const employeeOfTheWeek = eotwColl ? (await eotwColl.findOne({}) || { username: "MJGamerNL", reason: "Uitstekende inzet!" }) : { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
     const formattedDrivers = accountsDatabase.map(m => {
         const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
@@ -236,50 +242,52 @@ app.get('/api/haulmp', async (req, res) => {
 });
 
 app.post('/api/applications/complete', async (req, res) => {
-    await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
+    if (applicationsColl) await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
     res.json({ success: true });
 });
 
 app.post('/api/badges', async (req, res) => {
     const { title, targetUser } = req.body;
-    if (!title || !targetUser) return res.status(400).json({ success: false });
+    if (!title || !targetUser || !badgesColl) return res.status(400).json({ success: false });
     await badgesColl.insertOne({ id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') });
     res.json({ success: true });
 });
 
 app.post('/api/badges/delete', async (req, res) => {
-    await badgesColl.deleteOne({ id: req.body.badgeId });
+    if (badgesColl) await badgesColl.deleteOne({ id: req.body.badgeId });
     res.json({ success: true });
 });
 
 app.post('/api/info', async (req, res) => {
-    await infoColl.insertOne({ id: "info-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') });
+    if (infoColl) await infoColl.insertOne({ id: "info-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') });
     res.json({ success: true });
 });
 
 app.post('/api/convoys', async (req, res) => {
-    await convoysColl.insertOne({ id: "conv-" + Date.now(), ...req.body });
+    if (convoysColl) await convoysColl.insertOne({ id: "conv-" + Date.now(), ...req.body });
     res.json({ success: true });
 });
 
 app.post('/api/eotw', async (req, res) => {
-    await eotwColl.deleteMany({});
-    await eotwColl.insertOne({ username: req.body.targetUser, reason: req.body.reason, setBy: req.body.username });
+    if (eotwColl) {
+        await eotwColl.deleteMany({});
+        await eotwColl.insertOne({ username: req.body.targetUser, reason: req.body.reason, setBy: req.body.username });
+    }
     res.json({ success: true });
 });
 
 app.post('/api/announcements', async (req, res) => {
-    await announcementsColl.insertOne({ id: "ann-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') });
+    if (announcementsColl) await announcementsColl.insertOne({ id: "ann-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') });
     res.json({ success: true });
 });
 
 app.post('/api/staff/update-password', async (req, res) => {
-    const result = await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
-    if (result.matchedCount > 0) return res.json({ success: true });
-    res.status(404).json({ success: false });
+    if (accountsColl) await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
+    res.json({ success: true });
 });
 
 app.post('/api/staff/add', async (req, res) => {
+    if (!accountsColl) return res.status(500).json({ success: false });
     const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
     if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
     const pw = "Brecht" + Math.floor(1000 + Math.random() * 9000);
@@ -288,22 +296,21 @@ app.post('/api/staff/add', async (req, res) => {
 });
 
 app.post('/api/staff/update-role', async (req, res) => {
-    await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
+    if (accountsColl) await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
     res.json({ success: true });
 });
 
 app.delete('/api/staff/:targetUser', async (req, res) => {
-    await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
+    if (accountsColl) await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
     res.json({ success: true });
 });
 
 app.post('/api/gallery', upload.single('photo'), async (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false });
+    if (!req.file || !galleryColl) return res.status(400).json({ success: false });
     const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
     await galleryColl.insertOne({ id: "photo-" + Date.now(), url: dataUrl, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') });
     res.json({ success: true });
 });
-
 
 if (DISCORD_BOT_TOKEN) clientBot.login(DISCORD_BOT_TOKEN);
 app.listen(PORT, () => console.log(`Server actief op poort ${PORT} met MongoDB Atlas`));
