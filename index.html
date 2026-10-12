@@ -15,11 +15,11 @@
         :root {
             --bg-base: #090202;
             --bg-sidebar: #100303;
-            --bg-card: rgba(28, 5, 5, 0.75);
+            --bg-card: rgba(28, 5, 5, 0.85);
             --primary: #800000;
             --primary-light: #cc0000;
             --accent-red: #ff3333;
-            --border-red: rgba(204, 0, 0, 0.22);
+            --border-red: rgba(204, 0, 0, 0.25);
             --text-main: #ffffff;
             --text-muted: #caa8a8;
             --glass-blur: blur(14px);
@@ -79,7 +79,7 @@
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 20px 0; }
         .stat-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 14px; padding: 20px; backdrop-filter: var(--glass-blur); }
-        .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
+        .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; margin-top: 4px; color: #fff; }
         .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
 
         .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 14px; padding: 20px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
@@ -95,8 +95,9 @@
         .role-green { background: rgba(56, 161, 105, 0.15); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.3); }
         .role-gray { background: rgba(160, 174, 192, 0.15); color: #cbd5e0; border: 1px solid rgba(160, 174, 192, 0.3); }
 
-        .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-red); }
-        .form-input { width: 100%; padding: 10px 14px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 8px; font-size: 0.9rem; }
+        .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-red); }
+        .form-input { width: 100%; padding: 10px 14px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 8px; font-size: 0.9rem; }
+        .form-input:focus { outline: none; border-color: var(--accent-red); }
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
@@ -172,7 +173,7 @@
             <li><a href="#team" data-i18n="team">Het Team</a></li>
             <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
             <li><a href="#livemap-sec">Live Map</a></li>
-            <li><a href="#activiteit" data-i18n="trips">Onderweg</a></li>
+            <li><a href="#activiteit">Onderweg</a></li>
             <li><button onclick="toggleLang()" class="btn-portal" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-globe"></i> <span id="lang-label">ENG</span></button></li>
             <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
             <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="apply">Solliciteer Direct</span></a></li>
@@ -272,7 +273,6 @@
 
                     <!-- TAB 1: DASHBOARD -->
                     <div id="p-tab-stats" class="portal-tab-content">
-                        <!-- CHAUFFEUR VAN DE WEEK (ALLEEN IN PORTAAL) -->
                         <div id="eotw-display-card" class="gallery-card" style="background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(204,0,0,0.1)); border: 1px solid var(--accent-red); display:none; text-align:center; padding:25px; margin-bottom:20px;">
                             <h3 style="color:#f6e05e; font-size:1.3rem; margin-bottom:8px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
                             <h2 id="eotw-username" style="font-size:1.8rem; margin-bottom:6px;">Chauffeur</h2>
@@ -400,7 +400,7 @@
                         <div id="staff-cards-container" class="staff-card-grid"></div>
                     </div>
 
-                    <!-- TAB: BADGES & EOTW (BOOMSTRUCTUUR / DROPDOWN) -->
+                    <!-- TAB: BADGES & EOTW -->
                     <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="margin-bottom:16px;">
                             <h3><i class="fa-solid fa-crown"></i> Chauffeur van de Week</h3>
@@ -445,7 +445,6 @@
 
     <script>
         let currentUser = null;
-        let globalPortalData = null;
         let chartInstance = null;
         let currentLang = 'NL';
         const MAIN_DOMAIN = "brechttransport.nl";
@@ -640,7 +639,6 @@
                 }
             });
 
-            // RENDER EIGEN BADGES OP DASHBOARD
             const myBadgesContainer = document.getElementById('my-badges-container');
             myBadgesContainer.innerHTML = '';
             const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
@@ -660,7 +658,6 @@
             document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
             renderChart(data.weeklyChartData, currentUser.username);
 
-            // RENDER BOOMSTRUCTUUR BADGES BEHEER
             const treeContainer = document.getElementById('badges-tree-container');
             const badgeSelect = document.getElementById('badge-user-select');
             const eotwSelect = document.getElementById('eotw-select-user');
@@ -671,7 +668,6 @@
                     eotwSelect.insertAdjacentHTML('beforeend', `<option value="${d.username}">${d.username}</option>`);
                 });
 
-                // Groepeer badges per badge-titel
                 const badgeGroups = {};
                 data.badges?.forEach(b => {
                     if (!badgeGroups[b.title]) badgeGroups[b.title] = [];
@@ -686,7 +682,7 @@
                                 <b style="color:var(--accent-red); font-size:1rem;">🏆 ${badgeTitle} (${badgeList.length})</b>
                                 <div>
                                     <button onclick="event.stopPropagation(); quickAddBadgeUser('${badgeTitle}')" class="btn-portal" style="padding:2px 8px; font-size:0.75rem;">+ Voeg toe</button>
-                                    <span id="icon-${badgeTitle}">▼</span>
+                                    <span>▼</span>
                                 </div>
                             </div>
                             <div id="list-${badgeTitle}" style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
@@ -696,6 +692,36 @@
                     `;
                     treeContainer.insertAdjacentHTML('beforeend', groupHtml);
                 }
+            }
+
+            if (currentUser.canManageStaff) {
+                const cardGrid = document.getElementById('staff-cards-container');
+                cardGrid.innerHTML = '';
+                data.drivers_list.filter(m => !m.isDev).forEach(m => {
+                    const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
+                    cardGrid.insertAdjacentHTML('beforeend', `
+                        <div class="staff-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <b>${m.username}</b>
+                                <span class="member-role role-${m.color}">${m.role}</span>
+                            </div>
+                            <label style="font-size:0.75rem; color:var(--text-muted);">Rol Wijzigen:</label>
+                            <select id="role-select-${m.username}" class="form-input" style="padding:6px; margin:4px 0 10px 0; background:rgba(0,0,0,0.5);" ${isSelf ? 'disabled' : ''}>
+                                <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
+                                <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
+                                <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
+                                <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
+                                <option value="Werknemer" ${m.role === 'Werknemer' ? 'selected' : ''}>Werknemer</option>
+                            </select>
+                            <label style="font-size:0.75rem; color:var(--text-muted);">Nieuw Wachtwoord:</label>
+                            <div style="display:flex; gap:6px;">
+                                <input type="password" id="pass-input-${m.username}" placeholder="Nieuw..." class="form-input" style="padding:6px; margin:0; font-size:0.8rem;">
+                                <button onclick="updateStaffPassword('${m.username}')" class="btn-portal" style="padding:6px 10px;">🔑</button>
+                            </div>
+                            ${!isSelf ? `<div style="display:flex; gap:6px; margin-top:12px;"><button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="flex:1; justify-content:center; font-size:0.8rem;">Opslaan</button><button onclick="fireStaffMember('${m.username}')" class="btn-red" style="font-size:0.8rem; padding:6px 10px;"><i class="fa-solid fa-trash"></i></button></div>` : ''}
+                        </div>
+                    `);
+                });
             }
         }
 
@@ -784,6 +810,41 @@
             const title = document.getElementById('ann-title').value;
             const content = document.getElementById('ann-content').value;
             await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
+            refreshPortalData();
+        }
+
+        async function updateStaffPassword(targetUser) {
+            const newPassword = document.getElementById(`pass-input-${targetUser}`).value;
+            await fetch('/api/staff/update-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, newPassword, adminUser: currentUser.username }) });
+            alert('Wachtwoord bijgewerkt!');
+        }
+
+        async function updateStaffRole(targetUser) {
+            const newRole = document.getElementById(`role-select-${targetUser}`).value;
+            await fetch('/api/staff/update-role', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, newRole, adminUser: currentUser.username }) });
+            refreshPortalData();
+        }
+
+        async function fireStaffMember(targetUser) {
+            if (!confirm(`Weet je zeker dat je ${targetUser} wilt ontslaan?`)) return;
+            await fetch(`/api/staff/${targetUser}?adminUser=${currentUser.username}`, { method: 'DELETE' });
+            refreshPortalData();
+        }
+
+        async function addNewStaff() {
+            const username = document.getElementById('new-staff-user').value;
+            const role = document.getElementById('new-staff-role').value;
+            const res = await fetch('/api/staff/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, role, adminUser: currentUser.username }) });
+            const data = await res.json();
+            alert(`Toegevoegd! Wachtwoord: ${data.message}`);
+            refreshPortalData();
+        }
+
+        async function submitAbsence() {
+            const fromDate = document.getElementById('abs-from').value;
+            const toDate = document.getElementById('abs-to').value;
+            const reason = document.getElementById('abs-reason').value;
+            await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username, fromDate, toDate, reason }) });
             refreshPortalData();
         }
     </script>
