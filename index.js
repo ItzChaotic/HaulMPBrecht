@@ -39,13 +39,13 @@ const EOTW_FILE = path.join(__dirname, 'eotw.json');
 
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
-    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
+    { username: "MJGamerNL", password: "Brecht123456", role: "Directeur" },
+    { username: "ItzChaotic_", password: "ItzChaoticChaos", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "Zinnorax", password: "Sylveon2002!08", role: "Leidinggevende" }
 ];
 
 let accountsDatabase = defaultAccounts;
