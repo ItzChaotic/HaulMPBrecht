@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Brecht Transport B.V. | ETS2 VTC</title>
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png">
@@ -26,7 +26,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+        html, body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; width: 100%; overflow-x: hidden; }
 
         nav {
             position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1350px; width: 96%;
@@ -55,7 +55,7 @@
         }
         .btn-portal:hover { background: rgba(204, 0, 0, 0.2); border-color: var(--accent-red); }
 
-        .container { max-width: 1250px; margin: 0 auto; padding: 0 20px; }
+        .container { max-width: 1250px; margin: 0 auto; padding: 0 20px; width: 100%; }
         .page-view { display: none; }
         .page-view.active { display: block; }
 
@@ -71,7 +71,8 @@
             display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 8px;
             color: #caa8a8; text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left;
         }
-        .sidebar-menu li button:hover, .sidebar-menu li.active button {
+        .sidebar-menu li button i { color: var(--accent-red); width: 18px; text-align: center; }
+        .sidebar-menu li:hover button, .sidebar-menu li.active button {
             background: rgba(204, 0, 0, 0.25); color: #fff; border-left: 3px solid var(--accent-red);
         }
 
@@ -107,7 +108,7 @@
             background: linear-gradient(rgba(8, 2, 2, 0.82), rgba(8, 2, 2, 0.92)), 
                         url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png');
             background-size: cover; background-position: center;
-            z-index: 2000; justify-content: center; align-items: center; padding: 15px;
+            z-index: 2500; justify-content: center; align-items: center; padding: 15px;
         }
         .login-box {
             background: rgba(18, 4, 4, 0.92); border: 1px solid var(--border-red); border-radius: 20px;
@@ -126,11 +127,45 @@
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
 
-        .mobile-header-bar { display: none; background: rgba(22, 4, 4, 0.95); padding: 12px 18px; border-bottom: 1px solid var(--border-red); position: sticky; top: 0; z-index: 1001; justify-content: space-between; align-items: center; }
-        .mobile-drawer { display: none; position: fixed; top: 0; right: -280px; width: 280px; height: 100vh; background: var(--bg-sidebar); z-index: 2000; padding: 25px 20px; transition: right 0.3s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.8); color: #fff; }
-        .mobile-drawer.open { right: 0; }
+        /* MODERNE MOBIELE HEADER BAR */
+        .mobile-header-bar {
+            display: none; background: rgba(18, 3, 3, 0.96); padding: 10px 14px; border-bottom: 1px solid var(--border-red);
+            position: sticky; top: 0; z-index: 1001; justify-content: space-between; align-items: center; width: 100%; backdrop-filter: blur(10px);
+        }
 
-        /* Rotatie animatie voor dropdown pijltjes */
+        /* MODERNE MOBIELE DRAWER (ZIJMENU) */
+        .mobile-drawer {
+            display: none; position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh;
+            background: rgba(16, 3, 3, 0.98); backdrop-filter: blur(20px); z-index: 3000; padding: 25px 20px;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.9); color: #fff;
+            border-left: 1px solid var(--border-red); overflow-y: auto;
+        }
+        .mobile-drawer.open { right: 0; display: block; }
+        .mobile-drawer-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7); z-index: 2999; backdrop-filter: blur(4px);
+        }
+        .mobile-drawer-overlay.open { display: block; }
+
+        .mobile-drawer-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+        .mobile-drawer-menu a, .mobile-drawer-menu button {
+            display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 16px; border-radius: 10px;
+            color: #fff; text-decoration: none; font-size: 0.95rem; font-weight: 600; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05); text-align: left; cursor: pointer; transition: 0.2s;
+        }
+        .mobile-drawer-menu a i, .mobile-drawer-menu button i { color: var(--accent-red); font-size: 1.1rem; width: 20px; text-align: center; }
+        .mobile-drawer-menu a:active, .mobile-drawer-menu button:active { background: rgba(204,0,0,0.25); border-color: var(--accent-red); }
+
+        .mobile-portal-tabs {
+            display: none; background: rgba(20, 4, 4, 0.9); border: 1px solid var(--border-red); border-radius: 12px;
+            padding: 8px; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; gap: 8px;
+        }
+        .mobile-portal-tabs button {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted);
+            padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+        }
+        .mobile-portal-tabs button.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
+
         .rotate-arrow { transition: transform 0.3s ease; display: inline-block; }
         .rotate-arrow.open { transform: rotate(180deg); }
 
@@ -139,43 +174,53 @@
             .mobile-header-bar { display: flex; }
             .mobile-drawer { display: block; }
             .portal-layout { flex-direction: column; }
-            .sidebar { position: fixed; left: -280px; top: 0; width: 280px; }
-            .sidebar.mobile-open { left: 0; }
-            .portal-content { margin-left: 0; width: 100%; padding: 18px; }
+            .sidebar { display: none; }
+            .mobile-portal-tabs { display: flex; }
+            .portal-content { margin-left: 0; width: 100%; padding: 15px; }
             .stats-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
+    <!-- MOBIELE HEADER -->
     <div class="mobile-header-bar">
         <div class="brand-logo" onclick="goHome()">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:32px;">
-            <span style="font-weight:bold; font-size:0.95rem; color:#fff;">Brecht Transport</span>
+            <span style="font-weight:bold; font-size:0.9rem; color:#fff;">Brecht Transport</span>
         </div>
-        <div style="display:flex; gap:8px;">
-            <button onclick="handleNavLogin()" class="btn-portal" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-lock"></i> Portaal</button>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <button onclick="handleNavLogin()" class="btn-portal" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-lock" style="color:var(--accent-red);"></i> Portaal</button>
             <a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply" style="padding:6px 10px; font-size:0.75rem;">Solliciteer</a>
-            <button onclick="toggleMobileDrawer()" class="btn-portal" style="padding:6px 10px;"><i class="fa-solid fa-bars"></i></button>
+            <button onclick="toggleMobileDrawer()" class="btn-portal" style="padding:6px 10px; border-color:var(--accent-red);"><i class="fa-solid fa-bars" style="color:#fff;"></i></button>
         </div>
     </div>
 
+    <!-- MOBIELE OVERLAY EN ZIJMENU (DRAWER) -->
+    <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
     <div class="mobile-drawer" id="mobileDrawer">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-            <b style="font-size:1.1rem;">Menu</b>
-            <button onclick="toggleMobileDrawer()" style="background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer;">✕</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:26px;">
+                <b style="font-size:1rem; font-family:'Space Grotesk', sans-serif;">Menu</b>
+            </div>
+            <button onclick="toggleMobileDrawer()" style="background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
         </div>
-        <ul style="list-style:none; display:flex; flex-direction:column; gap:16px;">
-            <li><a href="javascript:void(0);" onclick="goHome(); toggleMobileDrawer();" style="color:#fff; text-decoration:none;"><i class="fa-solid fa-house"></i> <span data-i18n="home">Home</span></a></li>
-            <li><a href="#about-sec" onclick="toggleMobileDrawer();" style="color:#fff; text-decoration:none;"><i class="fa-solid fa-circle-info"></i> <span data-i18n="about">Over Ons</span></a></li>
-            <li><a href="#gallerij-sec" onclick="toggleMobileDrawer();" style="color:#fff; text-decoration:none;"><i class="fa-solid fa-camera"></i> <span data-i18n="gallery">Fotogalerij</span></a></li>
-            <li><a href="#team" onclick="toggleMobileDrawer();" style="color:#fff; text-decoration:none;"><i class="fa-solid fa-users"></i> <span data-i18n="team">Het Team</span></a></li>
-            <li><a href="#vloot" onclick="toggleMobileDrawer();" style="color:#fff; text-decoration:none;"><i class="fa-solid fa-truck"></i> <span data-i18n="fleet">Vloot</span></a></li>
-            <li><a href="#livemap-sec" onclick="toggleMobileDrawer();" style="color:#fff; text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Live Map</a></li>
-            <li><a href="#activiteit" onclick="toggleMobileDrawer();" style="color:#fff; text-decoration:none;"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Onderweg</span></a></li>
-        </ul>
+
+        <div class="mobile-drawer-menu">
+            <a href="javascript:void(0);" onclick="goHome(); toggleMobileDrawer();"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+            <a href="#about-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-circle-info"></i> <span data-i18n="about">Over Ons</span></a>
+            <a href="#gallerij-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-camera"></i> <span data-i18n="gallery">Fotogalerij</span></a>
+            <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> <span data-i18n="team">Het Team</span></a>
+            <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span data-i18n="fleet">Vloot</span></a>
+            <a href="#livemap-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-map-location-dot"></i> <span>Live Map</span></a>
+            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Onderweg</span></a>
+            <button onclick="toggleLang(); toggleMobileDrawer();" style="margin-top:10px;"><i class="fa-solid fa-globe"></i> <span>Taal: <b id="lang-label-mob">NL / ENG</b></span></button>
+        </div>
     </div>
 
+    <!-- LAPTOP DESKTOP NAVIGATIEBAR -->
     <nav id="main-nav-bar">
         <div onclick="goHome()" class="brand-logo">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img">
@@ -255,6 +300,7 @@
         <!-- PERSONEELSPORTAAL -->
         <div id="portal-view" class="page-view">
             <div class="portal-layout">
+                <!-- DESKTOP SIDEBAR -->
                 <div class="sidebar" id="portal-sidebar">
                     <div>
                         <div class="sidebar-brand" onclick="goHome()">
@@ -264,7 +310,7 @@
                         <ul class="sidebar-menu">
                             <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button></li>
                             <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-convoy"></i> 🚚 Konvooien</button></li>
+                            <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-convoy"></i> Konvooien</button></li>
                             <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
                             <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
                             <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
@@ -279,9 +325,21 @@
                 </div>
 
                 <div class="portal-content">
+                    <!-- MOBIELE HORIZONTALE TABBAR VOOR PERSONEELSPORTAAL -->
+                    <div class="mobile-portal-tabs" id="mobilePortalTabs">
+                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+                        <button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Info</button>
+                        <button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-convoy"></i> Konvooien</button>
+                        <button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
+                        <button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Upload</button>
+                        <button id="mob-apps-btn" onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button>
+                        <button id="mob-mgt-btn" style="display:none;" onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges</button>
+                        <button id="mob-staff-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel</button>
+                    </div>
+
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:12px;">
                         <div>
-                            <h1 id="welcome-title">Welkom terug!</h1>
+                            <h1 id="welcome-title" style="font-size:1.5rem;">Welkom terug!</h1>
                             <p style="color:var(--text-muted); font-size:0.85rem;" id="user-role-display">Ingelogd op het personeelsportaal</p>
                         </div>
                     </div>
@@ -296,7 +354,7 @@
 
                         <!-- Eigen Wachtwoord Wijzigen (Voor IEDEREEN) -->
                         <div class="gallery-card" style="margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-key"></i> Mijn Wachtwoord Wijzigen</h3>
+                            <h3><i class="fa-solid fa-key" style="color:var(--accent-red);"></i> Mijn Wachtwoord Wijzigen</h3>
                             <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                                 <input type="password" id="my-new-password" placeholder="Nieuw wachtwoord..." class="form-input" style="flex:1; min-width:200px; margin:0;">
                                 <button onclick="updateMyOwnPassword()" class="btn-red">Wachtwoord Opslaan</button>
@@ -306,7 +364,7 @@
                         <div id="announcements-display-container"></div>
 
                         <div id="announcement-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-bullhorn"></i> Nieuwe Mededeling Plaatsen</h3>
+                            <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Nieuwe Mededeling Plaatsen</h3>
                             <input type="text" id="ann-title" placeholder="Titel..." class="form-input">
                             <textarea id="ann-content" placeholder="Inhoud..." class="form-input" style="height:70px; resize:vertical;"></textarea>
                             <button onclick="postAnnouncement()" class="btn-red">Publiceren</button>
@@ -321,11 +379,11 @@
 
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
                             <div class="gallery-card">
-                                <h3><i class="fa-solid fa-award"></i> Mijn Badges</h3>
+                                <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Mijn Badges</h3>
                                 <div id="my-badges-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
                             </div>
                             <div class="gallery-card" style="overflow-x:auto;">
-                                <h3 style="margin-bottom:15px;"><i class="fa-solid fa-chart-line"></i> Inkomsten</h3>
+                                <h3 style="margin-bottom:15px;"><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Inkomsten</h3>
                                 <div style="height: 200px; min-width: 250px;"><canvas id="earningsChart"></canvas></div>
                             </div>
                         </div>
@@ -334,14 +392,14 @@
                     <!-- TAB: INFORMATIE -->
                     <div id="p-tab-info" class="portal-tab-content" style="display:none;">
                         <div id="info-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-plus"></i> Nieuwe Informatie / Mod Posten</h3>
+                            <h3><i class="fa-solid fa-plus" style="color:var(--accent-red);"></i> Nieuwe Informatie / Mod Posten</h3>
                             <input type="text" id="info-title" placeholder="Titel..." class="form-input">
                             <textarea id="info-content" placeholder="Omschrijving..." class="form-input" style="height:70px;"></textarea>
                             <input type="text" id="info-link" placeholder="Download link (optioneel)" class="form-input">
                             <button onclick="postInfo()" class="btn-red">Posten</button>
                         </div>
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-book-open"></i> Bedrijfsinformatie & Mods</h3>
+                            <h3><i class="fa-solid fa-book-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
                             <div id="info-list-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
@@ -349,7 +407,7 @@
                     <!-- TAB: KONVOOIEN -->
                     <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
                         <div id="convoy-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-calendar-plus"></i> 🚚 Nieuw Konvooi Inplannen</h3>
+                            <h3><i class="fa-solid fa-calendar-plus" style="color:var(--accent-red);"></i> Nieuw Konvooi Inplannen</h3>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                                 <input type="text" id="conv-title" placeholder="Titel..." class="form-input">
                                 <input type="text" id="conv-server" placeholder="Server..." class="form-input">
@@ -361,7 +419,7 @@
                             <button onclick="postConvoy()" class="btn-red">Inplannen</button>
                         </div>
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-truck-convoy"></i> 🚚 Geplande Konvooien</h3>
+                            <h3><i class="fa-solid fa-truck-convoy" style="color:var(--accent-red);"></i> Geplande Konvooien</h3>
                             <div id="convoys-list-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
@@ -369,7 +427,7 @@
                     <!-- TAB: SOLLICITATIES -->
                     <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-file-signature"></i> Actieve Sollicitaties</h3>
+                            <h3><i class="fa-solid fa-file-signature" style="color:var(--accent-red);"></i> Actieve Sollicitaties</h3>
                             <div id="applications-open-container" style="margin-top:12px;"></div>
                             <div style="margin-top:25px; border-top:1px solid var(--border-red); padding-top:15px;">
                                 <button onclick="toggleCompletedApps()" class="btn-portal" style="width:100%; justify-content:space-between;">
@@ -384,7 +442,7 @@
                     <!-- TAB: AFWEZIGHEID -->
                     <div id="p-tab-absence" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-pen-to-square"></i> Afwezigheid Melden</h3>
+                            <h3><i class="fa-solid fa-pen-to-square" style="color:var(--accent-red);"></i> Afwezigheid Melden</h3>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
                                 <div><label style="font-size:0.8rem; color:var(--text-muted);">Van:</label><input type="date" id="abs-from" class="form-input"></div>
                                 <div><label style="font-size:0.8rem; color:var(--text-muted);">Tot:</label><input type="date" id="abs-to" class="form-input"></div>
@@ -397,7 +455,7 @@
                     <!-- TAB: UPLOAD -->
                     <div id="p-tab-upload" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-upload"></i> Foto Uploaden</h3>
+                            <h3><i class="fa-solid fa-upload" style="color:var(--accent-red);"></i> Foto Uploaden</h3>
                             <input type="file" id="photo-file" accept="image/*" class="form-input">
                             <button onclick="uploadPhoto()" class="btn-red">Uploaden & Bewaren</button>
                         </div>
@@ -406,7 +464,7 @@
                     <!-- TAB: PERSONEEL BEHEREN -->
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-user-plus"></i> Nieuw Personeelslid Toevoegen</h3>
+                            <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuw Personeelslid Toevoegen</h3>
                             <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                                 <input type="text" id="new-staff-user" placeholder="Gebruikersnaam" class="form-input" style="flex:1; min-width:180px; margin:0;">
                                 <select id="new-staff-role" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);">
@@ -420,14 +478,14 @@
                                 <button onclick="addNewStaff()" class="btn-red">Toevoegen</button>
                             </div>
                         </div>
-                        <h3 style="margin-top:20px; font-size:1.1rem;"><i class="fa-solid fa-users-gear"></i> Personeelsbeheer</h3>
+                        <h3 style="margin-top:20px; font-size:1.1rem;"><i class="fa-solid fa-users-gear" style="color:var(--accent-red);"></i> Personeelsbeheer</h3>
                         <div id="staff-cards-container" class="staff-card-grid"></div>
                     </div>
 
                     <!-- TAB: BADGES & EOTW -->
                     <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="margin-bottom:16px;">
-                            <h3><i class="fa-solid fa-crown"></i> Chauffeur van de Week</h3>
+                            <h3><i class="fa-solid fa-crown" style="color:var(--accent-red);"></i> Chauffeur van de Week</h3>
                             <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                                 <select id="eotw-select-user" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
                                 <input type="text" id="eotw-input-reason" placeholder="Reden..." class="form-input" style="flex:2; min-width:200px; margin:0;">
@@ -436,7 +494,7 @@
                         </div>
 
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-award"></i> Badge Beheer & Toekennen</h3>
+                            <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Badge Beheer & Toekennen</h3>
                             <div style="display:flex; gap:10px; margin:12px 0; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;">
                                 <input type="text" id="badge-title" placeholder="Badge Naam (bijv. Nachtwaker)" class="form-input" style="flex:1; min-width:180px; margin:0;">
                                 <select id="badge-user-select" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
@@ -514,7 +572,14 @@
             });
         }
 
-        function toggleMobileDrawer() { document.getElementById('mobileDrawer').classList.toggle('open'); }
+        function toggleMobileDrawer() {
+            const drawer = document.getElementById('mobileDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            const isOpen = drawer.classList.contains('open');
+            drawer.classList.toggle('open', !isOpen);
+            overlay.classList.toggle('open', !isOpen);
+        }
+
         function toggleCompletedApps() {
             const c = document.getElementById('applications-completed-container');
             const icon = document.getElementById('completed-icon');
@@ -564,9 +629,13 @@
             document.getElementById('welcome-title').innerText = `Welkom, ${currentUser.username}`;
             document.getElementById('user-role-display').innerText = `Functie: ${currentUser.role}`;
 
-            if (currentUser.canManageBadges) document.getElementById('mgt-tab-btn').style.display = 'block';
+            if (currentUser.canManageBadges) {
+                document.getElementById('mgt-tab-btn').style.display = 'block';
+                document.getElementById('mob-mgt-btn').style.display = 'inline-flex';
+            }
             if (currentUser.canManageStaff) {
                 document.getElementById('staff-tab-btn').style.display = 'block';
+                document.getElementById('mob-staff-btn').style.display = 'inline-flex';
                 document.getElementById('announcement-create-box').style.display = 'block';
                 document.getElementById('info-create-box').style.display = 'block';
             }
@@ -580,8 +649,13 @@
         function switchPortalTab(tabId, btnElement) {
             document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.mobile-portal-tabs button').forEach(el => el.classList.remove('active'));
+            
             document.getElementById(tabId).style.display = 'block';
-            if (btnElement?.parentElement) btnElement.parentElement.classList.add('active');
+            if (btnElement) {
+                if (btnElement.tagName === 'BUTTON' && btnElement.parentElement.tagName === 'LI') btnElement.parentElement.classList.add('active');
+                else btnElement.classList.add('active');
+            }
         }
 
         async function loadData() {
@@ -902,4 +976,3 @@
     </script>
 </body>
 </html>
-
