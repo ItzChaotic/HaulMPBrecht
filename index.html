@@ -6,23 +6,24 @@
     <title>Brecht Transport B.V. | ETS2 VTC</title>
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
-            --bg-base: #090202;
-            --bg-sidebar: #100303;
-            --bg-card: rgba(28, 5, 5, 0.85);
+            --bg-base: #0a0303;
+            --bg-sidebar: #0d0404;
+            --bg-card: rgba(22, 7, 7, 0.88);
+            --bg-card-hover: rgba(35, 10, 10, 0.95);
             --primary: #800000;
             --primary-light: #cc0000;
             --accent-red: #ff3333;
-            --border-red: rgba(204, 0, 0, 0.25);
+            --border-red: rgba(204, 0, 0, 0.22);
             --text-main: #ffffff;
             --text-muted: #caa8a8;
-            --glass-blur: blur(14px);
+            --glass-blur: blur(16px);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -42,6 +43,12 @@
         .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .nav-links a:hover { color: #fff; }
 
+        .btn-discord {
+            background: #5865F2; color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
+            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: 0.2s;
+        }
+        .btn-discord:hover { background: #4752C4; }
+
         .btn-apply {
             background: linear-gradient(135deg, var(--primary-light), var(--primary));
             color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
@@ -55,7 +62,7 @@
         }
         .btn-portal:hover { background: rgba(204, 0, 0, 0.2); border-color: var(--accent-red); }
 
-        .container { max-width: 1250px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
+        .container { max-width: 1350px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
         .page-view { display: none; }
         .page-view.active { display: block; }
 
@@ -65,39 +72,59 @@
             padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; 
             position: fixed; height: 100vh; z-index: 100; transition: left 0.3s ease; color: #fff;
         }
-        .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
-        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
+        .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 15px 0 8px 10px; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
         .sidebar-menu li button {
-            display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 8px;
-            color: #caa8a8; text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left;
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
+            color: #caa8a8; text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
         }
-        .sidebar-menu li button i { color: var(--accent-red); width: 18px; text-align: center; }
+        .sidebar-menu li button i, .sidebar-menu li button svg { color: var(--accent-red); width: 18px; height: 18px; text-align: center; fill: var(--accent-red); }
         .sidebar-menu li:hover button, .sidebar-menu li.active button {
-            background: rgba(204, 0, 0, 0.25); color: #fff; border-left: 3px solid var(--accent-red);
+            background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red);
         }
 
-        .portal-content { margin-left: 260px; flex: 1; padding: 35px; width: calc(100% - 260px); }
+        .portal-content { margin-left: 260px; flex: 1; padding: 30px; width: calc(100% - 260px); }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 20px 0; }
-        .stat-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 14px; padding: 20px; backdrop-filter: var(--glass-blur); }
-        .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; margin-top: 4px; color: #fff; }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        /* VTC TELEMETRY & DASHBOARD MODERN CARDS */
+        .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .dash-card {
+            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px;
+            display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: var(--glass-blur); transition: 0.2s;
+        }
+        .dash-card:hover { border-color: rgba(255, 51, 51, 0.4); transform: translateY(-2px); }
+        .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .dash-card-title { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+        .dash-card-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,51,51,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--accent-red); font-size: 0.95rem; }
+        .dash-card-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 700; color: #fff; }
 
-        .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 14px; padding: 20px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
+        .dash-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 1200px) { .dash-main-row { grid-template-columns: 1fr; } }
+
+        .analytics-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 22px; backdrop-filter: var(--glass-blur); }
+        .live-feed-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 22px; backdrop-filter: var(--glass-blur); }
+        .feed-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .feed-item:hover { border-color: var(--border-red); background: rgba(204,0,0,0.08); }
+
+        .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
         .gallery-img, .fleet-img { width: 100%; height: 190px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
 
         .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
         .member-avatar { width: 46px; height: 46px; border-radius: 10px; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); }
         .member-role { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
 
-        .role-red { background: rgba(229, 62, 62, 0.15); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.3); }
-        .role-orange { background: rgba(221, 107, 32, 0.15); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.3); }
-        .role-yellow { background: rgba(214, 158, 46, 0.15); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.3); }
-        .role-green { background: rgba(56, 161, 105, 0.15); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.3); }
-        .role-gray { background: rgba(160, 174, 192, 0.15); color: #cbd5e0; border: 1px solid rgba(160, 174, 192, 0.3); }
+        /* ROLLEN KLEUREN */
+        .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
+        .role-orange { background: rgba(221, 107, 32, 0.18); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.4); }
+        .role-yellow { background: rgba(214, 158, 46, 0.18); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
+        .role-green { background: rgba(56, 161, 105, 0.18); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.4); }
+        .role-blue { background: rgba(49, 130, 206, 0.18); color: #63b3ed; border: 1px solid rgba(49, 130, 206, 0.4); }
+        .role-purple { background: rgba(128, 90, 213, 0.18); color: #b794f4; border: 1px solid rgba(128, 90, 213, 0.4); }
+        .role-cyan { background: rgba(0, 181, 216, 0.18); color: #76e4f7; border: 1px solid rgba(0, 181, 216, 0.4); }
+        .role-gray { background: rgba(160, 174, 192, 0.18); color: #cbd5e0; border: 1px solid rgba(160, 174, 192, 0.4); }
 
         .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-red); }
-        .form-input { width: 100%; padding: 10px 14px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 8px; font-size: 0.9rem; }
+        .form-input { width: 100%; padding: 10px 14px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 8px; font-size: 0.9rem; }
         .form-input:focus { outline: none; border-color: var(--accent-red); }
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
@@ -171,6 +198,13 @@
         }
         footer p { margin: 3px 0; }
 
+        /* USER PROFILE CARD LINKS ONDERIN SIDEBAR */
+        .sidebar-user-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px;
+            padding: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+        }
+        .user-avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light); color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+
         @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
             .mobile-header-bar { display: flex; }
@@ -179,7 +213,6 @@
             .sidebar { display: none; }
             .mobile-portal-tabs { display: flex; }
             .portal-content { margin-left: 0; width: 100%; padding: 15px; }
-            .stats-grid { grid-template-columns: 1fr; }
             .hero h1 { font-size: 1.8rem; }
         }
     </style>
@@ -193,8 +226,8 @@
             <span style="font-weight:bold; font-size:0.9rem; color:#fff;">Brecht Transport</span>
         </div>
         <div style="display:flex; gap:6px; align-items:center;">
+            <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-brands fa-discord"></i> Discord</a>
             <button onclick="handleNavLogin()" class="btn-portal" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-lock" style="color:var(--accent-red);"></i> Portaal</button>
-            <a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply" style="padding:6px 10px; font-size:0.75rem;">Solliciteer</a>
             <button onclick="toggleMobileDrawer()" class="btn-portal" style="padding:6px 10px; border-color:var(--accent-red);"><i class="fa-solid fa-bars" style="color:#fff;"></i></button>
         </div>
     </div>
@@ -217,6 +250,7 @@
             <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span data-i18n="fleet">Vloot</span></a>
             <a href="#livemap-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-map-location-dot"></i> <span>Live Map</span></a>
             <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Onderweg</span></a>
+            <a href="https://discord.gg/UCgWxAdXRu" target="_blank" style="background:#5865F2; margin-top:8px;"><i class="fa-brands fa-discord" style="color:#fff;"></i> <span>Join Discord</span></a>
             <button onclick="toggleLang(); toggleMobileDrawer();" style="margin-top:10px;"><i class="fa-solid fa-globe"></i> <span>Taal: <b id="lang-label-mob">NL / ENG</b></span></button>
         </div>
     </div>
@@ -235,6 +269,7 @@
             <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
             <li><a href="#livemap-sec">Live Map</a></li>
             <li><a href="#activiteit" data-i18n="trips">Onderweg</a></li>
+            <li><a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
             <li><button onclick="toggleLang()" class="btn-portal"><i class="fa-solid fa-globe"></i> <span id="lang-label">ENG</span></button></li>
             <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
             <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="apply">Solliciteer Direct</span></a></li>
@@ -249,10 +284,19 @@
                 <p data-i18n="hero_desc">Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.</p>
             </section>
 
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-label" data-i18n="stat_dist">Gereden Afstand</div><div class="stat-num" id="stat-distance">0 km</div></div>
-                <div class="stat-card"><div class="stat-label" data-i18n="stat_deliv">Leveringen Volbracht</div><div class="stat-num" id="stat-deliveries">0</div></div>
-                <div class="stat-card"><div class="stat-label" data-i18n="stat_drivers">Actieve Chauffeurs</div><div class="stat-num" id="stat-drivers">0</div></div>
+            <div class="dashboard-grid-top">
+                <div class="dash-card">
+                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_dist">Gereden Afstand</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
+                    <div class="dash-card-num" id="stat-distance">0 km</div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_deliv">Leveringen Volbracht</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
+                    <div class="dash-card-num" id="stat-deliveries">0</div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_drivers">Actieve Chauffeurs</span><div class="dash-card-icon"><i class="fa-solid fa-users"></i></div></div>
+                    <div class="dash-card-num" id="stat-drivers">0</div>
+                </div>
             </div>
 
             <div class="section-header" id="about-sec"><h2 data-i18n="about">Over Ons</h2></div>
@@ -308,29 +352,51 @@
                             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:28px;">
                             <span style="font-size:0.85rem; line-height:1.2;">Brecht Transport Personeelsportaal</span>
                         </div>
+
+                        <div class="sidebar-section-title">MAIN</div>
                         <ul class="sidebar-menu">
-                            <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-convoy"></i> Konvooien</button></li>
+                            <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overview</button></li>
+                            <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie & Mods</button></li>
+                            <li>
+                                <button onclick="switchPortalTab('p-tab-convoys', this)">
+                                    <!-- Hardfix Icoontje -->
+                                    <i class="fa-solid fa-truck-front"></i> 
+                                    <span>Konvooien</span>
+                                </button>
+                            </li>
                             <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
                             <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
                             <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
+                        </ul>
+
+                        <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">MANAGEMENT</div>
+                        <ul class="sidebar-menu">
                             <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
                             <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
                         </ul>
                     </div>
+
                     <div>
-                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; margin-bottom:10px;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
-                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
+                        <!-- USER CARD LINKSONDER (GEÏNSPIREERD OP SCREENSHOT) -->
+                        <div class="sidebar-user-card">
+                            <div class="user-avatar-circle" id="sidebar-avatar-char">U</div>
+                            <div style="overflow:hidden;">
+                                <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.85rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
+                                <div id="sidebar-role-txt" style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
+                            </div>
+                        </div>
+
+                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; margin-bottom:8px; padding:8px 12px; font-size:0.8rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:8px 12px; font-size:0.8rem;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
                     </div>
                 </div>
 
                 <div class="portal-content">
                     <!-- MOBIELE TABBAR -->
                     <div class="mobile-portal-tabs" id="mobilePortalTabs">
-                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overview</button>
                         <button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Info</button>
-                        <button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-convoy"></i> Konvooien</button>
+                        <button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button>
                         <button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
                         <button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Upload</button>
                         <button id="mob-apps-btn" onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button>
@@ -338,53 +404,90 @@
                         <button id="mob-staff-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel</button>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:12px;">
+                    <!-- DASHBOARD HEADER -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:14px;">
                         <div>
-                            <h1 id="welcome-title" style="font-size:1.5rem;">Welkom terug!</h1>
-                            <p style="color:var(--text-muted); font-size:0.85rem;" id="user-role-display">Ingelogd op het personeelsportaal</p>
+                            <h1 style="font-size:1.6rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overview</h1>
+                            <p style="color:var(--text-muted); font-size:0.82rem;" id="user-role-display">VTC Telemetry & Performance Dashboard</p>
                         </div>
                     </div>
 
-                    <!-- TAB 1: DASHBOARD -->
+                    <!-- TAB 1: OVERVIEW / TELEMETRY (STYLE SCREENSHOT) -->
                     <div id="p-tab-stats" class="portal-tab-content">
-                        <div id="eotw-display-card" class="gallery-card" style="background: linear-gradient(135deg, rgba(128,0,0,0.3), rgba(204,0,0,0.1)); border: 1px solid var(--accent-red); display:none; text-align:center; padding:25px; margin-bottom:20px;">
-                            <h3 style="color:#f6e05e; font-size:1.3rem; margin-bottom:8px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
-                            <h2 id="eotw-username" style="font-size:1.8rem; margin-bottom:6px;">Chauffeur</h2>
-                            <p id="eotw-reason" style="color:var(--text-muted); font-style:italic;">"Uitstekende prestaties!"</p>
-                        </div>
-
-                        <div class="gallery-card" style="margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-key" style="color:var(--accent-red);"></i> Mijn Wachtwoord Wijzigen</h3>
-                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                                <input type="password" id="my-new-password" placeholder="Nieuw wachtwoord..." class="form-input" style="flex:1; min-width:200px; margin:0;">
-                                <button onclick="updateMyOwnPassword()" class="btn-red">Wachtwoord Opslaan</button>
+                        <!-- TOP METRICS (VTC DISTANCE / ACTIVE DRIVERS / COMPANY BALANCE / MY CAREER) -->
+                        <div class="dashboard-grid-top">
+                            <div class="dash-card">
+                                <div class="dash-card-header"><span class="dash-card-title">VTC DISTANCE</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
+                                <div class="dash-card-num" id="company-stat-distance">0 KM</div>
+                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">▲ Growing</span>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-header"><span class="dash-card-title">ACTIVE DRIVERS</span><div class="dash-card-icon"><i class="fa-solid fa-user-group"></i></div></div>
+                                <div class="dash-card-num" id="company-stat-drivers">0</div>
+                                <span style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">Actieve VTC Leden</span>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-header"><span class="dash-card-title">COMPANY BALANCE</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
+                                <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
+                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Weekly Credits</span>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-header"><span class="dash-card-title">MY CAREER</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
+                                <div class="dash-card-num" id="user-stat-distance">0 KM</div>
+                                <span style="font-size:0.7rem; color:var(--accent-red); font-weight:bold; margin-top:4px;" id="user-stat-deliveries-label">0 Deliveries</span>
                             </div>
                         </div>
 
-                        <div id="announcements-display-container"></div>
+                        <!-- MAIN ANALYTICS + LIVE FEED ROW -->
+                        <div class="dash-main-row">
+                            <!-- LEFT: PERFORMANCE ANALYTICS -->
+                            <div>
+                                <div class="analytics-box" style="margin-bottom:20px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                                        <h3><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Performance Analytics</h3>
+                                        <span style="font-size:0.75rem; background:rgba(56,161,105,0.2); color:#68d391; padding:4px 10px; border-radius:8px; border:1px solid rgba(56,161,105,0.4); font-weight:bold;">● VTC ACTIVE</span>
+                                    </div>
+                                    <div style="height: 220px; width: 100%;"><canvas id="earningsChart"></canvas></div>
+                                </div>
 
-                        <div id="announcement-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Nieuwe Mededeling Plaatsen</h3>
-                            <input type="text" id="ann-title" placeholder="Titel..." class="form-input">
-                            <textarea id="ann-content" placeholder="Inhoud..." class="form-input" style="height:70px; resize:vertical;"></textarea>
-                            <button onclick="postAnnouncement()" class="btn-red">Publiceren</button>
-                        </div>
+                                <div id="eotw-display-card" class="gallery-card" style="background: linear-gradient(135deg, rgba(128,0,0,0.35), rgba(204,0,0,0.12)); border: 1px solid var(--accent-red); display:none; text-align:center; padding:20px; margin-bottom:20px;">
+                                    <h3 style="color:#f6e05e; font-size:1.1rem; margin-bottom:6px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
+                                    <h2 id="eotw-username" style="font-size:1.6rem; margin-bottom:4px;">Chauffeur</h2>
+                                    <p id="eotw-reason" style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">"Uitstekende prestaties!"</p>
+                                </div>
 
-                        <div class="stats-grid" style="margin-top:0;">
-                            <div class="stat-card"><div class="stat-label">MIJN RITTEN</div><div class="stat-num" id="user-stat-deliveries">0</div></div>
-                            <div class="stat-card"><div class="stat-label">MIJN KILOMETERS</div><div class="stat-num" id="user-stat-distance">0 km</div></div>
-                            <div class="stat-card"><div class="stat-label">PERSOONLIJKE INKOMSTEN</div><div class="stat-num" id="user-stat-earnings" style="color:#68d391;">€ 0</div></div>
-                            <div class="stat-card"><div class="stat-label">TOTAAL BEDRIJFSINKOMSTEN</div><div class="stat-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div></div>
-                        </div>
+                                <div class="gallery-card" style="margin-bottom:20px;">
+                                    <h3><i class="fa-solid fa-key" style="color:var(--accent-red);"></i> Mijn Wachtwoord Wijzigen</h3>
+                                    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                                        <input type="password" id="my-new-password" placeholder="Nieuw wachtwoord..." class="form-input" style="flex:1; min-width:200px; margin:0;">
+                                        <button onclick="updateMyOwnPassword()" class="btn-red">Opslaan</button>
+                                    </div>
+                                </div>
 
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
-                            <div class="gallery-card">
-                                <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Mijn Badges</h3>
-                                <div id="my-badges-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
+                                <div id="announcements-display-container"></div>
+
+                                <div id="announcement-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
+                                    <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Nieuwe Mededeling Plaatsen</h3>
+                                    <input type="text" id="ann-title" placeholder="Titel..." class="form-input">
+                                    <textarea id="ann-content" placeholder="Inhoud..." class="form-input" style="height:70px; resize:vertical;"></textarea>
+                                    <button onclick="postAnnouncement()" class="btn-red">Publiceren</button>
+                                </div>
                             </div>
-                            <div class="gallery-card" style="overflow-x:auto;">
-                                <h3 style="margin-bottom:15px;"><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Inkomsten</h3>
-                                <div style="height: 200px; min-width: 250px;"><canvas id="earningsChart"></canvas></div>
+
+                            <!-- RIGHT: LIVE FEED / RECENT JOBS (SCREENSHOT STYLE) -->
+                            <div>
+                                <div class="live-feed-box">
+                                    <h3 style="margin-bottom:12px; font-size:1rem; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Feed</h3>
+                                    <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:15px;">Meest recente ritten van onze chauffeurs.</p>
+                                    <div id="live-feed-container">
+                                        <p style="text-align:center; color:var(--text-muted); font-size:0.8rem;">Geen recente activiteit.</p>
+                                    </div>
+                                </div>
+
+                                <div class="gallery-card" style="margin-top:20px;">
+                                    <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Mijn Badges</h3>
+                                    <div id="my-badges-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -420,7 +523,7 @@
                             <button onclick="postConvoy()" class="btn-red">Inplannen</button>
                         </div>
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-truck-convoy" style="color:var(--accent-red);"></i> Geplande Konvooien</h3>
+                            <h3><i class="fa-solid fa-truck-front" style="color:var(--accent-red);"></i> Geplande Konvooien</h3>
                             <div id="convoys-list-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
@@ -473,7 +576,9 @@
                                     <option value="Onder Directeur">Onder Directeur</option>
                                     <option value="Management">Management</option>
                                     <option value="Leidinggevende">Leidinggevende</option>
-                                    <option value="Werknemer">Werknemer</option>
+                                    <option value="Senior Medewerker">Senior Medewerker</option>
+                                    <option value="Medewerker">Medewerker</option>
+                                    <option value="Junior Medewerker">Junior Medewerker</option>
                                     <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
                                 </select>
                                 <button onclick="addNewStaff()" class="btn-red">Toevoegen</button>
@@ -644,10 +749,13 @@
 
         function openPortalDashboard() {
             if (!currentUser) return openLoginModal();
-            document.getElementById('welcome-title').innerText = `Welkom, ${currentUser.username}`;
-            document.getElementById('user-role-display').innerText = `Functie: ${currentUser.role}`;
+            
+            document.getElementById('sidebar-username-txt').innerText = currentUser.username;
+            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
+            document.getElementById('sidebar-avatar-char').innerText = currentUser.username.charAt(0).toUpperCase();
 
             if (currentUser.canManageBadges) {
+                document.getElementById('mgt-section-head').style.display = 'block';
                 document.getElementById('mgt-tab-btn').style.display = 'block';
                 document.getElementById('mob-mgt-btn').style.display = 'inline-flex';
             }
@@ -680,9 +788,15 @@
             try {
                 const res = await fetch('/api/haulmp');
                 const data = await res.json();
-                if (data.distance) document.getElementById('stat-distance').innerText = data.distance;
+                if (data.distance) {
+                    document.getElementById('stat-distance').innerText = data.distance;
+                    if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance;
+                }
                 if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
-                if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
+                if (data.drivers) {
+                    document.getElementById('stat-drivers').innerText = data.drivers;
+                    if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers;
+                }
 
                 const pubGallery = document.getElementById('public-gallery-container');
                 const fullGallery = document.getElementById('full-gallery-container');
@@ -739,6 +853,23 @@
                 annContainer.insertAdjacentHTML('beforeend', `<div class="announcement-box"><h4><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> ${a.title}</h4><p style="font-size:0.88rem; margin-top:4px;">${a.content}</p><small style="color:#888; font-size:0.75rem;">Door ${a.author}</small></div>`);
             });
 
+            // LIVE FEED / RECENT JOBS ON PORTAL DASHBOARD (SCREENSHOT STYLE)
+            const liveFeedContainer = document.getElementById('live-feed-container');
+            if (liveFeedContainer && Array.isArray(data.recent_jobs)) {
+                liveFeedContainer.innerHTML = '';
+                data.recent_jobs.slice(0, 5).forEach(j => {
+                    liveFeedContainer.insertAdjacentHTML('beforeend', `
+                        <div class="feed-item">
+                            <div>
+                                <div style="font-weight:bold; font-size:0.85rem;"><i class="fa-solid fa-truck" style="color:var(--accent-red); margin-right:6px;"></i> ${j.driver}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">${j.from} → ${j.to}</div>
+                            </div>
+                            <div style="color:#68d391; font-weight:bold; font-size:0.85rem;">+${j.distance}</div>
+                        </div>
+                    `);
+                });
+            }
+
             const infoContainer = document.getElementById('info-list-container');
             infoContainer.innerHTML = '';
             data.infoList?.forEach(i => {
@@ -775,9 +906,8 @@
             myBadgesContainer.innerHTML = '';
             const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
             if (myStats) {
-                document.getElementById('user-stat-deliveries').innerText = myStats.deliveries || 0;
-                document.getElementById('user-stat-distance').innerText = myStats.distance || "0 km";
-                document.getElementById('user-stat-earnings').innerText = myStats.earnings || "€ 0";
+                document.getElementById('user-stat-distance').innerText = myStats.distance || "0 KM";
+                document.getElementById('user-stat-deliveries-label').innerText = `${myStats.deliveries || 0} Deliveries Completed`;
                 
                 if (myStats.badges && myStats.badges.length > 0) {
                     myStats.badges.forEach(b => {
@@ -787,7 +917,10 @@
                     myBadgesContainer.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Nog geen badges ontvangen.</p>';
                 }
             }
-            document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
+            if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
+            if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance || "0 KM";
+            if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers || "0";
+
             renderChart(data.weeklyChartData, currentUser.username);
 
             const treeContainer = document.getElementById('badges-tree-container');
@@ -843,7 +976,10 @@
                                 <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
                                 <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
                                 <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
-                                <option value="Werknemer" ${m.role === 'Werknemer' ? 'selected' : ''}>Werknemer</option>
+                                <option value="Senior Medewerker" ${m.role === 'Senior Medewerker' ? 'selected' : ''}>Senior Medewerker</option>
+                                <option value="Medewerker" ${m.role === 'Medewerker' ? 'selected' : ''}>Medewerker</option>
+                                <option value="Junior Medewerker" ${m.role === 'Junior Medewerker' ? 'selected' : ''}>Junior Medewerker</option>
+                                <option value="Chauffeur in opleiding" ${m.role === 'Chauffeur in opleiding' ? 'selected' : ''}>Chauffeur in opleiding</option>
                             </select>
                             <label style="font-size:0.75rem; color:var(--text-muted);">Nieuw Wachtwoord:</label>
                             <div style="display:flex; gap:6px;">
@@ -885,16 +1021,21 @@
         function renderChart(weeklyData, username) {
             const ctx = document.getElementById('earningsChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+            gradient.addColorStop(0, 'rgba(255, 51, 51, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 51, 51, 0.0)');
+
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: weeklyData.map(w => w.week),
                     datasets: [
-                        { label: 'Bedrijf (€)', data: weeklyData.map(w => w.company), borderColor: '#3399ff', borderWidth: 2, fill: false },
-                        { label: 'Mijn Inkomsten (€)', data: weeklyData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2, fill: false }
+                        { label: 'Bedrijf (€)', data: weeklyData.map(w => w.company), borderColor: '#ff3333', backgroundColor: gradient, borderWidth: 3, fill: true, tension: 0.4 },
+                        { label: 'Mijn Inkomsten (€)', data: weeklyData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.4 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8' } } } }
             });
         }
 
