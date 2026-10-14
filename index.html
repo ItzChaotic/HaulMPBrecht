@@ -67,24 +67,27 @@
         .page-view.active { display: block; }
 
         .portal-layout { display: flex; min-height: 100vh; position: relative; }
+        
+        /* Zijbalk lay-out fix: nette scrolling en ruimere marges */
         .sidebar {
-            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
-            padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; 
+            width: 270px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
+            padding: 20px 16px; display: flex; flex-direction: column; justify-content: space-between; 
             position: fixed; height: 100vh; z-index: 100; transition: left 0.3s ease; color: #fff;
+            overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
         }
-        .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
-        .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 15px 0 8px 10px; }
+        .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
+        .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 12px 0 6px 8px; }
         .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
         .sidebar-menu li button {
-            display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
-            color: #caa8a8; text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px;
+            color: #caa8a8; text-decoration: none; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
         }
-        .sidebar-menu li button i, .sidebar-menu li button svg { color: var(--accent-red); width: 18px; height: 18px; text-align: center; fill: var(--accent-red); }
+        .sidebar-menu li button i { color: var(--accent-red); width: 18px; text-align: center; }
         .sidebar-menu li:hover button, .sidebar-menu li.active button {
             background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red);
         }
 
-        .portal-content { margin-left: 260px; flex: 1; padding: 30px; width: calc(100% - 260px); }
+        .portal-content { margin-left: 270px; flex: 1; padding: 30px; width: calc(100% - 270px); }
 
         .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
         .dash-card {
@@ -109,12 +112,16 @@
         .gallery-img, .fleet-img { width: 100%; height: 190px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
 
         .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-        .member-avatar { width: 50px; height: 50px; border-radius: 12px; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); overflow: hidden; }
-        .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* PFP Automatisch Rond & Gecropt */
+        .member-avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); overflow: hidden; aspect-ratio: 1/1; }
+        .member-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
         .member-role { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
 
+        /* Rollen kleuren: Oranje voor Onder Directeur */
         .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
-        .role-orange { background: rgba(221, 107, 32, 0.18); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.4); }
+        .role-orange { background: rgba(221, 107, 32, 0.22); color: #ff9d42; border: 1px solid rgba(221, 107, 32, 0.5); }
         .role-yellow { background: rgba(214, 158, 46, 0.18); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
         .role-green { background: rgba(56, 161, 105, 0.18); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.4); }
         .role-blue { background: rgba(49, 130, 206, 0.18); color: #63b3ed; border: 1px solid rgba(49, 130, 206, 0.4); }
@@ -134,7 +141,7 @@
         }
         .login-box {
             background: rgba(18, 4, 4, 0.94); border: 1px solid var(--border-red); border-radius: 20px;
-            max-width: 400px; width: 100%; padding: 32px; text-align: center; color: #fff; backdrop-filter: blur(12px);
+            max-width: 400px; width: 100%; padding: 28px; text-align: center; color: #fff; backdrop-filter: blur(12px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
         }
 
@@ -174,7 +181,7 @@
             color: #fff; text-decoration: none; font-size: 0.95rem; font-weight: 600; background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.05); text-align: left; cursor: pointer; transition: 0.2s;
         }
-        .mobile-drawer-menu a i, .mobile-drawer-menu button i { color: var(--accent-red); font-size: 1.1rem; width: 20px; text-align: center; }
+        .mobile-drawer-menu a i { color: var(--accent-red); font-size: 1.1rem; width: 20px; text-align: center; }
 
         .mobile-portal-tabs {
             display: none; background: rgba(20, 4, 4, 0.9); border: 1px solid var(--border-red); border-radius: 12px;
@@ -201,10 +208,10 @@
 
         .sidebar-user-card {
             background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px;
-            padding: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+            padding: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
         }
-        .user-avatar-circle { width: 38px; height: 38px; border-radius: 10px; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow: hidden; }
-        .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .user-avatar-circle { width: 38px; height: 38px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow: hidden; aspect-ratio: 1/1; }
+        .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
         .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 15px; }
         .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 12px; padding: 15px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.2s; }
@@ -359,7 +366,7 @@
         <!-- PERSONEELSPORTAAL -->
         <div id="portal-view" class="page-view">
             <div class="portal-layout">
-                <!-- DESKTOP SIDEBAR -->
+                <!-- DESKTOP SIDEBAR (Aangepast voor strakke lay-out) -->
                 <div class="sidebar" id="portal-sidebar">
                     <div>
                         <div class="sidebar-brand" onclick="goHome()">
@@ -385,19 +392,24 @@
                         </ul>
                     </div>
 
-                    <div>
+                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-red);">
                         <div class="sidebar-user-card">
-                            <div class="user-avatar-circle" id="sidebar-avatar-container"><i class="fa-solid fa-user-gear"></i></div>
+                            <div class="user-avatar-circle" id="sidebar-avatar-container"><i class="fa-solid fa-user"></i></div>
                             <div style="overflow:hidden; flex:1;">
                                 <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.85rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
                                 <div id="sidebar-role-txt" style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
                             </div>
                         </div>
 
-                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:8px 12px; font-size:0.8rem; margin-bottom:6px; background:rgba(88,101,242,0.2); border-color:#5865F2;"><i class="fa-brands fa-discord"></i> Discord Koppelen (PFP)</button>
-                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:8px 12px; font-size:0.8rem; margin-bottom:6px;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
-                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; margin-bottom:6px; padding:8px 12px; font-size:0.8rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
-                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:8px 12px; font-size:0.8rem;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
+                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.78rem; margin-bottom:5px; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-camera"></i> Profielfoto Uploaden</button>
+                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.78rem; margin-bottom:5px;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
+                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; margin-bottom:5px; padding:7px 10px; font-size:0.78rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.78rem; margin-bottom:10px;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
+                        
+                        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
+                            <div>&copy; Alle rechten behouden 2026</div>
+                            <div>Gemaakt door ItzChaotic_</div>
+                        </div>
                     </div>
                 </div>
 
@@ -415,7 +427,6 @@
                         <button id="mob-staff-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel</button>
                     </div>
 
-                    <!-- DASHBOARD HEADER (Subtekst definitief weg) -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:14px;">
                         <div>
                             <h1 style="font-size:1.6rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1>
@@ -663,19 +674,19 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
+    <!-- FOOTER HOOFDPAGINA -->
     <footer>
-        <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden.</p>
+        <p>&copy; Alle rechten behouden 2026</p>
         <p>Gemaakt door ItzChaotic_</p>
     </footer>
 
-    <!-- MODAL: DISCORD KOPPELEN (PFP) -->
+    <!-- MODAL: PROFIELFOTO UPLOADEN -->
     <div id="discord-modal">
         <div class="login-box">
-            <h2 style="font-size:1.3rem; margin-bottom:12px;"><i class="fa-brands fa-discord" style="color:#5865F2;"></i> Discord Koppelen</h2>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Voer je Discord avatar afbeelding URL in (bijv. van je Discord profielfoto):</p>
-            <input type="url" id="discord-avatar-url" placeholder="https://cdn.discordapp.com/avatars/..." class="form-input">
-            <button onclick="saveDiscordAvatar()" class="btn-red" style="width:100%; margin-top:6px; background:#5865F2;">Avatar Opslaan</button>
+            <h2 style="font-size:1.3rem; margin-bottom:12px;"><i class="fa-solid fa-camera" style="color:var(--accent-red);"></i> Profielfoto Uploaden</h2>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Kies een afbeelding van je computer. De foto wordt automatisch rond en netjes gecropt:</p>
+            <input type="file" id="pfp-file-input" accept="image/*" class="form-input">
+            <button onclick="saveProfilePicture()" class="btn-red" style="width:100%; margin-top:6px;">Foto Opslaan & Instellen</button>
             <button onclick="closeDiscordModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:10px; cursor:pointer; font-size:0.85rem;">Annuleren</button>
         </div>
     </div>
@@ -763,19 +774,28 @@
         function openDiscordModal() { document.getElementById('discord-modal').style.display = 'flex'; }
         function closeDiscordModal() { document.getElementById('discord-modal').style.display = 'none'; }
 
-        async function saveDiscordAvatar() {
-            const avatarUrl = document.getElementById('discord-avatar-url').value;
-            if (!avatarUrl) return alert('Vul een geldige URL in!');
-            const res = await fetch('/api/staff/update-discord', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser: currentUser.username, avatarUrl }) });
-            if (res.ok) {
-                currentUser.avatarUrl = avatarUrl;
+        // Profielfoto bestand uploaden
+        async function saveProfilePicture() {
+            const fileInput = document.getElementById('pfp-file-input');
+            if (fileInput.files.length === 0) return alert('Selecteer eerst een bestand!');
+            
+            const formData = new FormData();
+            formData.append('pfp', fileInput.files[0]);
+            formData.append('targetUser', currentUser.username);
+
+            const res = await fetch('/api/staff/upload-pfp', { method: 'POST', body: formData });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                currentUser.avatarUrl = data.avatarUrl;
                 sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
-                alert('Discord avatar succesvol gekoppeld!');
+                alert('Profielfoto succesvol opgeslagen!');
                 closeDiscordModal();
                 updateSidebarAvatar();
                 loadData();
+                refreshPortalData();
             } else {
-                alert('Kon avatar niet opslaan.');
+                alert('Kon profielfoto niet opslaan.');
             }
         }
 
@@ -784,7 +804,7 @@
             if (currentUser && currentUser.avatarUrl) {
                 container.innerHTML = `<img src="${currentUser.avatarUrl}" alt="Avatar">`;
             } else {
-                container.innerHTML = `<i class="fa-solid fa-user-gear"></i>`;
+                container.innerHTML = `<i class="fa-solid fa-user"></i>`;
             }
         }
 
@@ -1304,12 +1324,14 @@
             const newRole = document.getElementById(`role-select-${targetUser}`).value;
             await fetch('/api/staff/update-role', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, newRole, adminUser: currentUser.username }) });
             refreshPortalData();
+            loadData();
         }
 
         async function fireStaffMember(targetUser) {
             if (!confirm(`Weet je zeker dat je ${targetUser} wilt ontslaan?`)) return;
             await fetch(`/api/staff/${targetUser}?adminUser=${currentUser.username}`, { method: 'DELETE' });
             refreshPortalData();
+            loadData();
         }
 
         async function addNewStaff() {
@@ -1320,6 +1342,7 @@
             alert(`Toegevoegd! Wachtwoord: ${data.message}`);
             document.getElementById('new-staff-user').value = '';
             refreshPortalData();
+            loadData();
         }
 
         async function submitAbsence() {
