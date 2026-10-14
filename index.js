@@ -34,7 +34,7 @@ let isConnected = false;
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
@@ -80,10 +80,11 @@ function parseCurrency(str) {
     return parseFloat(str.replace(/[^0-9\,\.]/g, '').replace(',', '.')) || 0;
 }
 
+// Volgorde gewijzigd: 'onder directeur' wordt eerst gecheckt zodat deze ORANJE krijgt
 function getRoleColor(role) {
     const r = (role || '').toLowerCase().trim();
-    if (r.includes('directeur')) return 'red';
     if (r.includes('onder directeur')) return 'orange';
+    if (r.includes('directeur')) return 'red';
     if (r.includes('management')) return 'yellow';
     if (r.includes('leidinggevende')) return 'green';
     if (r.includes('senior medewerker')) return 'blue';
@@ -279,6 +280,20 @@ app.get('/api/haulmp', async (req, res) => {
     });
 });
 
+// Profielfoto upload via bestand
+app.post('/api/staff/upload-pfp', upload.single('pfp'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen afbeelding ontvangen.' });
+    const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+    
+    if (isConnected && accountsColl) {
+        await accountsColl.updateOne(
+            { username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } },
+            { $set: { avatarUrl: dataUrl } }
+        );
+    }
+    res.json({ success: true, avatarUrl: dataUrl });
+});
+
 app.post('/api/applications/complete', async (req, res) => {
     if (isConnected && applicationsColl) await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
     res.json({ success: true });
@@ -360,14 +375,6 @@ app.delete('/api/socials/:id', async (req, res) => {
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
-    }
-    res.json({ success: true });
-});
-
-app.post('/api/staff/update-discord', async (req, res) => {
-    const { targetUser, avatarUrl } = req.body;
-    if (isConnected && accountsColl) {
-        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: avatarUrl || '' } });
     }
     res.json({ success: true });
 });
