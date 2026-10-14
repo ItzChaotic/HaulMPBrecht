@@ -125,7 +125,7 @@ clientBot.on('clientReady', () => {
     setTimeout(() => {
         fetchAllHistoricalDiscordLogs();
         fetchApplicationsFromDiscord();
-    }, 500);
+    }, 200);
 });
 
 clientBot.on('messageCreate', (message) => {
@@ -137,7 +137,7 @@ async function fetchApplicationsFromDiscord() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
         if (channel) {
-            const msgs = await channel.messages.fetch({ limit: 50 });
+            const msgs = await channel.messages.fetch({ limit: 30 });
             msgs.forEach(msg => parseAndAddApplication(msg));
         }
     } catch (e) {}
@@ -189,7 +189,7 @@ async function fetchAllHistoricalDiscordLogs() {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
             let lastId = undefined; let fetched = 0; allJobsHistory = [];
-            while (fetched < 100) { // Geoptimaliseerd voor snelheid
+            while (fetched < 50) { 
                 const opt = { limit: 50 }; if (lastId) opt.before = lastId;
                 const msgs = await channel.messages.fetch(opt);
                 if (msgs.size === 0) break;
@@ -365,9 +365,9 @@ app.post('/api/staff/update-password', async (req, res) => {
 });
 
 app.post('/api/staff/update-discord', async (req, res) => {
-    const { targetUser, discordId, avatarUrl } = req.body;
+    const { targetUser, avatarUrl } = req.body;
     if (isConnected && accountsColl) {
-        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { discordId: discordId || '', avatarUrl: avatarUrl || '' } });
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: avatarUrl || '' } });
     }
     res.json({ success: true });
 });
