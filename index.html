@@ -68,18 +68,18 @@
 
         .portal-layout { display: flex; min-height: 100vh; position: relative; }
         
-        /* Zijbalk lay-out fix: nette scrolling en ruimere marges */
+        /* Zijbalk lay-out geoptimaliseerd: Profiel bovenaan */
         .sidebar {
             width: 270px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
-            padding: 20px 16px; display: flex; flex-direction: column; justify-content: space-between; 
+            padding: 20px 16px; display: flex; flex-direction: column; justify-content: flex-start; gap: 15px;
             position: fixed; height: 100vh; z-index: 100; transition: left 0.3s ease; color: #fff;
             overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
         }
-        .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
-        .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 12px 0 6px 8px; }
-        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
+        .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 10px 0 4px 8px; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 3px; }
         .sidebar-menu li button {
-            display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px;
+            display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 8px;
             color: #caa8a8; text-decoration: none; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
         }
         .sidebar-menu li button i { color: var(--accent-red); width: 18px; text-align: center; }
@@ -112,14 +112,11 @@
         .gallery-img, .fleet-img { width: 100%; height: 190px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
 
         .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-        
-        /* PFP Automatisch Rond & Gecropt */
         .member-avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); overflow: hidden; aspect-ratio: 1/1; }
         .member-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
         .member-role { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
 
-        /* Rollen kleuren: Oranje voor Onder Directeur */
         .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
         .role-orange { background: rgba(221, 107, 32, 0.22); color: #ff9d42; border: 1px solid rgba(221, 107, 32, 0.5); }
         .role-yellow { background: rgba(214, 158, 46, 0.18); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
@@ -208,13 +205,13 @@
 
         .sidebar-user-card {
             background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px;
-            padding: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+            padding: 10px; display: flex; align-items: center; gap: 10px; width: 100%;
         }
         .user-avatar-circle { width: 38px; height: 38px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow: hidden; aspect-ratio: 1/1; }
         .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-        .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 15px; }
-        .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 12px; padding: 15px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.2s; }
+        .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 15px; }
+        .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 12px; padding: 15px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
         .social-card:hover { border-color: var(--accent-red); background: rgba(204,0,0,0.1); transform: translateY(-2px); }
         .social-card i { font-size: 1.8rem; color: var(--accent-red); }
 
@@ -366,47 +363,48 @@
         <!-- PERSONEELSPORTAAL -->
         <div id="portal-view" class="page-view">
             <div class="portal-layout">
-                <!-- DESKTOP SIDEBAR (Aangepast voor strakke lay-out) -->
+                <!-- DESKTOP SIDEBAR: Profiel netjes bovenaan en strakke indeling -->
                 <div class="sidebar" id="portal-sidebar">
-                    <div>
-                        <div class="sidebar-brand" onclick="goHome()">
-                            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:28px;">
-                            <span style="font-size:0.85rem; line-height:1.2;">Brecht Transport Personeelsportaal</span>
-                        </div>
-
-                        <div class="sidebar-section-title">HOOFDMENU</div>
-                        <ul class="sidebar-menu">
-                            <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie & Mods</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
-                            <li><button onclick="switchPortalTab('p-tab-socials', this)"><i class="fa-solid fa-share-nodes"></i> Socials Beheren</button></li>
-                            <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
-                        </ul>
-
-                        <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER</div>
-                        <ul class="sidebar-menu">
-                            <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
-                            <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
-                        </ul>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom: 5px;" class="sidebar-brand" onclick="goHome()">
+                        <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:26px;">
+                        <span style="font-size:0.8rem; line-height:1.2; font-weight:bold;">Brecht Transport Portaal</span>
                     </div>
 
-                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-red);">
-                        <div class="sidebar-user-card">
-                            <div class="user-avatar-circle" id="sidebar-avatar-container"><i class="fa-solid fa-user"></i></div>
-                            <div style="overflow:hidden; flex:1;">
-                                <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.85rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
-                                <div id="sidebar-role-txt" style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
-                            </div>
+                    <!-- Gebruiker Profielkaart bovenaan -->
+                    <div class="sidebar-user-card">
+                        <div class="user-avatar-circle" id="sidebar-avatar-container"><i class="fa-solid fa-user"></i></div>
+                        <div style="overflow:hidden; flex:1;">
+                            <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.82rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
+                            <div id="sidebar-role-txt" style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
                         </div>
+                    </div>
 
-                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.78rem; margin-bottom:5px; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-camera"></i> Profielfoto Uploaden</button>
-                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.78rem; margin-bottom:5px;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
-                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; margin-bottom:5px; padding:7px 10px; font-size:0.78rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
-                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.78rem; margin-bottom:10px;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
-                        
-                        <div style="text-align:center; font-size:0.7rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
+                    <div style="display:flex; flex-direction:column; gap:4px; width:100%;">
+                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:6px 8px; font-size:0.75rem; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-crop"></i> Profielfoto Croppen</button>
+                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:6px 8px; font-size:0.75rem;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
+                    </div>
+
+                    <div class="sidebar-section-title">HOOFDMENU</div>
+                    <ul class="sidebar-menu">
+                        <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie & Mods</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-socials', this)"><i class="fa-solid fa-share-nodes"></i> Socials Beheren</button></li>
+                        <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
+                    </ul>
+
+                    <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER</div>
+                    <ul class="sidebar-menu">
+                        <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
+                        <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
+                    </ul>
+
+                    <div style="margin-top:auto; padding-top:10px; border-top:1px solid var(--border-red); display:flex; flex-direction:column; gap:4px; width:100%;">
+                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:6px 8px; font-size:0.75rem;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
+                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; padding:6px 8px; font-size:0.75rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                        <div style="text-align:center; font-size:0.68rem; color:var(--text-muted); margin-top:4px;">
                             <div>&copy; Alle rechten behouden 2026</div>
                             <div>Gemaakt door ItzChaotic_</div>
                         </div>
@@ -680,13 +678,25 @@
         <p>Gemaakt door ItzChaotic_</p>
     </footer>
 
-    <!-- MODAL: PROFIELFOTO UPLOADEN -->
+    <!-- MODAL: PROFIELFOTO CROPPEN & UPLOADEN -->
     <div id="discord-modal">
-        <div class="login-box">
-            <h2 style="font-size:1.3rem; margin-bottom:12px;"><i class="fa-solid fa-camera" style="color:var(--accent-red);"></i> Profielfoto Uploaden</h2>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Kies een afbeelding van je computer. De foto wordt automatisch rond en netjes gecropt:</p>
-            <input type="file" id="pfp-file-input" accept="image/*" class="form-input">
-            <button onclick="saveProfilePicture()" class="btn-red" style="width:100%; margin-top:6px;">Foto Opslaan & Instellen</button>
+        <div class="login-box" style="max-width:440px;">
+            <h2 style="font-size:1.3rem; margin-bottom:10px;"><i class="fa-solid fa-crop" style="color:var(--accent-red);"></i> Profielfoto Croppen & Opslaan</h2>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Selecteer een foto en versleep/zoom om jouw ideale ronde profielfoto te maken:</p>
+            
+            <input type="file" id="pfp-file-input" accept="image/*" class="form-input" onchange="previewCropImage(this)">
+            
+            <div id="crop-preview-area" style="display:none; margin:12px 0; text-align:center;">
+                <div style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; margin: 0 auto; border: 2px solid var(--accent-red); background: #000;">
+                    <canvas id="cropCanvas" width="140" height="140" style="cursor: grab;"></canvas>
+                </div>
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:8px;">
+                    <button type="button" onclick="zoomCrop(0.9)" class="btn-portal" style="padding:4px 10px; font-size:0.75rem;">Zoom -</button>
+                    <button type="button" onclick="zoomCrop(1.1)" class="btn-portal" style="padding:4px 10px; font-size:0.75rem;">Zoom +</button>
+                </div>
+            </div>
+
+            <button onclick="saveCroppedProfilePicture()" class="btn-red" style="width:100%; margin-top:8px;">Foto Opslaan in Database</button>
             <button onclick="closeDiscordModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:10px; cursor:pointer; font-size:0.85rem;">Annuleren</button>
         </div>
     </div>
@@ -724,6 +734,14 @@
         let chartInstance = null;
         let currentLang = 'NL';
         const MAIN_DOMAIN = "brechttransport.nl";
+
+        // Cropper state variables
+        let cropImageObj = new Image();
+        let cropScale = 1;
+        let cropOffsetX = 0;
+        let cropOffsetY = 0;
+        let isDragging = false;
+        let startX = 0, startY = 0;
 
         function formatDateToNL(dateStr) {
             if (!dateStr) return '';
@@ -766,30 +784,80 @@
                 if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) { openLoginModal(); } } else openLoginModal();
             }
             loadData();
+            initCropperEvents();
         });
 
         function openPasswordModal() { document.getElementById('password-modal').style.display = 'flex'; }
         function closePasswordModal() { document.getElementById('password-modal').style.display = 'none'; }
-
         function openDiscordModal() { document.getElementById('discord-modal').style.display = 'flex'; }
         function closeDiscordModal() { document.getElementById('discord-modal').style.display = 'none'; }
 
-        // Profielfoto bestand uploaden
-        async function saveProfilePicture() {
-            const fileInput = document.getElementById('pfp-file-input');
-            if (fileInput.files.length === 0) return alert('Selecteer eerst een bestand!');
-            
-            const formData = new FormData();
-            formData.append('pfp', fileInput.files[0]);
-            formData.append('targetUser', currentUser.username);
+        function previewCropImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    cropImageObj.onload = function() {
+                        document.getElementById('crop-preview-area').style.display = 'block';
+                        cropScale = 1;
+                        cropOffsetX = 0;
+                        cropOffsetY = 0;
+                        drawCropCanvas();
+                    };
+                    cropImageObj.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
-            const res = await fetch('/api/staff/upload-pfp', { method: 'POST', body: formData });
+        function initCropperEvents() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas) return;
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX - cropOffsetX;
+                startY = e.clientY - cropOffsetY;
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                cropOffsetX = e.clientX - startX;
+                cropOffsetY = e.clientY - startY;
+                drawCropCanvas();
+            });
+            window.addEventListener('mouseup', () => { isDragging = false; });
+        }
+
+        function zoomCrop(factor) {
+            cropScale *= factor;
+            drawCropCanvas();
+        }
+
+        function drawCropCanvas() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(canvas.width / 2 + cropOffsetX, canvas.height / 2 + cropOffsetY);
+            ctx.scale(cropScale, cropScale);
+            ctx.drawImage(cropImageObj, -cropImageObj.width / 2, -cropImageObj.height / 2);
+            ctx.restore();
+        }
+
+        async function saveCroppedProfilePicture() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas || !cropImageObj.src) return alert('Selecteer eerst een afbeelding!');
+            const dataUrl = canvas.toDataURL('image/png');
+
+            const res = await fetch('/api/staff/upload-pfp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUser: currentUser.username, pfp: dataUrl })
+            });
             const data = await res.json();
-            
             if (res.ok && data.success) {
                 currentUser.avatarUrl = data.avatarUrl;
                 sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
-                alert('Profielfoto succesvol opgeslagen!');
+                alert('Profielfoto opgeslagen in database!');
                 closeDiscordModal();
                 updateSidebarAvatar();
                 loadData();
@@ -961,10 +1029,10 @@
                         else if (pLower.includes('twitter') || pLower.includes('x')) iconClass = "fa-brands fa-x-twitter";
 
                         if (pubSocials) {
-                            pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="${iconClass}"></i><span style="font-weight:bold;">${s.platform}</span><span style="font-size:0.75rem; color:var(--text-muted);">Bekijk kanaal →</span></a>`);
+                            pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="${iconClass}"></i><span style="font-weight:bold;">${s.platform}</span><span style="font-size:0.75rem; color:var(--text-muted);">Van: ${s.addedBy}</span><span style="font-size:0.72rem; color:var(--accent-red);">Bekijk kanaal →</span></a>`);
                         }
                         if (portalSocials) {
-                            portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:8px; margin-bottom:8px;"><div><b>${s.platform}</b>: <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button></div>`);
+                            portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:8px; margin-bottom:8px;"><div><b>${s.platform}</b> (door ${s.addedBy}): <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button></div>`);
                         }
                     });
                 } else {
@@ -1205,6 +1273,13 @@
             const ctx = document.getElementById('earningsChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
 
+            // Correcte chronologische sortering van weken op basis van nummer
+            const sortedData = [...weeklyData].sort((a, b) => {
+                const numA = parseInt(a.week.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.week.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
             const gradient = ctx.createLinearGradient(0, 0, 0, 200);
             gradient.addColorStop(0, 'rgba(255, 51, 51, 0.4)');
             gradient.addColorStop(1, 'rgba(255, 51, 51, 0.0)');
@@ -1212,10 +1287,10 @@
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: weeklyData.map(w => w.week),
+                    labels: sortedData.map(w => w.week),
                     datasets: [
-                        { label: 'Bedrijf (€)', data: weeklyData.map(w => w.company), borderColor: '#ff3333', backgroundColor: gradient, borderWidth: 3, fill: true, tension: 0.4 },
-                        { label: 'Mijn Inkomsten (€)', data: weeklyData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.4 }
+                        { label: 'Bedrijf (€)', data: sortedData.map(w => w.company), borderColor: '#ff3333', backgroundColor: gradient, borderWidth: 3, fill: true, tension: 0.4 },
+                        { label: 'Mijn Inkomsten (€)', data: sortedData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.4 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8' } } } }
