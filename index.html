@@ -16,7 +16,6 @@
             --bg-base: #0a0303;
             --bg-sidebar: #0d0404;
             --bg-card: rgba(22, 7, 7, 0.88);
-            --bg-card-hover: rgba(35, 10, 10, 0.95);
             --primary: #800000;
             --primary-light: #cc0000;
             --accent-red: #ff3333;
@@ -33,21 +32,20 @@
             position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1350px; width: 96%;
             background: rgba(22, 4, 4, 0.94); backdrop-filter: var(--glass-blur);
             border: 1px solid var(--border-red); border-radius: 16px; padding: 10px 20px;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 15px;
+            display: flex; justify-content: space-between; align-items: center; gap: 15px;
         }
 
         .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; cursor: pointer; flex-shrink: 0; }
         .logo-img { height: 38px; width: auto; object-fit: contain; }
         .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; white-space: nowrap; }
-        .nav-links { display: flex; gap: 12px; list-style: none; align-items: center; flex-wrap: nowrap; }
+        .nav-links { display: flex; gap: 12px; list-style: none; align-items: center; }
         .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .nav-links a:hover { color: #fff; }
 
         .btn-discord {
             background: #5865F2; color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
-            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
         }
-        .btn-discord:hover { background: #4752C4; }
 
         .btn-apply {
             background: linear-gradient(135deg, var(--primary-light), var(--primary));
@@ -60,7 +58,6 @@
             border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important; border: 1px solid var(--border-red);
             display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap;
         }
-        .btn-portal:hover { background: rgba(204, 0, 0, 0.2); border-color: var(--accent-red); }
 
         .container { max-width: 1350px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
         .page-view { display: none; }
@@ -70,7 +67,7 @@
         .sidebar {
             width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
             padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; 
-            position: fixed; height: 100vh; z-index: 100; transition: left 0.3s ease; color: #fff;
+            position: fixed; height: 100vh; z-index: 100; color: #fff;
         }
         .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
         .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 15px 0 8px 10px; }
@@ -79,7 +76,7 @@
             display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
             color: #caa8a8; text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
         }
-        .sidebar-menu li button i, .sidebar-menu li button svg { color: var(--accent-red); width: 18px; height: 18px; text-align: center; fill: var(--accent-red); }
+        .sidebar-menu li button i { color: var(--accent-red); width: 18px; text-align: center; }
         .sidebar-menu li:hover button, .sidebar-menu li.active button {
             background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red);
         }
@@ -87,23 +84,16 @@
         .portal-content { margin-left: 260px; flex: 1; padding: 30px; width: calc(100% - 260px); }
 
         .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .dash-card {
-            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px;
-            display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: var(--glass-blur); transition: 0.2s;
-        }
+        .dash-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
         .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .dash-card-title { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
-        .dash-card-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,51,51,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--accent-red); font-size: 0.95rem; }
+        .dash-card-title { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; }
+        .dash-card-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,51,51,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--accent-red); }
         .dash-card-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 700; color: #fff; }
 
         .dash-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         @media (max-width: 1200px) { .dash-main-row { grid-template-columns: 1fr; } }
 
-        .analytics-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 22px; backdrop-filter: var(--glass-blur); }
-        .live-feed-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 22px; backdrop-filter: var(--glass-blur); }
-        .feed-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-
-        .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
+        .analytics-box, .live-feed-box, .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         .gallery-img, .fleet-img { width: 100%; height: 190px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
 
         .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -123,20 +113,8 @@
 
         .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-red); }
         .form-input { width: 100%; padding: 10px 14px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 8px; font-size: 0.9rem; }
-        .form-input:focus { outline: none; border-color: var(--accent-red); }
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-red:hover { background: var(--accent-red); }
 
-        #login-modal, #password-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px);
-        }
-        .login-box {
-            background: rgba(18, 4, 4, 0.94); border: 1px solid var(--border-red); border-radius: 20px;
-            max-width: 400px; width: 100%; padding: 32px; text-align: center; color: #fff;
-        }
-
-        /* PERSONEELSTABEL (GEEN DUBBELE KNOPPEN) */
         .staff-table-wrapper { width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 10px; }
         .staff-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
         .staff-table th, .staff-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -147,93 +125,22 @@
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
 
-        .mobile-header-bar {
-            display: none; background: rgba(18, 3, 3, 0.96); padding: 10px 14px; border-bottom: 1px solid var(--border-red);
-            position: sticky; top: 0; z-index: 1001; justify-content: space-between; align-items: center; width: 100%; backdrop-filter: blur(10px);
-        }
-
-        .mobile-drawer {
-            display: none; position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh;
-            background: rgba(16, 3, 3, 0.98); backdrop-filter: blur(20px); z-index: 3000; padding: 25px 20px;
-            transition: right 0.3s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.9); color: #fff; border-left: 1px solid var(--border-red); overflow-y: auto;
-        }
-        .mobile-drawer.open { right: 0; display: block; }
-        .mobile-drawer-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 2999;
-        }
-        .mobile-drawer-overlay.open { display: block; }
-
-        .mobile-drawer-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
-        .mobile-drawer-menu a, .mobile-drawer-menu button {
-            display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 16px; border-radius: 10px;
-            color: #fff; text-decoration: none; font-size: 0.95rem; font-weight: 600; background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05); text-align: left; cursor: pointer;
-        }
-
-        .mobile-portal-tabs {
-            display: none; background: rgba(20, 4, 4, 0.9); border: 1px solid var(--border-red); border-radius: 12px;
-            padding: 8px; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; gap: 8px;
-        }
-        .mobile-portal-tabs button {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted);
-            padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-        }
-        .mobile-portal-tabs button.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
-
-        footer { text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border-red); margin-top: 60px; }
-
-        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-red); padding-bottom: 10px; }
-        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
-        .sub-tab-btn.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
-
         .sidebar-user-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
         .user-avatar-circle { width: 38px; height: 38px; border-radius: 10px; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow:hidden; }
         .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* SOCIALS GRID MAIN WEBSITE */
+        #login-modal, #password-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px); }
+        .login-box { background: rgba(18, 4, 4, 0.94); border: 1px solid var(--border-red); border-radius: 20px; max-width: 400px; width: 100%; padding: 32px; text-align: center; color: #fff; }
+
         .social-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 16px; text-align: center; text-decoration: none; color: #fff; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .social-card:hover { border-color: var(--accent-red); transform: translateY(-3px); }
 
-        @media (max-width: 1050px) {
-            nav#main-nav-bar { display: none !important; }
-            .mobile-header-bar { display: flex; }
-            .mobile-drawer { display: block; }
-            .portal-layout { flex-direction: column; }
-            .sidebar { display: none; }
-            .mobile-portal-tabs { display: flex; }
-            .portal-content { margin-left: 0; width: 100%; padding: 15px; }
-        }
+        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-red); padding-bottom: 10px; }
+        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+        .sub-tab-btn.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
     </style>
 </head>
 <body>
-
-    <!-- MOBIELE HEADER -->
-    <div class="mobile-header-bar">
-        <div class="brand-logo" onclick="goHome()">
-            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:32px;">
-            <span style="font-weight:bold; font-size:0.9rem; color:#fff;">Brecht Transport</span>
-        </div>
-        <div style="display:flex; gap:6px; align-items:center;">
-            <button onclick="handleNavLogin()" class="btn-portal" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-lock" style="color:var(--accent-red);"></i> Portaal</button>
-            <button onclick="toggleMobileDrawer()" class="btn-portal" style="padding:6px 10px; border-color:var(--accent-red);"><i class="fa-solid fa-bars" style="color:#fff;"></i></button>
-        </div>
-    </div>
-
-    <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
-    <div class="mobile-drawer" id="mobileDrawer">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:12px;">
-            <b style="font-size:1rem;">Menu</b>
-            <button onclick="toggleMobileDrawer()" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
-        </div>
-        <div class="mobile-drawer-menu">
-            <a href="javascript:void(0);" onclick="goHome(); toggleMobileDrawer();"><i class="fa-solid fa-house"></i> Home</a>
-            <a href="#about-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-circle-info"></i> Over Ons</a>
-            <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> Het Team</a>
-            <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> Vloot</a>
-            <a href="#socials-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-share-nodes"></i> Socials</a>
-            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> Onderweg</a>
-        </div>
-    </div>
 
     <!-- LAPTOP NAVIGATIEBAR -->
     <nav id="main-nav-bar">
@@ -283,20 +190,26 @@
             </div>
 
             <div class="section-header" id="team"><h2>Ons Team</h2></div>
-            <div class="team-grid" id="team-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;"></div>
+            <div class="team-grid" id="team-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                <p style="color:var(--text-muted); text-align:center; grid-column: 1/-1;">Informatie aan het inladen...</p>
+            </div>
 
             <div class="section-header" id="vloot"><h2>Onze Vloot</h2></div>
             <div class="fleet-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
                 <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg" class="fleet-img"><div style="font-weight:bold;">Scania S 2016</div></div>
                 <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png" class="fleet-img"><div style="font-weight:bold;">Volvo FH 16</div></div>
+                <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/RealDaf.png" class="fleet-img"><div style="font-weight:bold;">DAF XF Euro 6</div></div>
             </div>
 
-            <!-- SOCIALS SECTIE NETJES TUSSEN VLOOT EN ONDERWEG -->
             <div class="section-header" id="socials-sec"><h2>Check Onze Socials!</h2></div>
-            <div id="public-socials-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:40px;"></div>
+            <div id="public-socials-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:40px;">
+                <p style="color:var(--text-muted); text-align:center; grid-column: 1/-1;">Informatie aan het inladen...</p>
+            </div>
 
             <div class="section-header" id="activiteit"><h2>Onderweg</h2></div>
-            <div class="trips-card" id="trips-container" style="margin-bottom:40px;"></div>
+            <div class="trips-card" id="trips-container" style="margin-bottom:40px;">
+                <p style="text-align:center; color:var(--text-muted);">Informatie aan het inladen...</p>
+            </div>
         </div>
 
         <!-- PERSONEELSPORTAAL -->
@@ -326,7 +239,6 @@
                     </div>
 
                     <div>
-                        <!-- USER CARD LINKSONDER -->
                         <div class="sidebar-user-card">
                             <div class="user-avatar-circle" id="sidebar-avatar-box"><i class="fa-solid fa-user-gear"></i></div>
                             <div style="overflow:hidden; flex:1;">
@@ -343,7 +255,6 @@
                 </div>
 
                 <div class="portal-content">
-                    <!-- DASHBOARD HEADER ZONDER SUBTEKST -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:14px;">
                         <div>
                             <h1 style="font-size:1.6rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1>
@@ -381,13 +292,13 @@
                             <div>
                                 <div class="live-feed-box">
                                     <h3 style="margin-bottom:12px; font-size:1rem;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
-                                    <div id="live-feed-container"></div>
+                                    <div id="live-feed-container"><p style="color:var(--text-muted); font-size:0.85rem;">Informatie aan het inladen...</p></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TAB: INFORMATIE & MEDEDELINGEN (DATABASE PERSISTENT) -->
+                    <!-- TAB: INFORMATIE & MEDEDELINGEN -->
                     <div id="p-tab-info" class="portal-tab-content" style="display:none;">
                         <div class="sub-tab-bar">
                             <button class="sub-tab-btn active" onclick="switchInfoSubTab('info-sub-view', this)"><i class="fa-solid fa-book-open"></i> Overzicht & Mededelingen</button>
@@ -397,11 +308,11 @@
                         <div id="info-sub-view">
                             <div class="gallery-card" style="margin-bottom:20px;">
                                 <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Belangrijke Mededelingen</h3>
-                                <div id="announcements-display-container" style="margin-top:15px;"></div>
+                                <div id="announcements-display-container" style="margin-top:15px;"><p style="color:var(--text-muted);">Informatie aan het inladen...</p></div>
                             </div>
                             <div class="gallery-card">
                                 <h3><i class="fa-solid fa-folder-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
-                                <div id="info-list-container" style="margin-top:15px;"></div>
+                                <div id="info-list-container" style="margin-top:15px;"><p style="color:var(--text-muted);">Informatie aan het inladen...</p></div>
                             </div>
                         </div>
 
@@ -428,7 +339,7 @@
                             <h3><i class="fa-solid fa-share-nodes" style="color:var(--accent-red);"></i> Social Media Kanaal Toevoegen</h3>
                             <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                                 <select id="soc-platform" class="form-input" style="flex:1; margin:0; background:rgba(0,0,0,0.5);">
-                                    <option value="twitch">Twitch (Live check)</option>
+                                    <option value="twitch">Twitch</option>
                                     <option value="youtube">YouTube</option>
                                     <option value="tiktok">TikTok</option>
                                     <option value="instagram">Instagram</option>
@@ -444,11 +355,11 @@
                     <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-file-signature" style="color:var(--accent-red);"></i> Actieve Sollicitaties</h3>
-                            <div id="applications-open-container" style="margin-top:12px;"></div>
+                            <div id="applications-open-container" style="margin-top:12px;"><p style="color:var(--text-muted);">Informatie aan het inladen...</p></div>
                         </div>
                     </div>
 
-                    <!-- TAB: PERSONEEL BEHEREN (GEEN DUBBELE KNOPPEN + AUTO HIËRARCHIE) -->
+                    <!-- TAB: PERSONEEL BEHEREN -->
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
                         <h3 style="margin-bottom:12px; font-size:1.1rem;"><i class="fa-solid fa-users-gear" style="color:var(--accent-red);"></i> Personeelsoverzicht & Beheer</h3>
                         <div class="staff-table-wrapper">
@@ -457,25 +368,13 @@
                                     <tr>
                                         <th>Gebruiker</th>
                                         <th>Huidige Rol</th>
-                                        <th>Rol Wijzigen (Sla direct op)</th>
+                                        <th>Rol Wijzigen</th>
                                         <th>Wachtwoord Herstellen</th>
                                         <th>Actie</th>
                                     </tr>
                                 </thead>
-                                <tbody id="staff-table-body"></tbody>
+                                <tbody id="staff-table-body"><tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Informatie aan het inladen...</td></tr></tbody>
                             </table>
-                        </div>
-                    </div>
-
-                    <!-- TAB: BADGES & EOTW -->
-                    <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card">
-                            <h3><i class="fa-solid fa-crown" style="color:var(--accent-red);"></i> Chauffeur van de Week</h3>
-                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                                <select id="eotw-select-user" class="form-input" style="flex:1; margin:0; background:rgba(0,0,0,0.5);"></select>
-                                <input type="text" id="eotw-input-reason" placeholder="Reden..." class="form-input" style="flex:2; margin:0;">
-                                <button onclick="setEmployeeOfWeek()" class="btn-red">Instellen</button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -570,7 +469,6 @@
             if (currentUser.canManageStaff) {
                 document.getElementById('mgt-section-head').style.display = 'block';
                 document.getElementById('staff-tab-btn').style.display = 'block';
-                document.getElementById('mgt-tab-btn').style.display = 'block';
                 document.getElementById('info-create-subtab-btn').style.display = 'inline-block';
             }
             refreshPortalData();
@@ -607,7 +505,6 @@
                     if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers;
                 }
 
-                // Team met flexibele kleuren & PFP
                 const teamContainer = document.getElementById('team-container');
                 if (teamContainer && data.drivers_list) {
                     teamContainer.innerHTML = '';
@@ -627,35 +524,41 @@
                     });
                 }
 
-                // Public Socials tussen Vloot en Onderweg
                 const socGrid = document.getElementById('public-socials-grid');
                 if (socGrid && data.socials) {
                     socGrid.innerHTML = '';
-                    data.socials.forEach(s => {
-                        let icon = 'fa-share-nodes';
-                        if (s.platform === 'twitch') icon = 'fa-twitch';
-                        if (s.platform === 'youtube') icon = 'fa-youtube';
-                        if (s.platform === 'tiktok') icon = 'fa-tiktok';
-                        if (s.platform === 'instagram') icon = 'fa-instagram';
+                    if (data.socials.length === 0) {
+                        socGrid.innerHTML = '<p style="color:var(--text-muted); text-align:center; grid-column: 1/-1;">Geen social media kanalen ingesteld.</p>';
+                    } else {
+                        data.socials.forEach(s => {
+                            let icon = 'fa-share-nodes';
+                            if (s.platform === 'twitch') icon = 'fa-twitch';
+                            if (s.platform === 'youtube') icon = 'fa-youtube';
+                            if (s.platform === 'tiktok') icon = 'fa-tiktok';
+                            if (s.platform === 'instagram') icon = 'fa-instagram';
 
-                        socGrid.insertAdjacentHTML('beforeend', `
-                            <a href="${s.url}" target="_blank" class="social-card">
-                                <i class="fa-brands ${icon}" style="font-size:1.8rem; color:var(--accent-red);"></i>
-                                <b style="font-size:0.95rem;">${s.channelName}</b>
-                                <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">${s.platform}</span>
-                            </a>
-                        `);
-                    });
+                            socGrid.insertAdjacentHTML('beforeend', `
+                                <a href="${s.url}" target="_blank" class="social-card">
+                                    <i class="fa-brands ${icon}" style="font-size:1.8rem; color:var(--accent-red);"></i>
+                                    <b style="font-size:0.95rem;">${s.channelName}</b>
+                                    <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">${s.platform}</span>
+                                </a>
+                            `);
+                        });
+                    }
                 }
 
-                // Trips
                 if (Array.isArray(data.recent_jobs)) {
                     const container = document.getElementById('trips-container');
                     if (container) {
                         container.innerHTML = '';
-                        data.recent_jobs.forEach(job => {
-                            container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.9rem;">${job.from} → ${job.to}</div><div style="font-size:0.78rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.85rem;">${job.distance}</div></div>`);
-                        });
+                        if (data.recent_jobs.length === 0) {
+                            container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Geen recente ritten gevonden.</p>';
+                        } else {
+                            data.recent_jobs.forEach(job => {
+                                container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.9rem;">${job.from} → ${job.to}</div><div style="font-size:0.78rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.85rem;">${job.distance}</div></div>`);
+                            });
+                        }
                     }
                 }
             } catch (e) {}
@@ -665,9 +568,25 @@
             const res = await fetch('/api/haulmp');
             const data = await res.json();
 
+            if (data.announcements) {
+                const annContainer = document.getElementById('announcements-display-container');
+                annContainer.innerHTML = data.announcements.length ? '' : '<p style="color:var(--text-muted);">Geen mededelingen.</p>';
+                data.announcements.forEach(a => {
+                    annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px;"><b>${a.title}</b><p style="font-size:0.85rem; margin:4px 0;">${a.content}</p><small style="color:#888;">Door ${a.username || 'Admin'}</small></div>`);
+                });
+            }
+
+            if (data.infoList) {
+                const infoContainer = document.getElementById('info-list-container');
+                infoContainer.innerHTML = data.infoList.length ? '' : '<p style="color:var(--text-muted);">Geen informatie of mods gevonden.</p>';
+                data.infoList.forEach(i => {
+                    infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px;"><b>${i.title}</b><p style="font-size:0.85rem; margin:4px 0;">${i.content}</p></div>`);
+                });
+            }
+
             if (currentUser && currentUser.canManageStaff) {
                 const tableBody = document.getElementById('staff-table-body');
-                if (tableBody) {
+                if (tableBody && data.drivers_list) {
                     tableBody.innerHTML = '';
                     data.drivers_list.filter(m => !m.isDev).forEach(m => {
                         const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
