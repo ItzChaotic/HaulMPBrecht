@@ -35,25 +35,6 @@ const MONGO_URI = process.env.MONGO_URI;
 let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl, socialsColl;
 let isConnected = false;
 
-// In-memory cache voor bliksemsnelle laadtijden
-let cachedData = {
-    deliveries: "0",
-    distance: "0 km",
-    companyEarnings: "€ 0",
-    drivers: "0",
-    drivers_list: [],
-    recent_jobs: [],
-    gallery: [],
-    badges: [],
-    announcements: [],
-    applications: [],
-    infoList: [],
-    convoysList: [],
-    employeeOfTheWeek: {},
-    socials: [],
-    weeklyChartData: []
-};
-
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
@@ -65,7 +46,6 @@ let defaultAccounts = [
     { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
-// Hiërarchie voor automatische sortering
 const ROLE_RANKING = {
     'directeur': 100,
     'onder directeur': 90,
@@ -85,7 +65,6 @@ function getRoleRank(role) {
     return 10;
 }
 
-// Flexibele rolkleur matching (.includes i.p.v. exacte match)
 function getRoleColor(role) {
     const r = (role || '').toLowerCase();
     if (r.includes('directeur') && !r.includes('onder')) return 'red';
@@ -133,7 +112,6 @@ async function connectDB() {
         if (count === 0) {
             await accountsColl.insertMany(defaultAccounts);
         }
-        await updateCache();
     } catch (err) {
         console.error("MongoDB verbinding mislukt:", err.message);
     }
@@ -174,13 +152,8 @@ clientBot.on('clientReady', () => {
 });
 
 clientBot.on('messageCreate', (message) => {
-    if (message.channelId === DISCORD_CHANNEL_ID) {
-        parseAndAddJob(message);
-        updateCache();
-    } else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) {
-        parseAndAddApplication(message);
-        updateCache();
-    }
+    if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
+    else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
 
 async function fetchApplicationsFromDiscord() {
@@ -191,7 +164,6 @@ async function fetchApplicationsFromDiscord() {
             for (const msg of msgs.values()) {
                 await parseAndAddApplication(msg);
             }
-            updateCache();
         }
     } catch (e) {}
 }
@@ -251,12 +223,25 @@ async function fetchAllHistoricalDiscordLogs() {
                 if (msgs.size < 100) break;
             }
             allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
-            updateCache();
         }
     } catch (e) {}
 }
 
-async function updateCache() {
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    let accountsDatabase = defaultAccounts;
+    if (isConnected && accountsColl) {
+        accountsDatabase = await accountsColl.find({}).toArray();
+    }
+    const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
+    if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
+    res.json({ 
+        success: true, username: account.username, role: account.role, avatar: account.avatar || null,
+        color: getRoleColor(account.role), canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) 
+    });
+});
+
+app.get('/api/haulmp', async (req, res) => {
     const totalDeliveries = allJobsHistory.length;
     const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
     const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
@@ -308,7 +293,7 @@ async function updateCache() {
         weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
     });
 
-    cachedData = {
+    res.json({
         deliveries: totalDeliveries.toString(),
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
         companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
@@ -319,28 +304,10 @@ async function updateCache() {
         announcements: announcementsList, applications: applicationsList,
         infoList, convoysList, employeeOfTheWeek, socials: socialsList,
         weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
-    };
-}
-
-app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
-    let accountsDatabase = defaultAccounts;
-    if (isConnected && accountsColl) {
-        accountsDatabase = await accountsColl.find({}).toArray();
-    }
-    const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
-    if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
-    res.json({ 
-        success: true, username: account.username, role: account.role, avatar: account.avatar || null,
-        color: getRoleColor(account.role), canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) 
     });
 });
 
-app.get('/api/haulmp', (req, res) => {
-    res.json(cachedData);
-});
-
-// DISCORD OAUTH2 PFP LINKING
+// DISCORD OAUTH2 PFP LINKING (Gecorrigeerd met DISCORD_CLIENT_ID)
 app.get('/api/auth/discord/login', (req, res) => {
     const user = req.query.user;
     const redirectUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify&state=${encodeURIComponent(user)}`;
@@ -376,7 +343,6 @@ app.get('/api/auth/discord/callback', async (req, res) => {
                 { username: { $regex: new RegExp(`^${state}$`, 'i') } },
                 { $set: { avatar: avatarUrl, discordId: discordUser.id } }
             );
-            await updateCache();
         }
         res.redirect('/?discord_success=true');
     } catch (e) {
@@ -388,26 +354,17 @@ app.get('/api/auth/discord/callback', async (req, res) => {
 app.post('/api/socials', async (req, res) => {
     const { platform, url, channelName } = req.body;
     const socObj = { id: "soc-" + Date.now(), platform, url, channelName };
-    if (isConnected && socialsColl) {
-        await socialsColl.insertOne(socObj);
-        await updateCache();
-    }
+    if (isConnected && socialsColl) await socialsColl.insertOne(socObj);
     res.json({ success: true });
 });
 
 app.delete('/api/socials/:id', async (req, res) => {
-    if (isConnected && socialsColl) {
-        await socialsColl.deleteOne({ id: req.params.id });
-        await updateCache();
-    }
+    if (isConnected && socialsColl) await socialsColl.deleteOne({ id: req.params.id });
     res.json({ success: true });
 });
 
 app.post('/api/applications/complete', async (req, res) => {
-    if (isConnected && applicationsColl) {
-        await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
-        await updateCache();
-    }
+    if (isConnected && applicationsColl) await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
     res.json({ success: true });
 });
 
@@ -424,18 +381,12 @@ app.post('/api/badges', async (req, res) => {
     if (alreadyHas) return res.status(400).json({ success: false, message: 'Deze werknemer heeft deze badge al!' });
 
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
-    if (isConnected && badgesColl) {
-        await badgesColl.insertOne(badgeObj);
-        await updateCache();
-    }
+    if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
     res.json({ success: true });
 });
 
 app.post('/api/badges/delete', async (req, res) => {
-    if (isConnected && badgesColl) {
-        await badgesColl.deleteOne({ id: req.body.badgeId });
-        await updateCache();
-    }
+    if (isConnected && badgesColl) await badgesColl.deleteOne({ id: req.body.badgeId });
     res.json({ success: true });
 });
 
@@ -453,19 +404,13 @@ app.post('/api/info', upload.single('file'), async (req, res) => {
         username: req.body.username, 
         date: new Date().toLocaleDateString('nl-NL') 
     };
-    if (isConnected && infoColl) {
-        await infoColl.insertOne(infoObj);
-        await updateCache();
-    }
+    if (isConnected && infoColl) await infoColl.insertOne(infoObj);
     res.json({ success: true });
 });
 
 app.post('/api/convoys', async (req, res) => {
     const convObj = { id: "conv-" + Date.now(), ...req.body };
-    if (isConnected && convoysColl) {
-        await convoysColl.insertOne(convObj);
-        await updateCache();
-    }
+    if (isConnected && convoysColl) await convoysColl.insertOne(convObj);
     res.json({ success: true });
 });
 
@@ -473,24 +418,19 @@ app.post('/api/eotw', async (req, res) => {
     if (isConnected && eotwColl) {
         await eotwColl.deleteMany({});
         await eotwColl.insertOne({ username: req.body.targetUser, reason: req.body.reason, setBy: req.body.username });
-        await updateCache();
     }
     res.json({ success: true });
 });
 
 app.post('/api/announcements', async (req, res) => {
     const annObj = { id: "ann-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') };
-    if (isConnected && announcementsColl) {
-        await announcementsColl.insertOne(annObj);
-        await updateCache();
-    }
+    if (isConnected && announcementsColl) await announcementsColl.insertOne(annObj);
     res.json({ success: true });
 });
 
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
-        await updateCache();
     }
     res.json({ success: true });
 });
@@ -502,7 +442,6 @@ app.post('/api/staff/add', async (req, res) => {
         const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
         if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
         await accountsColl.insertOne(newAcc);
-        await updateCache();
     }
     res.json({ success: true, message: pw });
 });
@@ -510,7 +449,6 @@ app.post('/api/staff/add', async (req, res) => {
 app.post('/api/staff/update-role', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
-        await updateCache();
     }
     res.json({ success: true });
 });
@@ -518,7 +456,6 @@ app.post('/api/staff/update-role', async (req, res) => {
 app.delete('/api/staff/:targetUser', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
-        await updateCache();
     }
     res.json({ success: true });
 });
@@ -530,7 +467,6 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     
     if (isConnected && galleryColl) {
         await galleryColl.insertOne(photoObj);
-        await updateCache();
     }
     res.json({ success: true });
 });
