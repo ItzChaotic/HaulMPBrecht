@@ -80,7 +80,19 @@ function parseCurrency(str) {
     return parseFloat(str.replace(/[^0-9\,\.]/g, '').replace(',', '.')) || 0;
 }
 
-// Volgorde gewijzigd: 'onder directeur' wordt eerst gecheckt zodat deze ORANJE krijgt
+function getRoleWeight(role) {
+    const r = (role || '').toLowerCase();
+    if (r.includes('directeur') && !r.includes('onder')) return 8;
+    if (r.includes('onder directeur')) return 7;
+    if (r.includes('management')) return 6;
+    if (r.includes('leidinggevende')) return 5;
+    if (r.includes('senior medewerker')) return 4;
+    if (r.includes('medewerker') && !r.includes('senior') && !r.includes('junior')) return 3;
+    if (r.includes('junior medewerker')) return 2;
+    if (r.includes('chauffeur in opleiding')) return 1;
+    return 0;
+}
+
 function getRoleColor(role) {
     const r = (role || '').toLowerCase().trim();
     if (r.includes('onder directeur')) return 'orange';
@@ -116,7 +128,8 @@ function getISOWeekKey(timestamp) {
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     const yearStart = new Date(d.getFullYear(), 0, 1);
-    return `Wk ${Math.ceil((((d - yearStart) / 86400000) + 1) / 7)}`;
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return `Wk ${weekNo}`;
 }
 
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -190,7 +203,7 @@ async function fetchAllHistoricalDiscordLogs() {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
             let lastId = undefined; let fetched = 0; allJobsHistory = [];
-            while (fetched < 50) { 
+            while (fetched < 100) { 
                 const opt = { limit: 50 }; if (lastId) opt.before = lastId;
                 const msgs = await channel.messages.fetch(opt);
                 if (msgs.size === 0) break;
@@ -244,10 +257,10 @@ app.get('/api/haulmp', async (req, res) => {
         } catch (e) {}
     }
 
-    const formattedDrivers = accountsDatabase.map(m => {
+    let formattedDrivers = accountsDatabase.map(m => {
         const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
         return {
-            username: m.username, role: m.role, color: getRoleColor(m.role), isDev: !!m.isDev,
+            username: m.username, role: m.role, weight: getRoleWeight(m.role), color: getRoleColor(m.role), isDev: !!m.isDev,
             avatarUrl: m.avatarUrl || '', discordId: m.discordId || '',
             deliveries: userJobs.length,
             distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
@@ -256,6 +269,8 @@ app.get('/api/haulmp', async (req, res) => {
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
     });
+
+    formattedDrivers.sort((a, b) => b.weight - a.weight);
 
     const weeklyChartData = {};
     allJobsHistory.forEach(j => {
@@ -276,11 +291,10 @@ app.get('/api/haulmp', async (req, res) => {
         gallery: galleryPhotos, badges: customBadges,
         announcements: announcementsList, applications: applicationsList,
         infoList, convoysList, socialsList, employeeOfTheWeek,
-        weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
+        weeklyChartData: Object.values(weeklyChartData).reverse()
     });
 });
 
-// Profielfoto upload via bestand
 app.post('/api/staff/upload-pfp', upload.single('pfp'), async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: 'Geen afbeelding ontvangen.' });
     const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
