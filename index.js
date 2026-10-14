@@ -14,7 +14,7 @@ app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 15 * 1024 * 1024 }
+    limits: { fileSize: 25 * 1024 * 1024 }
 });
 
 app.use((req, res, next) => {
@@ -36,7 +36,7 @@ let isConnected = false;
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
@@ -45,13 +45,9 @@ let defaultAccounts = [
 ];
 
 async function connectDB() {
-    if (!MONGO_URI) {
-        console.error("❌ BELANGRIJK: Geen MONGO_URI gevonden in Environment Variables! Alles wordt lokaal opgeslagen en gereset bij een herstart.");
-        return;
-    }
+    if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld."); return; }
     try {
-        console.log("⏳ Bezig met verbinden naar MongoDB Atlas...");
-        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
+        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
         db = client.db('brecht_transport');
         
@@ -65,16 +61,20 @@ async function connectDB() {
         eotwColl = db.collection('eotw');
 
         isConnected = true;
-        console.log("✅ Succesvol verbonden met MongoDB Atlas! Data blijft nu permanent bewaard.");
+        console.log("Verbonden met MongoDB Atlas!");
 
         const count = await accountsColl.countDocuments();
         if (count === 0) {
             await accountsColl.insertMany(defaultAccounts);
-            console.log("ℹ️ Standaard accounts aangemaakt in MongoDB.");
+        } else {
+            // Zorg dat ItzChaotic_ de specifieke rol behoudt/krijgt
+            await accountsColl.updateOne(
+                { username: { $regex: /^ItzChaotic_$/i } },
+                { $set: { role: "Onder Directeur & Development" } }
+            );
         }
     } catch (err) {
-        console.error("❌ FOUT BIJ MONGOOSE/MONGODB VERBINDING:", err.message);
-        console.error("Controleer of je IP-adres in MongoDB Atlas openstaat (0.0.0.0/0) en je wachtwoord klopt.");
+        console.error("MongoDB verbinding mislukt:", err.message);
     }
 }
 connectDB();
@@ -235,8 +235,12 @@ app.get('/api/haulmp', async (req, res) => {
 
     const formattedDrivers = accountsDatabase.map(m => {
         const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
+        let displayRole = m.role;
+        if (m.username.toLowerCase() === 'itzchaotic_') {
+            displayRole = "Onder Directeur & Development";
+        }
         return {
-            username: m.username, role: m.role, color: getRoleColor(m.role), isDev: !!m.isDev,
+            username: m.username, role: displayRole, color: getRoleColor(displayRole), isDev: !!m.isDev,
             deliveries: userJobs.length,
             distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
             earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
@@ -295,8 +299,21 @@ app.post('/api/badges/delete', async (req, res) => {
     res.json({ success: true });
 });
 
-app.post('/api/info', async (req, res) => {
-    const infoObj = { id: "info-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') };
+// NIEUW: Informatie / Mod Posten met optionele bestandsupload via verkenner
+app.post('/api/info', upload.single('file'), async (req, res) => {
+    let fileUrl = req.body.link || '';
+    if (req.file) {
+        fileUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+    }
+    const infoObj = {
+        id: "info-" + Date.now(),
+        title: req.body.title,
+        content: req.body.content,
+        link: fileUrl,
+        filename: req.file ? req.file.originalname : null,
+        username: req.body.username,
+        date: new Date().toLocaleDateString('nl-NL')
+    };
     if (isConnected && infoColl) await infoColl.insertOne(infoObj);
     res.json({ success: true });
 });
@@ -360,9 +377,6 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     
     if (isConnected && galleryColl) {
         await galleryColl.insertOne(photoObj);
-        console.log("📸 Foto succesvol opgeslagen in MongoDB Atlas!");
-    } else {
-        console.log("⚠️ Let op: Geen actieve database-verbinding, foto kon niet permanent worden opgeslagen.");
     }
     res.json({ success: true });
 });
