@@ -14,7 +14,7 @@ app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 25 * 1024 * 1024 }
+    limits: { fileSize: 30 * 1024 * 1024 }
 });
 
 app.use((req, res, next) => {
@@ -47,7 +47,7 @@ let defaultAccounts = [
 async function connectDB() {
     if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld."); return; }
     try {
-        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
         await client.connect();
         db = client.db('brecht_transport');
         
@@ -66,12 +66,6 @@ async function connectDB() {
         const count = await accountsColl.countDocuments();
         if (count === 0) {
             await accountsColl.insertMany(defaultAccounts);
-        } else {
-            // Zorg dat ItzChaotic_ de specifieke rol behoudt/krijgt
-            await accountsColl.updateOne(
-                { username: { $regex: /^ItzChaotic_$/i } },
-                { $set: { role: "Onder Directeur & Development" } }
-            );
         }
     } catch (err) {
         console.error("MongoDB verbinding mislukt:", err.message);
@@ -199,7 +193,6 @@ app.post('/api/login', async (req, res) => {
     if (isConnected && accountsColl) {
         accountsDatabase = await accountsColl.find({}).toArray();
     }
-
     const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
     if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
     res.json({ success: true, username: account.username, role: account.role, color: getRoleColor(account.role), canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) });
@@ -235,12 +228,8 @@ app.get('/api/haulmp', async (req, res) => {
 
     const formattedDrivers = accountsDatabase.map(m => {
         const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
-        let displayRole = m.role;
-        if (m.username.toLowerCase() === 'itzchaotic_') {
-            displayRole = "Onder Directeur & Development";
-        }
         return {
-            username: m.username, role: displayRole, color: getRoleColor(displayRole), isDev: !!m.isDev,
+            username: m.username, role: m.role, color: getRoleColor(m.role), isDev: !!m.isDev,
             deliveries: userJobs.length,
             distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
             earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
@@ -299,20 +288,19 @@ app.post('/api/badges/delete', async (req, res) => {
     res.json({ success: true });
 });
 
-// NIEUW: Informatie / Mod Posten met optionele bestandsupload via verkenner
 app.post('/api/info', upload.single('file'), async (req, res) => {
-    let fileUrl = req.body.link || '';
+    let fileLink = req.body.link || '';
     if (req.file) {
-        fileUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+        fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
     }
-    const infoObj = {
-        id: "info-" + Date.now(),
-        title: req.body.title,
-        content: req.body.content,
-        link: fileUrl,
-        filename: req.file ? req.file.originalname : null,
-        username: req.body.username,
-        date: new Date().toLocaleDateString('nl-NL')
+    const infoObj = { 
+        id: "info-" + Date.now(), 
+        title: req.body.title, 
+        content: req.body.content, 
+        link: fileLink, 
+        fileName: req.file ? req.file.originalname : null,
+        username: req.body.username, 
+        date: new Date().toLocaleDateString('nl-NL') 
     };
     if (isConnected && infoColl) await infoColl.insertOne(infoObj);
     res.json({ success: true });
@@ -382,9 +370,7 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
 });
 
 if (DISCORD_BOT_TOKEN) {
-    clientBot.login(DISCORD_BOT_TOKEN).catch(err => {
-        console.error("Kon niet inloggen bij Discord:", err.message);
-    });
+    clientBot.login(DISCORD_BOT_TOKEN).catch(err => {});
 }
 
 app.listen(PORT, () => console.log(`Server actief op poort ${PORT}`));
