@@ -81,7 +81,7 @@ function parseCurrency(str) {
     return parseFloat(str.replace(/[^0-9\,\.]/g, '').replace(',', '.')) || 0;
 }
 
-// Unieke kleur per rol
+// Unieke kleur per specifieke rol
 function getRoleColor(role) {
     const r = (role || '').toLowerCase().trim();
     if (r === 'directeur') return 'red';
