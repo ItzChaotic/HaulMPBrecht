@@ -26,7 +26,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        html, body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; width: 100%; overflow-x: hidden; }
+        html, body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; width: 100%; overflow-x: hidden; display: flex; flex-direction: column; }
 
         nav {
             position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1350px; width: 96%;
@@ -55,7 +55,7 @@
         }
         .btn-portal:hover { background: rgba(204, 0, 0, 0.2); border-color: var(--accent-red); }
 
-        .container { max-width: 1250px; margin: 0 auto; padding: 0 20px; width: 100%; }
+        .container { max-width: 1250px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
         .page-view { display: none; }
         .page-view.active { display: block; }
 
@@ -102,7 +102,6 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
-        /* INLOGSCHERM MET DE 3 TRUCKS ACHTERGROND */
         #login-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(8, 2, 2, 0.82), rgba(8, 2, 2, 0.92)), 
@@ -127,13 +126,11 @@
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
 
-        /* MODERNE MOBIELE HEADER BAR */
         .mobile-header-bar {
             display: none; background: rgba(18, 3, 3, 0.96); padding: 10px 14px; border-bottom: 1px solid var(--border-red);
             position: sticky; top: 0; z-index: 1001; justify-content: space-between; align-items: center; width: 100%; backdrop-filter: blur(10px);
         }
 
-        /* MODERNE MOBIELE DRAWER (ZIJMENU) */
         .mobile-drawer {
             display: none; position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh;
             background: rgba(16, 3, 3, 0.98); backdrop-filter: blur(20px); z-index: 3000; padding: 25px 20px;
@@ -154,7 +151,6 @@
             border: 1px solid rgba(255,255,255,0.05); text-align: left; cursor: pointer; transition: 0.2s;
         }
         .mobile-drawer-menu a i, .mobile-drawer-menu button i { color: var(--accent-red); font-size: 1.1rem; width: 20px; text-align: center; }
-        .mobile-drawer-menu a:active, .mobile-drawer-menu button:active { background: rgba(204,0,0,0.25); border-color: var(--accent-red); }
 
         .mobile-portal-tabs {
             display: none; background: rgba(20, 4, 4, 0.9); border: 1px solid var(--border-red); border-radius: 12px;
@@ -168,6 +164,13 @@
 
         .rotate-arrow { transition: transform 0.3s ease; display: inline-block; }
         .rotate-arrow.open { transform: rotate(180deg); }
+
+        /* FOOTER STYLING */
+        footer {
+            text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem;
+            border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); backdrop-filter: blur(10px);
+        }
+        footer p { margin: 3px 0; }
 
         @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
@@ -197,7 +200,6 @@
         </div>
     </div>
 
-    <!-- MOBIELE OVERLAY EN ZIJMENU (DRAWER) -->
     <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
     <div class="mobile-drawer" id="mobileDrawer">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:12px;">
@@ -220,7 +222,7 @@
         </div>
     </div>
 
-    <!-- LAPTOP DESKTOP NAVIGATIEBAR -->
+    <!-- LAPTOP NAVIGATIEBAR -->
     <nav id="main-nav-bar">
         <div onclick="goHome()" class="brand-logo">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img">
@@ -305,7 +307,7 @@
                     <div>
                         <div class="sidebar-brand" onclick="goHome()">
                             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:28px;">
-                            <span>BRECHT PORTAL</span>
+                            <span style="font-size:0.85rem; line-height:1.2;">Brecht Transport Personeelsportaal</span>
                         </div>
                         <ul class="sidebar-menu">
                             <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button></li>
@@ -325,7 +327,7 @@
                 </div>
 
                 <div class="portal-content">
-                    <!-- MOBIELE HORIZONTALE TABBAR VOOR PERSONEELSPORTAAL -->
+                    <!-- MOBIELE TABBAR -->
                     <div class="mobile-portal-tabs" id="mobilePortalTabs">
                         <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
                         <button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Info</button>
@@ -352,7 +354,6 @@
                             <p id="eotw-reason" style="color:var(--text-muted); font-style:italic;">"Uitstekende prestaties!"</p>
                         </div>
 
-                        <!-- Eigen Wachtwoord Wijzigen (Voor IEDEREEN) -->
                         <div class="gallery-card" style="margin-bottom:20px;">
                             <h3><i class="fa-solid fa-key" style="color:var(--accent-red);"></i> Mijn Wachtwoord Wijzigen</h3>
                             <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
@@ -395,8 +396,9 @@
                             <h3><i class="fa-solid fa-plus" style="color:var(--accent-red);"></i> Nieuwe Informatie / Mod Posten</h3>
                             <input type="text" id="info-title" placeholder="Titel..." class="form-input">
                             <textarea id="info-content" placeholder="Omschrijving..." class="form-input" style="height:70px;"></textarea>
-                            <input type="text" id="info-link" placeholder="Download link (optioneel)" class="form-input">
-                            <button onclick="postInfo()" class="btn-red">Posten</button>
+                            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:4px;">Bestand selecteren (optioneel):</label>
+                            <input type="file" id="info-file" class="form-input" accept=".zip,.scs,.rar,.pdf,.png,.jpg,.jpeg">
+                            <button onclick="postInfo()" class="btn-red" style="margin-top:10px;">Posten</button>
                         </div>
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-book-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
@@ -507,6 +509,12 @@
             </div>
         </div>
     </div>
+
+    <!-- FOOTER OVERAL -->
+    <footer>
+        <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden.</p>
+        <p>Gemaakt door ItzChaotic_</p>
+    </footer>
 
     <!-- INLOGSCHERM -->
     <div id="login-modal">
@@ -724,7 +732,15 @@
             const infoContainer = document.getElementById('info-list-container');
             infoContainer.innerHTML = '';
             data.infoList?.forEach(i => {
-                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px; border-left:3px solid var(--accent-red);"><b>${i.title}</b><p style="font-size:0.85rem; margin:4px 0;">${i.content}</p>${i.link ? `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;"><i class="fa-solid fa-download"></i> Download</a>` : ''}</div>`);
+                let fileAction = '';
+                if (i.link) {
+                    if (i.link.startsWith('data:')) {
+                        fileAction = `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;"><i class="fa-solid fa-download"></i> Download ${i.fileName || 'Bestand'}</a>`;
+                    } else {
+                        fileAction = `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;"><i class="fa-solid fa-download"></i> Download</a>`;
+                    }
+                }
+                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px; border-left:3px solid var(--accent-red);"><b>${i.title}</b><p style="font-size:0.85rem; margin:4px 0;">${i.content}</p>${fileAction}</div>`);
             });
 
             const convContainer = document.getElementById('convoys-list-container');
@@ -903,9 +919,26 @@
         async function postInfo() {
             const title = document.getElementById('info-title').value;
             const content = document.getElementById('info-content').value;
-            const link = document.getElementById('info-link').value;
-            await fetch('/api/info', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, link, username: currentUser.username }) });
-            refreshPortalData();
+            const fileInput = document.getElementById('info-file');
+            
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('content', content);
+            formData.append('username', currentUser.username);
+            if (fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            const res = await fetch('/api/info', { method: 'POST', body: formData });
+            if (res.ok) {
+                alert('Informatie succesvol gepost!');
+                document.getElementById('info-title').value = '';
+                document.getElementById('info-content').value = '';
+                fileInput.value = '';
+                refreshPortalData();
+            } else {
+                alert('Fout bij het plaatsen van informatie.');
+            }
         }
 
         async function postConvoy() {
