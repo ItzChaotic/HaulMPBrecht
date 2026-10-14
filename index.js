@@ -109,9 +109,7 @@ async function connectDB() {
         console.log("Verbonden met MongoDB Atlas!");
 
         const count = await accountsColl.countDocuments();
-        if (count === 0) {
-            await accountsColl.insertMany(defaultAccounts);
-        }
+        if (count === 0) await accountsColl.insertMany(defaultAccounts);
     } catch (err) {
         console.error("MongoDB verbinding mislukt:", err.message);
     }
@@ -141,6 +139,16 @@ function getISOWeekKey(timestamp) {
     return `Wk ${Math.ceil((((d - yearStart) / 86400000) + 1) / 7)}`;
 }
 
+// Helper om te controleren of een rit in de huidige week valt (vanaf afgelopen maandag)
+function isCurrentWeek(timestamp) {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(now.setDate(diffToMonday));
+    monday.setHours(0, 0, 0, 0);
+    return timestamp >= monday.getTime();
+}
+
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 clientBot.on('clientReady', () => {
@@ -160,10 +168,8 @@ async function fetchApplicationsFromDiscord() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
         if (channel) {
-            const msgs = await channel.messages.fetch({ limit: 100 });
-            for (const msg of msgs.values()) {
-                await parseAndAddApplication(msg);
-            }
+            const msgs = await channel.messages.fetch({ limit: 50 });
+            for (const msg of msgs.values()) await parseAndAddApplication(msg);
         }
     } catch (e) {}
 }
@@ -214,13 +220,13 @@ async function fetchAllHistoricalDiscordLogs() {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
             let lastId = undefined; let fetched = 0; allJobsHistory = [];
-            while (fetched < 300) {
-                const opt = { limit: 100 }; if (lastId) opt.before = lastId;
+            while (fetched < 150) { // Beperkt tot 150 voor maximale snelheid
+                const opt = { limit: 50 }; if (lastId) opt.before = lastId;
                 const msgs = await channel.messages.fetch(opt);
                 if (msgs.size === 0) break;
                 msgs.forEach(msg => parseAndAddJob(msg));
                 lastId = msgs.last().id; fetched += msgs.size;
-                if (msgs.size < 100) break;
+                if (msgs.size < 50) break;
             }
             allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
         }
@@ -230,9 +236,7 @@ async function fetchAllHistoricalDiscordLogs() {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     let accountsDatabase = defaultAccounts;
-    if (isConnected && accountsColl) {
-        accountsDatabase = await accountsColl.find({}).toArray();
-    }
+    if (isConnected && accountsColl) accountsDatabase = await accountsColl.find({}).toArray();
     const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
     if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
     res.json({ 
@@ -242,9 +246,12 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/api/haulmp', async (req, res) => {
-    const totalDeliveries = allJobsHistory.length;
-    const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
-    const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
+    // Filter ritten op de huidige week voor snelle prestaties per week
+    const currentWeekJobs = allJobsHistory.filter(j => isCurrentWeek(j.timestamp));
+
+    const totalDeliveries = currentWeekJobs.length;
+    const totalDistanceKm = currentWeekJobs.reduce((acc, curr) => acc + curr.kmAmount, 0);
+    const totalCompanyEarnings = currentWeekJobs.reduce((acc, curr) => acc + curr.paidAmount, 0);
 
     let accountsDatabase = defaultAccounts;
     let customBadges = [];
@@ -272,26 +279,17 @@ app.get('/api/haulmp', async (req, res) => {
     }
 
     const formattedDrivers = accountsDatabase.map(m => {
-        const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
+        const userWeekJobs = currentWeekJobs.filter(j => isDriverMatch(j.driver, m.username));
         return {
             username: m.username, role: m.role, color: getRoleColor(m.role), rank: getRoleRank(m.role), isDev: !!m.isDev,
             avatar: m.avatar || null,
-            deliveries: userJobs.length,
-            distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
-            earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
-            userJobs: userJobs.slice(0, 15),
+            deliveries: userWeekJobs.length,
+            distance: `${userWeekJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
+            earnings: `€ ${userWeekJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
+            userJobs: userWeekJobs.slice(0, 10),
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
-    }).sort((a, b) => b.rank - a.rank); // Automatisch hoogste rang bovenaan!
-
-    const weeklyChartData = {};
-    allJobsHistory.forEach(j => {
-        const w = j.weekKey || 'Wk 1';
-        if (!weeklyChartData[w]) weeklyChartData[w] = { week: w, company: 0, drivers: {} };
-        weeklyChartData[w].company += j.paidAmount;
-        const dc = j.driver.toLowerCase().replace(/[^a-z0-9]/g, '');
-        weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
-    });
+    }).sort((a, b) => b.rank - a.rank);
 
     res.json({
         deliveries: totalDeliveries.toString(),
@@ -299,15 +297,26 @@ app.get('/api/haulmp', async (req, res) => {
         companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
         drivers: formattedDrivers.filter(d => !d.isDev).length.toString(),
         drivers_list: formattedDrivers,
-        recent_jobs: allJobsHistory.slice(0, 10),
+        recent_jobs: allJobsHistory.slice(0, 10), // Laatste 10 ritten onderweg
         gallery: galleryPhotos, badges: customBadges,
         announcements: announcementsList, applications: applicationsList,
         infoList, convoysList, employeeOfTheWeek, socials: socialsList,
-        weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
+        weeklyChartData: []
     });
 });
 
-// DISCORD OAUTH2 PFP LINKING (Gecorrigeerd met DISCORD_CLIENT_ID)
+// Verwijder endpoints voor mededelingen en info
+app.delete('/api/announcements/:id', async (req, res) => {
+    if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.delete('/api/info/:id', async (req, res) => {
+    if (isConnected && infoColl) await infoColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+// OAuth2 Discord
 app.get('/api/auth/discord/login', (req, res) => {
     const user = req.query.user;
     const redirectUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify&state=${encodeURIComponent(user)}`;
@@ -350,7 +359,6 @@ app.get('/api/auth/discord/callback', async (req, res) => {
     }
 });
 
-// SOCIALS API
 app.post('/api/socials', async (req, res) => {
     const { platform, url, channelName } = req.body;
     const socObj = { id: "soc-" + Date.now(), platform, url, channelName };
@@ -371,15 +379,6 @@ app.post('/api/applications/complete', async (req, res) => {
 app.post('/api/badges', async (req, res) => {
     const { title, targetUser } = req.body;
     if (!title || !targetUser) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
-
-    let accountsList = isConnected && accountsColl ? await accountsColl.find({}).toArray() : defaultAccounts;
-    const workerExists = accountsList.some(acc => acc.username.toLowerCase() === targetUser.trim().toLowerCase());
-    if (!workerExists) return res.status(400).json({ success: false, message: 'Deze gebruiker werkt niet bij ons transportbedrijf!' });
-
-    let existingBadges = isConnected && badgesColl ? await badgesColl.find({}).toArray() : [];
-    const alreadyHas = existingBadges.some(b => b.title.toLowerCase() === title.trim().toLowerCase() && b.targetUser.toLowerCase() === targetUser.trim().toLowerCase());
-    if (alreadyHas) return res.status(400).json({ success: false, message: 'Deze werknemer heeft deze badge al!' });
-
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
     res.json({ success: true });
@@ -396,13 +395,9 @@ app.post('/api/info', upload.single('file'), async (req, res) => {
         fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
     }
     const infoObj = { 
-        id: "info-" + Date.now(), 
-        title: req.body.title, 
-        content: req.body.content, 
-        link: fileLink, 
-        fileName: req.file ? req.file.originalname : null,
-        username: req.body.username, 
-        date: new Date().toLocaleDateString('nl-NL') 
+        id: "info-" + Date.now(), title: req.body.title, content: req.body.content, 
+        link: fileLink, fileName: req.file ? req.file.originalname : null,
+        username: req.body.username, date: new Date().toLocaleDateString('nl-NL') 
     };
     if (isConnected && infoColl) await infoColl.insertOne(infoObj);
     res.json({ success: true });
@@ -439,8 +434,6 @@ app.post('/api/staff/add', async (req, res) => {
     const pw = "Brecht" + Math.floor(1000 + Math.random() * 9000);
     const newAcc = { username: req.body.username.trim(), password: pw, role: req.body.role.trim() };
     if (isConnected && accountsColl) {
-        const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
-        if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
         await accountsColl.insertOne(newAcc);
     }
     res.json({ success: true, message: pw });
@@ -456,17 +449,6 @@ app.post('/api/staff/update-role', async (req, res) => {
 app.delete('/api/staff/:targetUser', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
-    }
-    res.json({ success: true });
-});
-
-app.post('/api/gallery', upload.single('photo'), async (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false });
-    const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
-    const photoObj = { id: "photo-" + Date.now(), url: dataUrl, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') };
-    
-    if (isConnected && galleryColl) {
-        await galleryColl.insertOne(photoObj);
     }
     res.json({ success: true });
 });
