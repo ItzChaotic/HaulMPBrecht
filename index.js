@@ -36,7 +36,7 @@ let isConnected = false;
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
@@ -81,16 +81,17 @@ function parseCurrency(str) {
     return parseFloat(str.replace(/[^0-9\,\.]/g, '').replace(',', '.')) || 0;
 }
 
+// Unieke kleur per rol
 function getRoleColor(role) {
-    const r = (role || '').toLowerCase();
-    if (r.includes('directeur')) return 'red';
-    if (r.includes('onder directeur')) return 'orange';
-    if (r.includes('management')) return 'yellow';
-    if (r.includes('leidinggevende')) return 'green';
-    if (r.includes('senior medewerker')) return 'blue';
-    if (r.includes('medewerker')) return 'purple';
-    if (r.includes('junior medewerker')) return 'cyan';
-    if (r.includes('chauffeur in opleiding')) return 'gray';
+    const r = (role || '').toLowerCase().trim();
+    if (r === 'directeur') return 'red';
+    if (r === 'onder directeur') return 'orange';
+    if (r === 'management') return 'yellow';
+    if (r === 'leidinggevende') return 'green';
+    if (r === 'senior medewerker') return 'blue';
+    if (r === 'medewerker') return 'purple';
+    if (r === 'junior medewerker') return 'cyan';
+    if (r === 'chauffeur in opleiding') return 'gray';
     return 'gray';
 }
 
@@ -123,13 +124,26 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`Discord Bot ingelogd als ${clientBot.user.tag}`);
-    setTimeout(fetchAllHistoricalDiscordLogs, 500);
+    setTimeout(() => {
+        fetchAllHistoricalDiscordLogs();
+        fetchApplicationsFromDiscord();
+    }, 500);
 });
 
 clientBot.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
+
+async function fetchApplicationsFromDiscord() {
+    try {
+        const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
+        if (channel) {
+            const msgs = await channel.messages.fetch({ limit: 50 });
+            msgs.forEach(msg => parseAndAddApplication(msg));
+        }
+    } catch (e) {}
+}
 
 async function parseAndAddApplication(message) {
     const applicantName = message.author ? message.author.username : "Sollicitant";
