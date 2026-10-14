@@ -165,7 +165,6 @@
         .rotate-arrow { transition: transform 0.3s ease; display: inline-block; }
         .rotate-arrow.open { transform: rotate(180deg); }
 
-        /* FOOTER STYLING */
         footer {
             text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem;
             border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); backdrop-filter: blur(10px);
@@ -510,7 +509,7 @@
         </div>
     </div>
 
-    <!-- FOOTER OVERAL -->
+    <!-- FOOTER -->
     <footer>
         <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden.</p>
         <p>Gemaakt door ItzChaotic_</p>
@@ -538,6 +537,18 @@
         let chartInstance = null;
         let currentLang = 'NL';
         const MAIN_DOMAIN = "brechttransport.nl";
+
+        // Helper functie voor Nederlandse datumweergave (DD-MM-JJJJ)
+        function formatDateToNL(dateStr) {
+            if (!dateStr) return '';
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split('T')[0].split('-');
+                if (parts.length === 3 && parts[0].length === 4) {
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+            return dateStr;
+        }
 
         const i18n = {
             NL: {
@@ -686,7 +697,7 @@
                     if (fullGallery) {
                         fullGallery.innerHTML = '';
                         data.gallery.forEach(p => {
-                            fullGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);">${p.uploadedBy} - ${p.date}</div></div>`);
+                            fullGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);">${p.uploadedBy} - ${formatDateToNL(p.date)}</div></div>`);
                         });
                     }
                 }
@@ -746,7 +757,8 @@
             const convContainer = document.getElementById('convoys-list-container');
             convContainer.innerHTML = '';
             data.convoysList?.forEach(c => {
-                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:10px; border:1px solid var(--border-red);"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red);">${c.title}</b><span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:6px;">${c.date} ${c.time}</span></div><div style="font-size:0.85rem; margin-top:6px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:4px;">${c.details}</div></div></div>`);
+                const formattedDate = formatDateToNL(c.date);
+                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:10px; border:1px solid var(--border-red);"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red);">${c.title}</b><span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:6px;">${formattedDate} ${c.time || ''}</span></div><div style="font-size:0.85rem; margin-top:6px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:4px;">${c.details}</div></div></div>`);
             });
 
             const appsOpen = document.getElementById('applications-open-container');
