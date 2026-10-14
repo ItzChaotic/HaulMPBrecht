@@ -24,10 +24,6 @@ app.use((req, res, next) => {
 });
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://brechttransport.nl/api/auth/discord/callback';
-
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 const DISCORD_APPLICATIONS_CHANNEL_ID = '1558075393729363968';
 const MONGO_URI = process.env.MONGO_URI;
@@ -38,7 +34,7 @@ let isConnected = false;
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
@@ -46,52 +42,10 @@ let defaultAccounts = [
     { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
-const ROLE_RANKING = {
-    'directeur': 100,
-    'onder directeur': 90,
-    'management': 80,
-    'leidinggevende': 70,
-    'senior medewerker': 60,
-    'medewerker': 50,
-    'junior medewerker': 40,
-    'chauffeur in opleiding': 30
-};
-
-function getRoleRank(role) {
-    const r = (role || '').toLowerCase();
-    for (const [key, rank] of Object.entries(ROLE_RANKING)) {
-        if (r.includes(key)) return rank;
-    }
-    return 10;
-}
-
-function getRoleColor(role) {
-    const r = (role || '').toLowerCase();
-    if (r.includes('directeur') && !r.includes('onder')) return 'red';
-    if (r.includes('onder directeur')) return 'orange';
-    if (r.includes('management')) return 'yellow';
-    if (r.includes('leidinggevende')) return 'green';
-    if (r.includes('senior medewerker')) return 'blue';
-    if (r.includes('junior medewerker')) return 'cyan';
-    if (r.includes('medewerker')) return 'purple';
-    if (r.includes('chauffeur in opleiding')) return 'gray';
-    return 'gray';
-}
-
-function canManageBadges(role) {
-    const r = (role || '').toLowerCase();
-    return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
-}
-
-function canManageStaff(role) {
-    const r = (role || '').toLowerCase();
-    return r.includes('directeur') || r.includes('onder directeur');
-}
-
 async function connectDB() {
     if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld."); return; }
     try {
-        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
+        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
         db = client.db('brecht_transport');
         
@@ -109,7 +63,9 @@ async function connectDB() {
         console.log("Verbonden met MongoDB Atlas!");
 
         const count = await accountsColl.countDocuments();
-        if (count === 0) await accountsColl.insertMany(defaultAccounts);
+        if (count === 0) {
+            await accountsColl.insertMany(defaultAccounts);
+        }
     } catch (err) {
         console.error("MongoDB verbinding mislukt:", err.message);
     }
@@ -122,6 +78,29 @@ function cleanText(text) { return text ? text.replace(/[\*\_\`]/g, '').trim() : 
 function parseCurrency(str) {
     if (!str) return 0;
     return parseFloat(str.replace(/[^0-9\,\.]/g, '').replace(',', '.')) || 0;
+}
+
+function getRoleColor(role) {
+    const r = (role || '').toLowerCase().trim();
+    if (r.includes('directeur')) return 'red';
+    if (r.includes('onder directeur')) return 'orange';
+    if (r.includes('management')) return 'yellow';
+    if (r.includes('leidinggevende')) return 'green';
+    if (r.includes('senior medewerker')) return 'blue';
+    if (r.includes('medewerker')) return 'purple';
+    if (r.includes('junior medewerker')) return 'cyan';
+    if (r.includes('chauffeur in opleiding')) return 'gray';
+    return 'gray';
+}
+
+function canManageBadges(role) {
+    const r = (role || '').toLowerCase();
+    return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
+}
+
+function canManageStaff(role) {
+    const r = (role || '').toLowerCase();
+    return r.includes('directeur') || r.includes('onder directeur');
 }
 
 function isDriverMatch(jobDriver, accountUsername) {
@@ -137,16 +116,6 @@ function getISOWeekKey(timestamp) {
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     const yearStart = new Date(d.getFullYear(), 0, 1);
     return `Wk ${Math.ceil((((d - yearStart) / 86400000) + 1) / 7)}`;
-}
-
-// Helper om te controleren of een rit in de huidige week valt (vanaf afgelopen maandag)
-function isCurrentWeek(timestamp) {
-    const now = new Date();
-    const day = now.getDay();
-    const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(now.setDate(diffToMonday));
-    monday.setHours(0, 0, 0, 0);
-    return timestamp >= monday.getTime();
 }
 
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -169,7 +138,7 @@ async function fetchApplicationsFromDiscord() {
         const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
         if (channel) {
             const msgs = await channel.messages.fetch({ limit: 50 });
-            for (const msg of msgs.values()) await parseAndAddApplication(msg);
+            msgs.forEach(msg => parseAndAddApplication(msg));
         }
     } catch (e) {}
 }
@@ -220,7 +189,7 @@ async function fetchAllHistoricalDiscordLogs() {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
             let lastId = undefined; let fetched = 0; allJobsHistory = [];
-            while (fetched < 150) { // Beperkt tot 150 voor maximale snelheid
+            while (fetched < 100) { // Geoptimaliseerd voor snelheid
                 const opt = { limit: 50 }; if (lastId) opt.before = lastId;
                 const msgs = await channel.messages.fetch(opt);
                 if (msgs.size === 0) break;
@@ -236,22 +205,18 @@ async function fetchAllHistoricalDiscordLogs() {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     let accountsDatabase = defaultAccounts;
-    if (isConnected && accountsColl) accountsDatabase = await accountsColl.find({}).toArray();
+    if (isConnected && accountsColl) {
+        accountsDatabase = await accountsColl.find({}).toArray();
+    }
     const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
     if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
-    res.json({ 
-        success: true, username: account.username, role: account.role, avatar: account.avatar || null,
-        color: getRoleColor(account.role), canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) 
-    });
+    res.json({ success: true, username: account.username, role: account.role, color: getRoleColor(account.role), discordId: account.discordId || '', avatarUrl: account.avatarUrl || '', canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) });
 });
 
 app.get('/api/haulmp', async (req, res) => {
-    // Filter ritten op de huidige week voor snelle prestaties per week
-    const currentWeekJobs = allJobsHistory.filter(j => isCurrentWeek(j.timestamp));
-
-    const totalDeliveries = currentWeekJobs.length;
-    const totalDistanceKm = currentWeekJobs.reduce((acc, curr) => acc + curr.kmAmount, 0);
-    const totalCompanyEarnings = currentWeekJobs.reduce((acc, curr) => acc + curr.paidAmount, 0);
+    const totalDeliveries = allJobsHistory.length;
+    const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+    const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
 
     let accountsDatabase = defaultAccounts;
     let customBadges = [];
@@ -272,24 +237,33 @@ app.get('/api/haulmp', async (req, res) => {
             applicationsList = await applicationsColl.find({}).toArray();
             infoList = await infoColl.find({}).sort({ _id: -1 }).toArray();
             convoysList = await convoysColl.find({}).sort({ _id: -1 }).toArray();
-            socialsList = await socialsColl.find({}).toArray();
+            socialsList = await socialsColl.find({}).sort({ _id: -1 }).toArray();
             const eotw = await eotwColl.findOne({});
             if (eotw) employeeOfTheWeek = eotw;
         } catch (e) {}
     }
 
     const formattedDrivers = accountsDatabase.map(m => {
-        const userWeekJobs = currentWeekJobs.filter(j => isDriverMatch(j.driver, m.username));
+        const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
         return {
-            username: m.username, role: m.role, color: getRoleColor(m.role), rank: getRoleRank(m.role), isDev: !!m.isDev,
-            avatar: m.avatar || null,
-            deliveries: userWeekJobs.length,
-            distance: `${userWeekJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
-            earnings: `€ ${userWeekJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
-            userJobs: userWeekJobs.slice(0, 10),
+            username: m.username, role: m.role, color: getRoleColor(m.role), isDev: !!m.isDev,
+            avatarUrl: m.avatarUrl || '', discordId: m.discordId || '',
+            deliveries: userJobs.length,
+            distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
+            earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
+            userJobs: userJobs.slice(0, 15),
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
-    }).sort((a, b) => b.rank - a.rank);
+    });
+
+    const weeklyChartData = {};
+    allJobsHistory.forEach(j => {
+        const w = j.weekKey || 'Wk 1';
+        if (!weeklyChartData[w]) weeklyChartData[w] = { week: w, company: 0, drivers: {} };
+        weeklyChartData[w].company += j.paidAmount;
+        const dc = j.driver.toLowerCase().replace(/[^a-z0-9]/g, '');
+        weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
+    });
 
     res.json({
         deliveries: totalDeliveries.toString(),
@@ -297,78 +271,12 @@ app.get('/api/haulmp', async (req, res) => {
         companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
         drivers: formattedDrivers.filter(d => !d.isDev).length.toString(),
         drivers_list: formattedDrivers,
-        recent_jobs: allJobsHistory.slice(0, 10), // Laatste 10 ritten onderweg
+        recent_jobs: allJobsHistory.slice(0, 10),
         gallery: galleryPhotos, badges: customBadges,
         announcements: announcementsList, applications: applicationsList,
-        infoList, convoysList, employeeOfTheWeek, socials: socialsList,
-        weeklyChartData: []
+        infoList, convoysList, socialsList, employeeOfTheWeek,
+        weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
     });
-});
-
-// Verwijder endpoints voor mededelingen en info
-app.delete('/api/announcements/:id', async (req, res) => {
-    if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
-    res.json({ success: true });
-});
-
-app.delete('/api/info/:id', async (req, res) => {
-    if (isConnected && infoColl) await infoColl.deleteOne({ id: req.params.id });
-    res.json({ success: true });
-});
-
-// OAuth2 Discord
-app.get('/api/auth/discord/login', (req, res) => {
-    const user = req.query.user;
-    const redirectUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify&state=${encodeURIComponent(user)}`;
-    res.redirect(redirectUrl);
-});
-
-app.get('/api/auth/discord/callback', async (req, res) => {
-    const { code, state } = req.query;
-    if (!code) return res.redirect('/?error=no_code');
-    try {
-        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-            method: 'POST',
-            body: new URLSearchParams({
-                client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET,
-                grant_type: 'authorization_code', code, redirect_uri: DISCORD_REDIRECT_URI
-            }),
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-        const tokens = await tokenRes.json();
-        
-        const userRes = await fetch('https://discord.com/api/users/@me', {
-            headers: { authorization: `${tokens.token_type} ${tokens.access_token}` }
-        });
-        const discordUser = await userRes.json();
-
-        let avatarUrl = `https://cdn.discordapp.com/embed/avatars/0.png`;
-        if (discordUser.avatar) {
-            avatarUrl = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`;
-        }
-
-        if (isConnected && accountsColl && state) {
-            await accountsColl.updateOne(
-                { username: { $regex: new RegExp(`^${state}$`, 'i') } },
-                { $set: { avatar: avatarUrl, discordId: discordUser.id } }
-            );
-        }
-        res.redirect('/?discord_success=true');
-    } catch (e) {
-        res.redirect('/?error=oauth_failed');
-    }
-});
-
-app.post('/api/socials', async (req, res) => {
-    const { platform, url, channelName } = req.body;
-    const socObj = { id: "soc-" + Date.now(), platform, url, channelName };
-    if (isConnected && socialsColl) await socialsColl.insertOne(socObj);
-    res.json({ success: true });
-});
-
-app.delete('/api/socials/:id', async (req, res) => {
-    if (isConnected && socialsColl) await socialsColl.deleteOne({ id: req.params.id });
-    res.json({ success: true });
 });
 
 app.post('/api/applications/complete', async (req, res) => {
@@ -379,6 +287,15 @@ app.post('/api/applications/complete', async (req, res) => {
 app.post('/api/badges', async (req, res) => {
     const { title, targetUser } = req.body;
     if (!title || !targetUser) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
+
+    let accountsList = isConnected && accountsColl ? await accountsColl.find({}).toArray() : defaultAccounts;
+    const workerExists = accountsList.some(acc => acc.username.toLowerCase() === targetUser.trim().toLowerCase());
+    if (!workerExists) return res.status(400).json({ success: false, message: 'Deze gebruiker werkt niet bij ons transportbedrijf!' });
+
+    let existingBadges = isConnected && badgesColl ? await badgesColl.find({}).toArray() : [];
+    const alreadyHas = existingBadges.some(b => b.title.toLowerCase() === title.trim().toLowerCase() && b.targetUser.toLowerCase() === targetUser.trim().toLowerCase());
+    if (alreadyHas) return res.status(400).json({ success: false, message: 'Deze werknemer heeft deze badge al!' });
+
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
     res.json({ success: true });
@@ -395,9 +312,13 @@ app.post('/api/info', upload.single('file'), async (req, res) => {
         fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
     }
     const infoObj = { 
-        id: "info-" + Date.now(), title: req.body.title, content: req.body.content, 
-        link: fileLink, fileName: req.file ? req.file.originalname : null,
-        username: req.body.username, date: new Date().toLocaleDateString('nl-NL') 
+        id: "info-" + Date.now(), 
+        title: req.body.title, 
+        content: req.body.content, 
+        link: fileLink, 
+        fileName: req.file ? req.file.originalname : null,
+        username: req.body.username, 
+        date: new Date().toLocaleDateString('nl-NL') 
     };
     if (isConnected && infoColl) await infoColl.insertOne(infoObj);
     res.json({ success: true });
@@ -423,9 +344,30 @@ app.post('/api/announcements', async (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/api/socials', async (req, res) => {
+    const { platform, url, username } = req.body;
+    if (!platform || !url) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
+    const socialObj = { id: "soc-" + Date.now(), platform: platform.trim(), url: url.trim(), addedBy: username || 'Admin' };
+    if (isConnected && socialsColl) await socialsColl.insertOne(socialObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/socials/:id', async (req, res) => {
+    if (isConnected && socialsColl) await socialsColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/staff/update-discord', async (req, res) => {
+    const { targetUser, discordId, avatarUrl } = req.body;
+    if (isConnected && accountsColl) {
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { discordId: discordId || '', avatarUrl: avatarUrl || '' } });
     }
     res.json({ success: true });
 });
@@ -434,6 +376,8 @@ app.post('/api/staff/add', async (req, res) => {
     const pw = "Brecht" + Math.floor(1000 + Math.random() * 9000);
     const newAcc = { username: req.body.username.trim(), password: pw, role: req.body.role.trim() };
     if (isConnected && accountsColl) {
+        const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
+        if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
         await accountsColl.insertOne(newAcc);
     }
     res.json({ success: true, message: pw });
@@ -449,6 +393,17 @@ app.post('/api/staff/update-role', async (req, res) => {
 app.delete('/api/staff/:targetUser', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/gallery', upload.single('photo'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false });
+    const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+    const photoObj = { id: "photo-" + Date.now(), url: dataUrl, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') };
+    
+    if (isConnected && galleryColl) {
+        await galleryColl.insertOne(photoObj);
     }
     res.json({ success: true });
 });
