@@ -86,7 +86,6 @@
 
         .portal-content { margin-left: 260px; flex: 1; padding: 30px; width: calc(100% - 260px); }
 
-        /* VTC TELEMETRY & DASHBOARD MODERN CARDS */
         .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
         .dash-card {
             background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px;
@@ -113,7 +112,7 @@
         .member-avatar { width: 46px; height: 46px; border-radius: 10px; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); }
         .member-role { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
 
-        /* ROLLEN KLEUREN */
+        /* ROL KLEUREN SCHEMA */
         .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
         .role-orange { background: rgba(221, 107, 32, 0.18); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.4); }
         .role-yellow { background: rgba(214, 158, 46, 0.18); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
@@ -129,23 +128,22 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-red:hover { background: var(--accent-red); }
 
-        #login-modal {
+        #login-modal, #password-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(8, 2, 2, 0.82), rgba(8, 2, 2, 0.92)), 
-                        url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png');
-            background-size: cover; background-position: center;
-            z-index: 2500; justify-content: center; align-items: center; padding: 15px;
+            background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px);
         }
         .login-box {
-            background: rgba(18, 4, 4, 0.92); border: 1px solid var(--border-red); border-radius: 20px;
-            max-width: 400px; width: 100%; padding: 36px; text-align: center; color: #fff; backdrop-filter: blur(12px);
+            background: rgba(18, 4, 4, 0.94); border: 1px solid var(--border-red); border-radius: 20px;
+            max-width: 400px; width: 100%; padding: 32px; text-align: center; color: #fff; backdrop-filter: blur(12px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
         }
 
-        .staff-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 15px; }
-        .staff-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 12px; padding: 16px; }
-        .app-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
-        .announcement-box { background: rgba(255,51,51,0.08); border-left: 4px solid var(--accent-red); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+        /* OVERZICHTELIJKE PERSONEELSTABEL */
+        .staff-table-wrapper { width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 10px; }
+        .staff-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+        .staff-table th, .staff-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .staff-table th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+        .staff-table tr:last-child td { border-bottom: none; }
 
         .hero { text-align: center; padding: 35px 0 25px 0; }
         .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; }
@@ -198,12 +196,17 @@
         }
         footer p { margin: 3px 0; }
 
-        /* USER PROFILE CARD LINKS ONDERIN SIDEBAR */
+        /* SUB-TABS VOOR INFORMATIE & MEDEDELINGEN */
+        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-red); padding-bottom: 10px; }
+        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+        .sub-tab-btn.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
+
+        /* USER CARD LINKSONDER (VERBETERD LOGO / AVATAR) */
         .sidebar-user-card {
             background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px;
             padding: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
         }
-        .user-avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light); color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+        .user-avatar-circle { width: 38px; height: 38px; border-radius: 10px; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
 
         @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
@@ -353,23 +356,17 @@
                             <span style="font-size:0.85rem; line-height:1.2;">Brecht Transport Personeelsportaal</span>
                         </div>
 
-                        <div class="sidebar-section-title">MAIN</div>
+                        <div class="sidebar-section-title">HOOFDMENU</div>
                         <ul class="sidebar-menu">
-                            <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overview</button></li>
+                            <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht</button></li>
                             <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie & Mods</button></li>
-                            <li>
-                                <button onclick="switchPortalTab('p-tab-convoys', this)">
-                                    <!-- Hardfix Icoontje -->
-                                    <i class="fa-solid fa-truck-front"></i> 
-                                    <span>Konvooien</span>
-                                </button>
-                            </li>
+                            <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
                             <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
                             <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
                             <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
                         </ul>
 
-                        <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">MANAGEMENT</div>
+                        <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER</div>
                         <ul class="sidebar-menu">
                             <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
                             <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
@@ -377,16 +374,17 @@
                     </div>
 
                     <div>
-                        <!-- USER CARD LINKSONDER (GEÏNSPIREERD OP SCREENSHOT) -->
+                        <!-- STIJLVOLLE USER CARD LINKSONDER -->
                         <div class="sidebar-user-card">
-                            <div class="user-avatar-circle" id="sidebar-avatar-char">U</div>
-                            <div style="overflow:hidden;">
+                            <div class="user-avatar-circle"><i class="fa-solid fa-user-gear"></i></div>
+                            <div style="overflow:hidden; flex:1;">
                                 <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.85rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
-                                <div id="sidebar-role-txt" style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
+                                <div id="sidebar-role-txt" style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
                             </div>
                         </div>
 
-                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; margin-bottom:8px; padding:8px 12px; font-size:0.8rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:8px 12px; font-size:0.8rem; margin-bottom:6px;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
+                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; margin-bottom:6px; padding:8px 12px; font-size:0.8rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
                         <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:8px 12px; font-size:0.8rem;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
                     </div>
                 </div>
@@ -394,7 +392,7 @@
                 <div class="portal-content">
                     <!-- MOBIELE TABBAR -->
                     <div class="mobile-portal-tabs" id="mobilePortalTabs">
-                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht</button>
                         <button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Info</button>
                         <button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button>
                         <button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
@@ -407,45 +405,44 @@
                     <!-- DASHBOARD HEADER -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:14px;">
                         <div>
-                            <h1 style="font-size:1.6rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overview</h1>
-                            <p style="color:var(--text-muted); font-size:0.82rem;" id="user-role-display">VTC Telemetry & Performance Dashboard</p>
+                            <h1 style="font-size:1.6rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1>
+                            <p style="color:var(--text-muted); font-size:0.82rem;" id="user-role-display">VTC Telemetrie & Prestatie Dashboard</p>
                         </div>
                     </div>
 
-                    <!-- TAB 1: OVERVIEW / TELEMETRY (STYLE SCREENSHOT) -->
+                    <!-- TAB 1: OVERZICHT (SCHOON & NEDERLANDS) -->
                     <div id="p-tab-stats" class="portal-tab-content">
-                        <!-- TOP METRICS (VTC DISTANCE / ACTIVE DRIVERS / COMPANY BALANCE / MY CAREER) -->
+                        <!-- TOP METRICS -->
                         <div class="dashboard-grid-top">
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">VTC DISTANCE</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
-                                <div class="dash-card-num" id="company-stat-distance">0 KM</div>
-                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">▲ Growing</span>
+                                <div class="dash-card-header"><span class="dash-card-title">TOTALE AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
+                                <div class="dash-card-num" id="company-stat-distance">0 km</div>
+                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">▲ Groeiend</span>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">ACTIVE DRIVERS</span><div class="dash-card-icon"><i class="fa-solid fa-user-group"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">ACTIEVE CHAUFFEURS</span><div class="dash-card-icon"><i class="fa-solid fa-user-group"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-drivers">0</div>
                                 <span style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">Actieve VTC Leden</span>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">COMPANY BALANCE</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
-                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Weekly Credits</span>
+                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Wekelijkse Inkomsten</span>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">MY CAREER</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
-                                <div class="dash-card-num" id="user-stat-distance">0 KM</div>
-                                <span style="font-size:0.7rem; color:var(--accent-red); font-weight:bold; margin-top:4px;" id="user-stat-deliveries-label">0 Deliveries</span>
+                                <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
+                                <div class="dash-card-num" id="user-stat-distance">0 km</div>
+                                <span style="font-size:0.7rem; color:var(--accent-red); font-weight:bold; margin-top:4px;" id="user-stat-deliveries-label">0 Leveringen Volbracht</span>
                             </div>
                         </div>
 
-                        <!-- MAIN ANALYTICS + LIVE FEED ROW -->
+                        <!-- MAIN ROW -->
                         <div class="dash-main-row">
-                            <!-- LEFT: PERFORMANCE ANALYTICS -->
                             <div>
                                 <div class="analytics-box" style="margin-bottom:20px;">
                                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                                        <h3><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Performance Analytics</h3>
-                                        <span style="font-size:0.75rem; background:rgba(56,161,105,0.2); color:#68d391; padding:4px 10px; border-radius:8px; border:1px solid rgba(56,161,105,0.4); font-weight:bold;">● VTC ACTIVE</span>
+                                        <h3><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Prestatie Analyse</h3>
+                                        <span style="font-size:0.75rem; background:rgba(56,161,105,0.2); color:#68d391; padding:4px 10px; border-radius:8px; border:1px solid rgba(56,161,105,0.4); font-weight:bold;">● VTC ACTIEF</span>
                                     </div>
                                     <div style="height: 220px; width: 100%;"><canvas id="earningsChart"></canvas></div>
                                 </div>
@@ -455,29 +452,11 @@
                                     <h2 id="eotw-username" style="font-size:1.6rem; margin-bottom:4px;">Chauffeur</h2>
                                     <p id="eotw-reason" style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">"Uitstekende prestaties!"</p>
                                 </div>
-
-                                <div class="gallery-card" style="margin-bottom:20px;">
-                                    <h3><i class="fa-solid fa-key" style="color:var(--accent-red);"></i> Mijn Wachtwoord Wijzigen</h3>
-                                    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                                        <input type="password" id="my-new-password" placeholder="Nieuw wachtwoord..." class="form-input" style="flex:1; min-width:200px; margin:0;">
-                                        <button onclick="updateMyOwnPassword()" class="btn-red">Opslaan</button>
-                                    </div>
-                                </div>
-
-                                <div id="announcements-display-container"></div>
-
-                                <div id="announcement-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                                    <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Nieuwe Mededeling Plaatsen</h3>
-                                    <input type="text" id="ann-title" placeholder="Titel..." class="form-input">
-                                    <textarea id="ann-content" placeholder="Inhoud..." class="form-input" style="height:70px; resize:vertical;"></textarea>
-                                    <button onclick="postAnnouncement()" class="btn-red">Publiceren</button>
-                                </div>
                             </div>
 
-                            <!-- RIGHT: LIVE FEED / RECENT JOBS (SCREENSHOT STYLE) -->
                             <div>
                                 <div class="live-feed-box">
-                                    <h3 style="margin-bottom:12px; font-size:1rem; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Feed</h3>
+                                    <h3 style="margin-bottom:12px; font-size:1rem; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
                                     <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:15px;">Meest recente ritten van onze chauffeurs.</p>
                                     <div id="live-feed-container">
                                         <p style="text-align:center; color:var(--text-muted); font-size:0.8rem;">Geen recente activiteit.</p>
@@ -492,19 +471,43 @@
                         </div>
                     </div>
 
-                    <!-- TAB: INFORMATIE -->
+                    <!-- TAB: INFORMATIE & MEDEDELINGEN (MET SUB-TABS) -->
                     <div id="p-tab-info" class="portal-tab-content" style="display:none;">
-                        <div id="info-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-plus" style="color:var(--accent-red);"></i> Nieuwe Informatie / Mod Posten</h3>
-                            <input type="text" id="info-title" placeholder="Titel..." class="form-input">
-                            <textarea id="info-content" placeholder="Omschrijving..." class="form-input" style="height:70px;"></textarea>
-                            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:4px;">Bestand selecteren (optioneel):</label>
-                            <input type="file" id="info-file" class="form-input" accept=".zip,.scs,.rar,.pdf,.png,.jpg,.jpeg">
-                            <button onclick="postInfo()" class="btn-red" style="margin-top:10px;">Posten</button>
+                        <div class="sub-tab-bar">
+                            <button class="sub-tab-btn active" onclick="switchInfoSubTab('info-sub-view', this)"><i class="fa-solid fa-book-open"></i> Overzicht & Mededelingen</button>
+                            <button id="info-create-subtab-btn" class="sub-tab-btn" style="display:none;" onclick="switchInfoSubTab('info-sub-create', this)"><i class="fa-solid fa-plus"></i> Nieuwe Post / Mededeling Plaatsen</button>
                         </div>
-                        <div class="gallery-card">
-                            <h3><i class="fa-solid fa-book-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
-                            <div id="info-list-container" style="margin-top:15px;"></div>
+
+                        <!-- SUB 1: BEKIJKEN -->
+                        <div id="info-sub-view">
+                            <div class="gallery-card" style="margin-bottom:20px;">
+                                <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Belangrijke Mededelingen</h3>
+                                <div id="announcements-display-container" style="margin-top:15px;"></div>
+                            </div>
+
+                            <div class="gallery-card">
+                                <h3><i class="fa-solid fa-folder-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
+                                <div id="info-list-container" style="margin-top:15px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- SUB 2: PLAATSEN -->
+                        <div id="info-sub-create" style="display:none;">
+                            <div class="gallery-card" style="margin-bottom:20px;">
+                                <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Nieuwe Mededeling Plaatsen</h3>
+                                <input type="text" id="ann-title" placeholder="Titel van mededeling..." class="form-input">
+                                <textarea id="ann-content" placeholder="Inhoud van de mededeling..." class="form-input" style="height:80px; resize:vertical;"></textarea>
+                                <button onclick="postAnnouncement()" class="btn-red">Publiceren op Portaal</button>
+                            </div>
+
+                            <div class="gallery-card">
+                                <h3><i class="fa-solid fa-file-arrow-up" style="color:var(--accent-red);"></i> Nieuwe Informatie of Mod Posten</h3>
+                                <input type="text" id="info-title" placeholder="Titel..." class="form-input">
+                                <textarea id="info-content" placeholder="Omschrijving..." class="form-input" style="height:70px;"></textarea>
+                                <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:4px;">Bestand selecteren uit verkenner (optioneel):</label>
+                                <input type="file" id="info-file" class="form-input" accept=".zip,.scs,.rar,.pdf,.png,.jpg,.jpeg">
+                                <button onclick="postInfo()" class="btn-red" style="margin-top:10px;">Informatie Opslaan</button>
+                            </div>
                         </div>
                     </div>
 
@@ -565,9 +568,9 @@
                         </div>
                     </div>
 
-                    <!-- TAB: PERSONEEL BEHEREN -->
+                    <!-- TAB: PERSONEEL BEHEREN (STRAK OVERZICHTELIJKE TABEL) -->
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card">
+                        <div class="gallery-card" style="margin-bottom:20px;">
                             <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuw Personeelslid Toevoegen</h3>
                             <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                                 <input type="text" id="new-staff-user" placeholder="Gebruikersnaam" class="form-input" style="flex:1; min-width:180px; margin:0;">
@@ -584,8 +587,22 @@
                                 <button onclick="addNewStaff()" class="btn-red">Toevoegen</button>
                             </div>
                         </div>
-                        <h3 style="margin-top:20px; font-size:1.1rem;"><i class="fa-solid fa-users-gear" style="color:var(--accent-red);"></i> Personeelsbeheer</h3>
-                        <div id="staff-cards-container" class="staff-card-grid"></div>
+
+                        <h3 style="margin-bottom:12px; font-size:1.1rem;"><i class="fa-solid fa-users-gear" style="color:var(--accent-red);"></i> Personeelsoverzicht & Beheer</h3>
+                        <div class="staff-table-wrapper">
+                            <table class="staff-table">
+                                <thead>
+                                    <tr>
+                                        <th>Gebruiker</th>
+                                        <th>Huidige Rol</th>
+                                        <th>Rol Wijzigen</th>
+                                        <th>Wachtwoord Herstellen</th>
+                                        <th>Acties</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staff-table-body"></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- TAB: BADGES & EOTW -->
@@ -593,571 +610,5 @@
                         <div class="gallery-card" style="margin-bottom:16px;">
                             <h3><i class="fa-solid fa-crown" style="color:var(--accent-red);"></i> Chauffeur van de Week</h3>
                             <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                                <select id="eotw-select-user" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
-                                <input type="text" id="eotw-input-reason" placeholder="Reden..." class="form-input" style="flex:2; min-width:200px; margin:0;">
-                                <button onclick="setEmployeeOfWeek()" class="btn-red">Instellen</button>
-                            </div>
-                        </div>
-
-                        <div class="gallery-card">
-                            <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Badge Beheer & Toekennen</h3>
-                            <div style="display:flex; gap:10px; margin:12px 0; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;">
-                                <input type="text" id="badge-title" placeholder="Badge Naam (bijv. Nachtwaker)" class="form-input" style="flex:1; min-width:180px; margin:0;">
-                                <select id="badge-user-select" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
-                                <button onclick="awardBadge()" class="btn-red">+ Toevoegen</button>
-                            </div>
-                            <div id="badges-tree-container" style="margin-top:15px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer>
-        <p>&copy; 2026 Brecht Transport B.V. Alle rechten voorbehouden.</p>
-        <p>Gemaakt door ItzChaotic_</p>
-    </footer>
-
-    <!-- INLOGSCHERM -->
-    <div id="login-modal">
-        <div class="login-box">
-            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;">
-            <h2 style="font-size:1.4rem; font-family:'Space Grotesk', sans-serif;">Personeel Inloggen</h2>
-            <div style="text-align:left; margin-top:15px;">
-                <label style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:bold;">Gebruikersnaam</label>
-                <input type="text" id="login-user" placeholder="Gebruikersnaam" class="form-input" style="margin-top:4px;">
-                <label style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:bold;">Wachtwoord</label>
-                <input type="password" id="login-pass" placeholder="••••••••" class="form-input" style="margin-top:4px;">
-            </div>
-            <button onclick="handleLogin()" class="btn-red" style="width:100%; margin-top:10px; padding:12px; font-size:0.95rem; border-radius:10px;"><i class="fa-solid fa-right-to-bracket"></i> Inloggen</button>
-            <button onclick="closeLoginModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:12px; cursor:pointer; font-size:0.85rem;">Terug</button>
-            <div id="login-error" style="color:#ff4d4d; font-size:0.82rem; margin-top:10px;"></div>
-        </div>
-    </div>
-
-    <script>
-        let currentUser = null;
-        let chartInstance = null;
-        let currentLang = 'NL';
-        const MAIN_DOMAIN = "brechttransport.nl";
-
-        function formatDateToNL(dateStr) {
-            if (!dateStr) return '';
-            if (dateStr.includes('-')) {
-                const parts = dateStr.split('T')[0].split('-');
-                if (parts.length === 3 && parts[0].length === 4) {
-                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                }
-            }
-            return dateStr;
-        }
-
-        const i18n = {
-            NL: {
-                home: "Home", about: "Over Ons", gallery: "Fotogalerij", team: "Het Team", fleet: "Vloot", trips: "Onderweg",
-                login: "Inloggen", apply: "Solliciteer Direct", hero_title: "Brecht Transport B.V.",
-                hero_desc: "Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.",
-                stat_dist: "Gereden Afstand", stat_deliv: "Leveringen Volbracht", stat_drivers: "Actieve Chauffeurs",
-                about_p1: "Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.",
-                about_p2: "Met ons eigen personeelsportaal, konvooi-organisatie en actieve chauffeursgroep streven wij elke dag naar kwaliteit op de Europese wegen. Of je nu houdt van rustig kilometers maken of grote konvooien rijden: bij Brecht Transport B.V. ben je aan het juiste adres!",
-                map_desc: "Volg al onze actieve chauffeurs realtime via de HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
-                gallery_full: "Bekijk Volledig Foto-Archief", loading: "Laden van recente ritten...", back: "Terug"
-            },
-            ENG: {
-                home: "Home", about: "About Us", gallery: "Gallery", team: "The Team", fleet: "Fleet", trips: "On The Road",
-                login: "Login", apply: "Apply Now", hero_title: "Brecht Transport B.V.",
-                hero_desc: "Welcome to Brecht Transport B.V. We combine craftsmanship, professional convoys, and a great community on the European highways of Euro Truck Simulator 2.",
-                stat_dist: "Total Distance", stat_deliv: "Deliveries Completed", stat_drivers: "Active Drivers",
-                about_p1: "Brecht Transport B.V. is a close-knit and professional Virtual Trucking Company (VTC) operating on the Euro Truck Simulator 2 platform. Our goal is to provide realistic and enjoyable digital haulage.",
-                about_p2: "With our custom driver portal, convoy organization, and active community of truckers, we strive for quality on the European roads every day. Whether you enjoy relaxed long hauls or driving in large convoys: Brecht Transport B.V. is the right place for you!",
-                map_desc: "Track all our active drivers in real-time via the HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
-                gallery_full: "View Full Photo Archive", loading: "Loading recent jobs...", back: "Back"
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.location.hostname.includes("personeelsportaal")) {
-                document.getElementById('main-nav-bar').style.display = 'none';
-                const savedUser = sessionStorage.getItem('brecht_user');
-                if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) { openLoginModal(); } } else openLoginModal();
-            }
-            loadData();
-        });
-
-        function toggleLang() {
-            currentLang = currentLang === 'NL' ? 'ENG' : 'NL';
-            document.getElementById('lang-label').innerText = currentLang === 'NL' ? 'ENG' : 'NL';
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
-            });
-        }
-
-        function toggleMobileDrawer() {
-            const drawer = document.getElementById('mobileDrawer');
-            const overlay = document.getElementById('drawerOverlay');
-            const isOpen = drawer.classList.contains('open');
-            drawer.classList.toggle('open', !isOpen);
-            overlay.classList.toggle('open', !isOpen);
-        }
-
-        function toggleCompletedApps() {
-            const c = document.getElementById('applications-completed-container');
-            const icon = document.getElementById('completed-icon');
-            const isOpen = c.style.display === 'block';
-            c.style.display = isOpen ? 'none' : 'block';
-            if (icon) icon.classList.toggle('open', !isOpen);
-        }
-
-        function goHome() {
-            if (window.location.hostname.includes("personeelsportaal")) window.location.href = `https://${MAIN_DOMAIN}`;
-            else switchView('home-view');
-        }
-
-        function handleNavLogin() {
-            if (!window.location.hostname.includes("personeelsportaal")) window.location.href = `https://personeelsportaal.${MAIN_DOMAIN}`;
-            else openLoginModal();
-        }
-
-        function switchView(viewId) {
-            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        }
-
-        function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
-        function closeLoginModal() {
-            if (window.location.hostname.includes("personeelsportaal") && !currentUser) window.location.href = `https://${MAIN_DOMAIN}`;
-            document.getElementById('login-modal').style.display = 'none';
-        }
-
-        async function handleLogin() {
-            const username = document.getElementById('login-user').value;
-            const password = document.getElementById('login-pass').value;
-            try {
-                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
-                const data = await res.json();
-                if (res.ok && data.success) {
-                    currentUser = data; sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
-                    closeLoginModal(); openPortalDashboard();
-                } else document.getElementById('login-error').innerText = data.message || 'Onjuiste gegevens.';
-            } catch (e) { document.getElementById('login-error').innerText = 'Server niet bereikbaar.'; }
-        }
-
-        function logout() { currentUser = null; sessionStorage.removeItem('brecht_user'); window.location.href = `https://${MAIN_DOMAIN}`; }
-
-        function openPortalDashboard() {
-            if (!currentUser) return openLoginModal();
-            
-            document.getElementById('sidebar-username-txt').innerText = currentUser.username;
-            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
-            document.getElementById('sidebar-avatar-char').innerText = currentUser.username.charAt(0).toUpperCase();
-
-            if (currentUser.canManageBadges) {
-                document.getElementById('mgt-section-head').style.display = 'block';
-                document.getElementById('mgt-tab-btn').style.display = 'block';
-                document.getElementById('mob-mgt-btn').style.display = 'inline-flex';
-            }
-            if (currentUser.canManageStaff) {
-                document.getElementById('staff-tab-btn').style.display = 'block';
-                document.getElementById('mob-staff-btn').style.display = 'inline-flex';
-                document.getElementById('announcement-create-box').style.display = 'block';
-                document.getElementById('info-create-box').style.display = 'block';
-            }
-            if (['directeur', 'onder directeur', 'management', 'leidinggevende'].some(r => currentUser.role.toLowerCase().includes(r))) {
-                document.getElementById('convoy-create-box').style.display = 'block';
-            }
-            refreshPortalData();
-            switchView('portal-view');
-        }
-
-        function switchPortalTab(tabId, btnElement) {
-            document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.mobile-portal-tabs button').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(tabId).style.display = 'block';
-            if (btnElement) {
-                if (btnElement.tagName === 'BUTTON' && btnElement.parentElement.tagName === 'LI') btnElement.parentElement.classList.add('active');
-                else btnElement.classList.add('active');
-            }
-        }
-
-        async function loadData() {
-            try {
-                const res = await fetch('/api/haulmp');
-                const data = await res.json();
-                if (data.distance) {
-                    document.getElementById('stat-distance').innerText = data.distance;
-                    if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance;
-                }
-                if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
-                if (data.drivers) {
-                    document.getElementById('stat-drivers').innerText = data.drivers;
-                    if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers;
-                }
-
-                const pubGallery = document.getElementById('public-gallery-container');
-                const fullGallery = document.getElementById('full-gallery-container');
-                if (data.gallery) {
-                    if (pubGallery) {
-                        pubGallery.innerHTML = '';
-                        data.gallery.slice(0, 3).forEach(p => {
-                            pubGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="margin-bottom:0;"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div></div>`);
-                        });
-                    }
-                    if (fullGallery) {
-                        fullGallery.innerHTML = '';
-                        data.gallery.forEach(p => {
-                            fullGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);">${p.uploadedBy} - ${formatDateToNL(p.date)}</div></div>`);
-                        });
-                    }
-                }
-
-                if (Array.isArray(data.drivers_list)) {
-                    const teamContainer = document.getElementById('team-container');
-                    if (teamContainer) {
-                        teamContainer.innerHTML = '';
-                        data.drivers_list.filter(m => !m.isDev).forEach(m => {
-                            teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div style="display:flex; align-items:center; gap:12px;"><div class="member-avatar"><i class="fa-solid fa-user"></i></div><div><div style="font-weight:bold; font-size:0.9rem;">${m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div></div>`);
-                        });
-                    }
-                }
-
-                if (Array.isArray(data.recent_jobs)) {
-                    const container = document.getElementById('trips-container');
-                    if (container) {
-                        container.innerHTML = '';
-                        data.recent_jobs.forEach(job => {
-                            container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.9rem;">${job.from} → ${job.to}</div><div style="font-size:0.78rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.85rem;">${job.distance}</div></div>`);
-                        });
-                    }
-                }
-            } catch (e) {}
-        }
-
-        async function refreshPortalData() {
-            const res = await fetch('/api/haulmp');
-            const data = await res.json();
-
-            if (data.employeeOfTheWeek?.username) {
-                document.getElementById('eotw-display-card').style.display = 'block';
-                document.getElementById('eotw-username').innerText = data.employeeOfTheWeek.username;
-                document.getElementById('eotw-reason').innerText = `"${data.employeeOfTheWeek.reason}"`;
-            }
-
-            const annContainer = document.getElementById('announcements-display-container');
-            annContainer.innerHTML = '';
-            data.announcements?.forEach(a => {
-                annContainer.insertAdjacentHTML('beforeend', `<div class="announcement-box"><h4><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> ${a.title}</h4><p style="font-size:0.88rem; margin-top:4px;">${a.content}</p><small style="color:#888; font-size:0.75rem;">Door ${a.author}</small></div>`);
-            });
-
-            // LIVE FEED / RECENT JOBS ON PORTAL DASHBOARD (SCREENSHOT STYLE)
-            const liveFeedContainer = document.getElementById('live-feed-container');
-            if (liveFeedContainer && Array.isArray(data.recent_jobs)) {
-                liveFeedContainer.innerHTML = '';
-                data.recent_jobs.slice(0, 5).forEach(j => {
-                    liveFeedContainer.insertAdjacentHTML('beforeend', `
-                        <div class="feed-item">
-                            <div>
-                                <div style="font-weight:bold; font-size:0.85rem;"><i class="fa-solid fa-truck" style="color:var(--accent-red); margin-right:6px;"></i> ${j.driver}</div>
-                                <div style="font-size:0.75rem; color:var(--text-muted);">${j.from} → ${j.to}</div>
-                            </div>
-                            <div style="color:#68d391; font-weight:bold; font-size:0.85rem;">+${j.distance}</div>
-                        </div>
-                    `);
-                });
-            }
-
-            const infoContainer = document.getElementById('info-list-container');
-            infoContainer.innerHTML = '';
-            data.infoList?.forEach(i => {
-                let fileAction = '';
-                if (i.link) {
-                    if (i.link.startsWith('data:')) {
-                        fileAction = `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;"><i class="fa-solid fa-download"></i> Download ${i.fileName || 'Bestand'}</a>`;
-                    } else {
-                        fileAction = `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;"><i class="fa-solid fa-download"></i> Download</a>`;
-                    }
-                }
-                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px; border-left:3px solid var(--accent-red);"><b>${i.title}</b><p style="font-size:0.85rem; margin:4px 0;">${i.content}</p>${fileAction}</div>`);
-            });
-
-            const convContainer = document.getElementById('convoys-list-container');
-            convContainer.innerHTML = '';
-            data.convoysList?.forEach(c => {
-                const formattedDate = formatDateToNL(c.date);
-                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:10px; border:1px solid var(--border-red);"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red);">${c.title}</b><span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:6px;">${formattedDate} ${c.time || ''}</span></div><div style="font-size:0.85rem; margin-top:6px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:4px;">${c.details}</div></div></div>`);
-            });
-
-            const appsOpen = document.getElementById('applications-open-container');
-            const appsComp = document.getElementById('applications-completed-container');
-            appsOpen.innerHTML = ''; appsComp.innerHTML = '';
-            data.applications?.forEach(app => {
-                if (app.status === 'completed') {
-                    appsComp.insertAdjacentHTML('beforeend', `<div class="app-card" style="opacity:0.6;"><b>${app.applicant} (Afgerond)</b></div>`);
-                } else {
-                    appsOpen.insertAdjacentHTML('beforeend', `<div class="app-card"><b>${app.applicant} heeft gesolliciteerd!</b><div style="font-size:0.88rem; color:var(--text-muted); margin:8px 0;">"${app.content}"</div><div style="display:flex; justify-content:space-between;"><a href="${app.link}" target="_blank" class="btn-portal" style="padding:4px 10px; font-size:0.75rem;">Bekijk</a><button onclick="completeApp('${app.id}')" class="btn-red" style="padding:4px 10px; font-size:0.75rem;">Afronden</button></div></div>`);
-                }
-            });
-
-            const myBadgesContainer = document.getElementById('my-badges-container');
-            myBadgesContainer.innerHTML = '';
-            const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
-            if (myStats) {
-                document.getElementById('user-stat-distance').innerText = myStats.distance || "0 KM";
-                document.getElementById('user-stat-deliveries-label').innerText = `${myStats.deliveries || 0} Deliveries Completed`;
-                
-                if (myStats.badges && myStats.badges.length > 0) {
-                    myStats.badges.forEach(b => {
-                        myBadgesContainer.insertAdjacentHTML('beforeend', `<span style="background:rgba(255,51,51,0.2); border:1px solid var(--accent-red); padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:bold;">🛡️ ${b.title}</span>`);
-                    });
-                } else {
-                    myBadgesContainer.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Nog geen badges ontvangen.</p>';
-                }
-            }
-            if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
-            if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance || "0 KM";
-            if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers || "0";
-
-            renderChart(data.weeklyChartData, currentUser.username);
-
-            const treeContainer = document.getElementById('badges-tree-container');
-            const badgeSelect = document.getElementById('badge-user-select');
-            const eotwSelect = document.getElementById('eotw-select-user');
-            if (treeContainer && badgeSelect && eotwSelect && data.drivers_list) {
-                badgeSelect.innerHTML = ''; eotwSelect.innerHTML = '';
-                data.drivers_list.filter(d => !d.isDev).forEach(d => {
-                    badgeSelect.insertAdjacentHTML('beforeend', `<option value="${d.username}">${d.username}</option>`);
-                    eotwSelect.insertAdjacentHTML('beforeend', `<option value="${d.username}">${d.username}</option>`);
-                });
-
-                const badgeGroups = {};
-                data.badges?.forEach(b => {
-                    if (!badgeGroups[b.title]) badgeGroups[b.title] = [];
-                    badgeGroups[b.title].push(b);
-                });
-
-                treeContainer.innerHTML = '';
-                for (const [badgeTitle, badgeList] of Object.entries(badgeGroups)) {
-                    const groupHtml = `
-                        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-red); border-radius:10px; padding:12px; margin-bottom:10px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleBadgeGroup('${badgeTitle}')">
-                                <b style="color:var(--accent-red); font-size:1rem;">🏆 ${badgeTitle} (${badgeList.length})</b>
-                                <div>
-                                    <button onclick="event.stopPropagation(); quickAddBadgeUser('${badgeTitle}')" class="btn-portal" style="padding:2px 8px; font-size:0.75rem;">+ Voeg toe</button>
-                                    <span id="arrow-${badgeTitle}" class="rotate-arrow">▼</span>
-                                </div>
-                            </div>
-                            <div id="list-${badgeTitle}" style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-                                ${badgeList.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:0.85rem;"><span>- ${b.targetUser}</span><button onclick="deleteBadge('${b.id}')" class="btn-red" style="padding:2px 6px; font-size:0.7rem;">[Badge intrekken]</button></div>`).join('')}
-                            </div>
-                        </div>
-                    `;
-                    treeContainer.insertAdjacentHTML('beforeend', groupHtml);
-                }
-            }
-
-            if (currentUser.canManageStaff) {
-                const cardGrid = document.getElementById('staff-cards-container');
-                cardGrid.innerHTML = '';
-                data.drivers_list.filter(m => !m.isDev).forEach(m => {
-                    const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
-                    cardGrid.insertAdjacentHTML('beforeend', `
-                        <div class="staff-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <b>${m.username}</b>
-                                <span class="member-role role-${m.color}">${m.role}</span>
-                            </div>
-                            <label style="font-size:0.75rem; color:var(--text-muted);">Rol Wijzigen:</label>
-                            <select id="role-select-${m.username}" class="form-input" style="padding:6px; margin:4px 0 10px 0; background:rgba(0,0,0,0.5);" ${isSelf ? 'disabled' : ''}>
-                                <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
-                                <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
-                                <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
-                                <option value="Leidinggevende" ${m.role === 'Leidinggevende' ? 'selected' : ''}>Leidinggevende</option>
-                                <option value="Senior Medewerker" ${m.role === 'Senior Medewerker' ? 'selected' : ''}>Senior Medewerker</option>
-                                <option value="Medewerker" ${m.role === 'Medewerker' ? 'selected' : ''}>Medewerker</option>
-                                <option value="Junior Medewerker" ${m.role === 'Junior Medewerker' ? 'selected' : ''}>Junior Medewerker</option>
-                                <option value="Chauffeur in opleiding" ${m.role === 'Chauffeur in opleiding' ? 'selected' : ''}>Chauffeur in opleiding</option>
-                            </select>
-                            <label style="font-size:0.75rem; color:var(--text-muted);">Nieuw Wachtwoord:</label>
-                            <div style="display:flex; gap:6px;">
-                                <input type="password" id="pass-input-${m.username}" placeholder="Nieuw..." class="form-input" style="padding:6px; margin:0; font-size:0.8rem;">
-                                <button onclick="updateStaffPassword('${m.username}')" class="btn-portal" style="padding:6px 10px;">🔑</button>
-                            </div>
-                            ${!isSelf ? `<div style="display:flex; gap:6px; margin-top:12px;"><button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="flex:1; justify-content:center; font-size:0.8rem;">Opslaan</button><button onclick="fireStaffMember('${m.username}')" class="btn-red" style="font-size:0.8rem; padding:6px 10px;"><i class="fa-solid fa-trash"></i></button></div>` : ''}
-                        </div>
-                    `);
-                });
-            }
-        }
-
-        function toggleBadgeGroup(title) {
-            const el = document.getElementById(`list-${title}`);
-            const arrow = document.getElementById(`arrow-${title}`);
-            const isOpen = el.style.display === 'block';
-            el.style.display = isOpen ? 'none' : 'block';
-            if (arrow) arrow.classList.toggle('open', !isOpen);
-        }
-
-        async function updateMyOwnPassword() {
-            const newPassword = document.getElementById('my-new-password').value;
-            if (!newPassword || newPassword.trim().length < 3) return alert('Vul een geldig nieuw wachtwoord in!');
-            const res = await fetch('/api/staff/update-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser: currentUser.username, newPassword, adminUser: currentUser.username }) });
-            if (res.ok) { alert('Je eigen wachtwoord is succesvol gewijzigd!'); document.getElementById('my-new-password').value = ''; }
-            else alert('Er ging iets mis bij het wijzigen.');
-        }
-
-        async function quickAddBadgeUser(title) {
-            const targetUser = prompt(`Welke gebruiker wil je de badge "${title}" geven?`);
-            if (!targetUser) return;
-            const res = await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
-            const data = await res.json();
-            if (!data.success) alert(data.message || 'Kon badge niet toevoegen.');
-            refreshPortalData();
-        }
-
-        function renderChart(weeklyData, username) {
-            const ctx = document.getElementById('earningsChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-
-            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-            gradient.addColorStop(0, 'rgba(255, 51, 51, 0.4)');
-            gradient.addColorStop(1, 'rgba(255, 51, 51, 0.0)');
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weeklyData.map(w => w.week),
-                    datasets: [
-                        { label: 'Bedrijf (€)', data: weeklyData.map(w => w.company), borderColor: '#ff3333', backgroundColor: gradient, borderWidth: 3, fill: true, tension: 0.4 },
-                        { label: 'Mijn Inkomsten (€)', data: weeklyData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.4 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8' } } } }
-            });
-        }
-
-        async function completeApp(appId) {
-            await fetch('/api/applications/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ appId }) });
-            refreshPortalData();
-        }
-
-        async function awardBadge() {
-            const title = document.getElementById('badge-title').value;
-            const targetUser = document.getElementById('badge-user-select').value;
-            if (!title) return alert('Vul een badgenaam in!');
-            const res = await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
-            const data = await res.json();
-            if (!data.success) alert(data.message || 'Kon badge niet toevoegen.');
-            document.getElementById('badge-title').value = '';
-            refreshPortalData();
-        }
-
-        async function deleteBadge(badgeId) {
-            await fetch('/api/badges/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ badgeId }) });
-            refreshPortalData();
-        }
-
-        async function setEmployeeOfWeek() {
-            const targetUser = document.getElementById('eotw-select-user').value;
-            const reason = document.getElementById('eotw-input-reason').value;
-            await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
-            alert('Chauffeur van de week succesvol ingesteld!');
-            refreshPortalData();
-        }
-
-        async function postInfo() {
-            const title = document.getElementById('info-title').value;
-            const content = document.getElementById('info-content').value;
-            const fileInput = document.getElementById('info-file');
-            
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('content', content);
-            formData.append('username', currentUser.username);
-            if (fileInput.files.length > 0) {
-                formData.append('file', fileInput.files[0]);
-            }
-
-            const res = await fetch('/api/info', { method: 'POST', body: formData });
-            if (res.ok) {
-                alert('Informatie succesvol gepost!');
-                document.getElementById('info-title').value = '';
-                document.getElementById('info-content').value = '';
-                fileInput.value = '';
-                refreshPortalData();
-            } else {
-                alert('Fout bij het plaatsen van informatie.');
-            }
-        }
-
-        async function postConvoy() {
-            const title = document.getElementById('conv-title').value;
-            const date = document.getElementById('conv-date').value;
-            const time = document.getElementById('conv-time').value;
-            const server = document.getElementById('conv-server').value;
-            const route = document.getElementById('conv-route').value;
-            const details = document.getElementById('conv-details').value;
-            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route, details, username: currentUser.username }) });
-            refreshPortalData();
-        }
-
-        async function uploadPhoto() {
-            const fileInput = document.getElementById('photo-file');
-            if (fileInput.files.length === 0) return alert('Selecteer een foto!');
-            const formData = new FormData(); formData.append('photo', fileInput.files[0]); formData.append('username', currentUser.username);
-            const res = await fetch('/api/gallery', { method: 'POST', body: formData });
-            if (res.ok) {
-                alert('📸 Foto succesvol geüpload en opgeslagen in de fotogalerij!');
-                fileInput.value = ''; refreshPortalData(); loadData();
-            } else {
-                alert('Er is een fout opgetreden bij het uploaden van de foto.');
-            }
-        }
-
-        async function postAnnouncement() {
-            const title = document.getElementById('ann-title').value;
-            const content = document.getElementById('ann-content').value;
-            await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
-            refreshPortalData();
-        }
-
-        async function updateStaffPassword(targetUser) {
-            const newPassword = document.getElementById(`pass-input-${targetUser}`).value;
-            await fetch('/api/staff/update-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, newPassword, adminUser: currentUser.username }) });
-            alert('Wachtwoord bijgewerkt!');
-        }
-
-        async function updateStaffRole(targetUser) {
-            const newRole = document.getElementById(`role-select-${targetUser}`).value;
-            await fetch('/api/staff/update-role', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, newRole, adminUser: currentUser.username }) });
-            refreshPortalData();
-        }
-
-        async function fireStaffMember(targetUser) {
-            if (!confirm(`Weet je zeker dat je ${targetUser} wilt ontslaan?`)) return;
-            await fetch(`/api/staff/${targetUser}?adminUser=${currentUser.username}`, { method: 'DELETE' });
-            refreshPortalData();
-        }
-
-        async function addNewStaff() {
-            const username = document.getElementById('new-staff-user').value;
-            const role = document.getElementById('new-staff-role').value;
-            const res = await fetch('/api/staff/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, role, adminUser: currentUser.username }) });
-            const data = await res.json();
-            alert(`Toegevoegd! Wachtwoord: ${data.message}`);
-            refreshPortalData();
-        }
-
-        async function submitAbsence() {
-            const fromDate = document.getElementById('abs-from').value;
-            const toDate = document.getElementById('abs-to').value;
-            const reason = document.getElementById('abs-reason').value;
-            await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username, fromDate, toDate, reason }) });
-            refreshPortalData();
-        }
-    </script>
-</body>
-</html>
+                                <select id="eotw
+                                    
