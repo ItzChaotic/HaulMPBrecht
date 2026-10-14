@@ -9,8 +9,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         :root {
             --bg-base: #0a0303;
@@ -42,44 +40,22 @@
         .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .nav-links a:hover { color: #fff; }
 
-        .btn-discord {
-            background: #5865F2; color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
-            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
-        }
-
-        .btn-apply {
-            background: linear-gradient(135deg, var(--primary-light), var(--primary));
-            color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
-            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
-        }
-
-        .btn-portal {
-            background: rgba(255, 255, 255, 0.05); color: #fff !important; padding: 7px 12px;
-            border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important; border: 1px solid var(--border-red);
-            display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap;
-        }
+        .btn-discord { background: #5865F2; color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-apply { background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-portal { background: rgba(255, 255, 255, 0.05); color: #fff !important; padding: 7px 12px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important; border: 1px solid var(--border-red); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 
         .container { max-width: 1350px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
         .page-view { display: none; }
         .page-view.active { display: block; }
 
         .portal-layout { display: flex; min-height: 100vh; position: relative; }
-        .sidebar {
-            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
-            padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; 
-            position: fixed; height: 100vh; z-index: 100; color: #fff;
-        }
+        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red); padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; position: fixed; height: 100vh; z-index: 100; color: #fff; }
         .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
         .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 15px 0 8px 10px; }
         .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-        .sidebar-menu li button {
-            display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
-            color: #caa8a8; text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
-        }
+        .sidebar-menu li button { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #caa8a8; text-decoration: none; font-size: 0.88rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; }
         .sidebar-menu li button i { color: var(--accent-red); width: 18px; text-align: center; }
-        .sidebar-menu li:hover button, .sidebar-menu li.active button {
-            background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red);
-        }
+        .sidebar-menu li:hover button, .sidebar-menu li.active button { background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red); }
 
         .portal-content { margin-left: 260px; flex: 1; padding: 30px; width: calc(100% - 260px); }
 
@@ -90,10 +66,7 @@
         .dash-card-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,51,51,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--accent-red); }
         .dash-card-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 700; color: #fff; }
 
-        .dash-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        @media (max-width: 1200px) { .dash-main-row { grid-template-columns: 1fr; } }
-
-        .analytics-box, .live-feed-box, .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         .gallery-img, .fleet-img { width: 100%; height: 190px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
 
         .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -101,7 +74,6 @@
         .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .member-role { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
 
-        /* ROL KLEUREN SCHEMA */
         .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
         .role-orange { background: rgba(221, 107, 32, 0.18); color: #f6ad55; border: 1px solid rgba(221, 107, 32, 0.4); }
         .role-yellow { background: rgba(214, 158, 46, 0.18); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
@@ -142,7 +114,7 @@
 </head>
 <body>
 
-    <!-- LAPTOP NAVIGATIEBAR -->
+    <!-- NAVIGATIEBAR -->
     <nav id="main-nav-bar">
         <div onclick="goHome()" class="brand-logo">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img">
@@ -162,7 +134,7 @@
     </nav>
 
     <div class="container">
-        <!-- OPENBARE HOOFDPAGINA -->
+        <!-- HOOFDPAGINA -->
         <div id="home-view" class="page-view active">
             <section class="hero">
                 <h1>Brecht Transport B.V.</h1>
@@ -171,11 +143,11 @@
 
             <div class="dashboard-grid-top">
                 <div class="dash-card">
-                    <div class="dash-card-header"><span class="dash-card-title">Gereden Afstand</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
+                    <div class="dash-card-header"><span class="dash-card-title">Gereden Afstand (Deze Week)</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
                     <div class="dash-card-num" id="stat-distance">0 km</div>
                 </div>
                 <div class="dash-card">
-                    <div class="dash-card-header"><span class="dash-card-title">Leveringen Volbracht</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
+                    <div class="dash-card-header"><span class="dash-card-title">Leveringen (Deze Week)</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
                     <div class="dash-card-num" id="stat-deliveries">0</div>
                 </div>
                 <div class="dash-card">
@@ -261,11 +233,11 @@
                         </div>
                     </div>
 
-                    <!-- TAB 1: OVERZICHT -->
+                    <!-- TAB 1: OVERZICHT (WEEK STATS) -->
                     <div id="p-tab-stats" class="portal-tab-content">
                         <div class="dashboard-grid-top">
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">TOTALE AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">AFSTAND DEZE WEEK</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-distance">0 km</div>
                             </div>
                             <div class="dash-card">
@@ -273,32 +245,23 @@
                                 <div class="dash-card-num" id="company-stat-drivers">0</div>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">SALDO DEZE WEEK</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE (WEEK)</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
                                 <div class="dash-card-num" id="user-stat-distance">0 km</div>
                             </div>
                         </div>
 
-                        <div class="dash-main-row">
-                            <div>
-                                <div class="analytics-box">
-                                    <h3><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Prestatie Analyse</h3>
-                                    <div style="height: 220px; width: 100%; margin-top:15px;"><canvas id="earningsChart"></canvas></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="live-feed-box">
-                                    <h3 style="margin-bottom:12px; font-size:1rem;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
-                                    <div id="live-feed-container"><p style="color:var(--text-muted); font-size:0.85rem;">Informatie aan het inladen...</p></div>
-                                </div>
-                            </div>
+                        <div id="eotw-display-card" class="gallery-card" style="background: linear-gradient(135deg, rgba(128,0,0,0.35), rgba(204,0,0,0.12)); border: 1px solid var(--accent-red); display:none; text-align:center; padding:20px; margin-bottom:20px;">
+                            <h3 style="color:#f6e05e; font-size:1.1rem; margin-bottom:6px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
+                            <h2 id="eotw-username" style="font-size:1.6rem; margin-bottom:4px;">Chauffeur</h2>
+                            <p id="eotw-reason" style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">"Uitstekende prestaties!"</p>
                         </div>
                     </div>
 
-                    <!-- TAB: INFORMATIE & MEDEDELINGEN -->
+                    <!-- TAB: INFORMATIE & MEDEDELINGEN (MET VERWIJDERKNOP) -->
                     <div id="p-tab-info" class="portal-tab-content" style="display:none;">
                         <div class="sub-tab-bar">
                             <button class="sub-tab-btn active" onclick="switchInfoSubTab('info-sub-view', this)"><i class="fa-solid fa-book-open"></i> Overzicht & Mededelingen</button>
@@ -311,7 +274,7 @@
                                 <div id="announcements-display-container" style="margin-top:15px;"><p style="color:var(--text-muted);">Informatie aan het inladen...</p></div>
                             </div>
                             <div class="gallery-card">
-                                <h3><i class="fa-solid fa-folder-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
+                                <h3><i class="fa-solid fa-folder-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods (Downloads)</h3>
                                 <div id="info-list-container" style="margin-top:15px;"><p style="color:var(--text-muted);">Informatie aan het inladen...</p></div>
                             </div>
                         </div>
@@ -330,6 +293,14 @@
                                 <input type="file" id="info-file" class="form-input" accept=".zip,.scs,.rar,.pdf,.png,.jpg">
                                 <button onclick="postInfo()" class="btn-red">Opslaan in Database</button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: KONVOOIEN -->
+                    <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-truck-front" style="color:var(--accent-red);"></i> Geplande Konvooien</h3>
+                            <div id="convoys-list-container" style="margin-top:15px;"><p style="color:var(--text-muted);">Informatie aan het inladen...</p></div>
                         </div>
                     </div>
 
@@ -377,6 +348,18 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- TAB: BADGES & EOTW -->
+                    <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="margin-bottom:16px;">
+                            <h3><i class="fa-solid fa-crown" style="color:var(--accent-red);"></i> Chauffeur van de Week</h3>
+                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                                <select id="eotw-select-user" class="form-input" style="flex:1; margin:0; background:rgba(0,0,0,0.5);"></select>
+                                <input type="text" id="eotw-input-reason" placeholder="Reden..." class="form-input" style="flex:2; margin:0;">
+                                <button onclick="setEmployeeOfWeek()" class="btn-red">Instellen</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -410,7 +393,6 @@
 
     <script>
         let currentUser = null;
-        let chartInstance = null;
         const MAIN_DOMAIN = "brechttransport.nl";
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -469,6 +451,7 @@
             if (currentUser.canManageStaff) {
                 document.getElementById('mgt-section-head').style.display = 'block';
                 document.getElementById('staff-tab-btn').style.display = 'block';
+                document.getElementById('mgt-tab-btn').style.display = 'block';
                 document.getElementById('info-create-subtab-btn').style.display = 'inline-block';
             }
             refreshPortalData();
@@ -503,6 +486,22 @@
                 if (data.drivers) {
                     document.getElementById('stat-drivers').innerText = data.drivers;
                     if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers;
+                }
+                if (document.getElementById('company-stat-earnings') && data.companyEarnings) {
+                    document.getElementById('company-stat-earnings').innerText = data.companyEarnings;
+                }
+
+                if (currentUser && data.drivers_list) {
+                    const myStats = data.drivers_list.find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
+                    if (myStats && document.getElementById('user-stat-distance')) {
+                        document.getElementById('user-stat-distance').innerText = myStats.distance || '0 km';
+                    }
+                }
+
+                if (data.employeeOfTheWeek?.username && document.getElementById('eotw-display-card')) {
+                    document.getElementById('eotw-display-card').style.display = 'block';
+                    document.getElementById('eotw-username').innerText = data.employeeOfTheWeek.username;
+                    document.getElementById('eotw-reason').innerText = `"${data.employeeOfTheWeek.reason}"`;
                 }
 
                 const teamContainer = document.getElementById('team-container');
@@ -561,6 +560,28 @@
                         }
                     }
                 }
+
+                // Konvooien inladen
+                const convContainer = document.getElementById('convoys-list-container');
+                if (convContainer && data.convoysList) {
+                    convContainer.innerHTML = data.convoysList.length ? '' : '<p style="color:var(--text-muted);">Geen geplande konvooien.</p>';
+                    data.convoysList.forEach(c => {
+                        convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:10px; border:1px solid var(--border-red);"><b style="color:var(--accent-red);">${c.title}</b><p style="font-size:0.85rem; margin-top:6px;"><b>Datum:</b> ${c.date} ${c.time || ''} | <b>Server:</b> ${c.server}</p><p style="font-size:0.85rem; color:var(--text-muted);"><b>Route:</b> ${c.route}</p></div>`);
+                    });
+                }
+
+                // Sollicitaties inladen
+                const appsOpen = document.getElementById('applications-open-container');
+                if (appsOpen && data.applications) {
+                    appsOpen.innerHTML = data.applications.length ? '' : '<p style="color:var(--text-muted);">Geen actieve sollicitaties.</p>';
+                    data.applications.forEach(app => {
+                        if (app.status !== 'completed') {
+                            appsOpen.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px;"><b>${app.applicant}</b><p style="font-size:0.85rem; margin:6px 0;">"${app.content}"</p><a href="${app.link}" target="_blank" class="btn-portal" style="padding:4px 10px; font-size:0.75rem;">Bekijk op HaulMP</a></div>`);
+                        }
+                    });
+                }
+
+                refreshPortalData();
             } catch (e) {}
         }
 
@@ -568,25 +589,34 @@
             const res = await fetch('/api/haulmp');
             const data = await res.json();
 
+            // Mededelingen met verwijderknop
             if (data.announcements) {
                 const annContainer = document.getElementById('announcements-display-container');
                 annContainer.innerHTML = data.announcements.length ? '' : '<p style="color:var(--text-muted);">Geen mededelingen.</p>';
                 data.announcements.forEach(a => {
-                    annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px;"><b>${a.title}</b><p style="font-size:0.85rem; margin:4px 0;">${a.content}</p><small style="color:#888;">Door ${a.username || 'Admin'}</small></div>`);
+                    const deleteBtn = currentUser && currentUser.canManageStaff ? `<button onclick="deleteAnnouncement('${a.id}')" class="btn-red" style="padding:2px 6px; font-size:0.7rem; float:right;">Verwijderen</button>` : '';
+                    annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px;">${deleteBtn}<b>${a.title}</b><p style="font-size:0.85rem; margin:4px 0;">${a.content}</p><small style="color:#888;">Door ${a.username || 'Admin'}</small></div>`);
                 });
             }
 
+            // Bedrijfsinformatie & Mods met werkende downloadknoppen en verwijderknop
             if (data.infoList) {
                 const infoContainer = document.getElementById('info-list-container');
                 infoContainer.innerHTML = data.infoList.length ? '' : '<p style="color:var(--text-muted);">Geen informatie of mods gevonden.</p>';
                 data.infoList.forEach(i => {
-                    infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px;"><b>${i.title}</b><p style="font-size:0.85rem; margin:4px 0;">${i.content}</p></div>`);
+                    let fileAction = '';
+                    if (i.link) {
+                        fileAction = `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:6px; display:inline-block;"><i class="fa-solid fa-download"></i> Download ${i.fileName || 'Bestand'}</a>`;
+                    }
+                    const deleteBtn = currentUser && currentUser.canManageStaff ? `<button onclick="deleteInfoItem('${i.id}')" class="btn-red" style="padding:2px 6px; font-size:0.7rem; float:right;">Verwijderen</button>` : '';
+                    infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px; border-left:3px solid var(--accent-red);">${deleteBtn}<b>${i.title}</b><p style="font-size:0.85rem; margin:4px 0;">${i.content}</p>${fileAction}</div>`);
                 });
             }
 
-            if (currentUser && currentUser.canManageStaff) {
+            // Personeelstabel beheren
+            if (currentUser && currentUser.canManageStaff && data.drivers_list) {
                 const tableBody = document.getElementById('staff-table-body');
-                if (tableBody && data.drivers_list) {
+                if (tableBody) {
                     tableBody.innerHTML = '';
                     data.drivers_list.filter(m => !m.isDev).forEach(m => {
                         const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
@@ -620,6 +650,70 @@
                     });
                 }
             }
+
+            // EOTW dropdown vullen
+            const eotwSelect = document.getElementById('eotw-select-user');
+            if (eotwSelect && data.drivers_list) {
+                eotwSelect.innerHTML = '';
+                data.drivers_list.filter(d => !d.isDev).forEach(d => {
+                    eotwSelect.insertAdjacentHTML('beforeend', `<option value="${d.username}">${d.username}</option>`);
+                });
+            }
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm('Weet je zeker dat je deze mededeling wilt verwijderen?')) return;
+            await fetch(`/api/announcements/${id}`, { method: 'DELETE' });
+            refreshPortalData();
+        }
+
+        async function deleteInfoItem(id) {
+            if (!confirm('Weet je zeker dat je dit informatie-item wilt verwijderen?')) return;
+            await fetch(`/api/info/${id}`, { method: 'DELETE' });
+            refreshPortalData();
+        }
+
+        async function postAnnouncement() {
+            const title = document.getElementById('ann-title').value;
+            const content = document.getElementById('ann-content').value;
+            if (!title || !content) return alert('Vul alle velden in!');
+            await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
+            alert('Mededeling geplaatst!');
+            document.getElementById('ann-title').value = '';
+            document.getElementById('ann-content').value = '';
+            refreshPortalData();
+        }
+
+        async function postInfo() {
+            const title = document.getElementById('info-title').value;
+            const content = document.getElementById('info-content').value;
+            const fileInput = document.getElementById('info-file');
+            if (!title) return alert('Vul een titel in!');
+            
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('content', content);
+            formData.append('username', currentUser.username);
+            if (fileInput.files.length > 0) formData.append('file', fileInput.files[0]);
+
+            const res = await fetch('/api/info', { method: 'POST', body: formData });
+            if (res.ok) {
+                alert('Informatie succesvol gepost!');
+                document.getElementById('info-title').value = '';
+                document.getElementById('info-content').value = '';
+                fileInput.value = '';
+                refreshPortalData();
+            } else {
+                alert('Fout bij opslaan.');
+            }
+        }
+
+        async function setEmployeeOfWeek() {
+            const targetUser = document.getElementById('eotw-select-user').value;
+            const reason = document.getElementById('eotw-input-reason').value;
+            await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
+            alert('Chauffeur van de week ingesteld!');
+            loadData();
         }
 
         async function updateStaffRole(targetUser, newRole) {
