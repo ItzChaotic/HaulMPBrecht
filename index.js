@@ -83,11 +83,14 @@ function parseCurrency(str) {
 
 function getRoleColor(role) {
     const r = (role || '').toLowerCase();
-    if (r.includes('chauffeur in opleiding')) return 'gray';
-    if (r.includes('onder directeur')) return 'orange';
     if (r.includes('directeur')) return 'red';
+    if (r.includes('onder directeur')) return 'orange';
     if (r.includes('management')) return 'yellow';
     if (r.includes('leidinggevende')) return 'green';
+    if (r.includes('senior medewerker')) return 'blue';
+    if (r.includes('medewerker')) return 'purple';
+    if (r.includes('junior medewerker')) return 'cyan';
+    if (r.includes('chauffeur in opleiding')) return 'gray';
     return 'gray';
 }
 
