@@ -2,8 +2,6 @@ const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,23 +24,90 @@ app.use((req, res, next) => {
 });
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://brechttransport.nl/api/auth/discord/callback';
+
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 const DISCORD_APPLICATIONS_CHANNEL_ID = '1558075393729363968';
 const MONGO_URI = process.env.MONGO_URI;
 
-let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl;
+let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl, socialsColl;
 let isConnected = false;
+
+// In-memory cache voor bliksemsnelle laadtijden
+let cachedData = {
+    deliveries: "0",
+    distance: "0 km",
+    companyEarnings: "€ 0",
+    drivers: "0",
+    drivers_list: [],
+    recent_jobs: [],
+    gallery: [],
+    badges: [],
+    announcements: [],
+    applications: [],
+    infoList: [],
+    convoysList: [],
+    employeeOfTheWeek: {},
+    socials: [],
+    weeklyChartData: []
+};
 
 let defaultAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur" },
+    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
     { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
     { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
     { username: "Jellybear", password: "JellyBearPass", role: "Management" },
     { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
     { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
+
+// Hiërarchie voor automatische sortering
+const ROLE_RANKING = {
+    'directeur': 100,
+    'onder directeur': 90,
+    'management': 80,
+    'leidinggevende': 70,
+    'senior medewerker': 60,
+    'medewerker': 50,
+    'junior medewerker': 40,
+    'chauffeur in opleiding': 30
+};
+
+function getRoleRank(role) {
+    const r = (role || '').toLowerCase();
+    for (const [key, rank] of Object.entries(ROLE_RANKING)) {
+        if (r.includes(key)) return rank;
+    }
+    return 10;
+}
+
+// Flexibele rolkleur matching (.includes i.p.v. exacte match)
+function getRoleColor(role) {
+    const r = (role || '').toLowerCase();
+    if (r.includes('directeur') && !r.includes('onder')) return 'red';
+    if (r.includes('onder directeur')) return 'orange';
+    if (r.includes('management')) return 'yellow';
+    if (r.includes('leidinggevende')) return 'green';
+    if (r.includes('senior medewerker')) return 'blue';
+    if (r.includes('junior medewerker')) return 'cyan';
+    if (r.includes('medewerker')) return 'purple';
+    if (r.includes('chauffeur in opleiding')) return 'gray';
+    return 'gray';
+}
+
+function canManageBadges(role) {
+    const r = (role || '').toLowerCase();
+    return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
+}
+
+function canManageStaff(role) {
+    const r = (role || '').toLowerCase();
+    return r.includes('directeur') || r.includes('onder directeur');
+}
 
 async function connectDB() {
     if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld."); return; }
@@ -59,6 +124,7 @@ async function connectDB() {
         convoysColl = db.collection('convoys');
         badgesColl = db.collection('badges');
         eotwColl = db.collection('eotw');
+        socialsColl = db.collection('socials');
 
         isConnected = true;
         console.log("Verbonden met MongoDB Atlas!");
@@ -67,6 +133,7 @@ async function connectDB() {
         if (count === 0) {
             await accountsColl.insertMany(defaultAccounts);
         }
+        await updateCache();
     } catch (err) {
         console.error("MongoDB verbinding mislukt:", err.message);
     }
@@ -79,30 +146,6 @@ function cleanText(text) { return text ? text.replace(/[\*\_\`]/g, '').trim() : 
 function parseCurrency(str) {
     if (!str) return 0;
     return parseFloat(str.replace(/[^0-9\,\.]/g, '').replace(',', '.')) || 0;
-}
-
-// Unieke kleur per specifieke rol
-function getRoleColor(role) {
-    const r = (role || '').toLowerCase().trim();
-    if (r === 'directeur') return 'red';
-    if (r === 'onder directeur') return 'orange';
-    if (r === 'management') return 'yellow';
-    if (r === 'leidinggevende') return 'green';
-    if (r === 'senior medewerker') return 'blue';
-    if (r === 'medewerker') return 'purple';
-    if (r === 'junior medewerker') return 'cyan';
-    if (r === 'chauffeur in opleiding') return 'gray';
-    return 'gray';
-}
-
-function canManageBadges(role) {
-    const r = (role || '').toLowerCase();
-    return r.includes('directeur') || r.includes('management') || r.includes('leidinggevende');
-}
-
-function canManageStaff(role) {
-    const r = (role || '').toLowerCase();
-    return r.includes('directeur') || r.includes('onder directeur');
 }
 
 function isDriverMatch(jobDriver, accountUsername) {
@@ -131,16 +174,24 @@ clientBot.on('clientReady', () => {
 });
 
 clientBot.on('messageCreate', (message) => {
-    if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
-    else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
+    if (message.channelId === DISCORD_CHANNEL_ID) {
+        parseAndAddJob(message);
+        updateCache();
+    } else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) {
+        parseAndAddApplication(message);
+        updateCache();
+    }
 });
 
 async function fetchApplicationsFromDiscord() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
         if (channel) {
-            const msgs = await channel.messages.fetch({ limit: 50 });
-            msgs.forEach(msg => parseAndAddApplication(msg));
+            const msgs = await channel.messages.fetch({ limit: 100 });
+            for (const msg of msgs.values()) {
+                await parseAndAddApplication(msg);
+            }
+            updateCache();
         }
     } catch (e) {}
 }
@@ -191,7 +242,7 @@ async function fetchAllHistoricalDiscordLogs() {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
             let lastId = undefined; let fetched = 0; allJobsHistory = [];
-            while (fetched < 200) {
+            while (fetched < 300) {
                 const opt = { limit: 100 }; if (lastId) opt.before = lastId;
                 const msgs = await channel.messages.fetch(opt);
                 if (msgs.size === 0) break;
@@ -200,22 +251,12 @@ async function fetchAllHistoricalDiscordLogs() {
                 if (msgs.size < 100) break;
             }
             allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
+            updateCache();
         }
     } catch (e) {}
 }
 
-app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
-    let accountsDatabase = defaultAccounts;
-    if (isConnected && accountsColl) {
-        accountsDatabase = await accountsColl.find({}).toArray();
-    }
-    const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
-    if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
-    res.json({ success: true, username: account.username, role: account.role, color: getRoleColor(account.role), canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) });
-});
-
-app.get('/api/haulmp', async (req, res) => {
+async function updateCache() {
     const totalDeliveries = allJobsHistory.length;
     const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
     const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
@@ -227,6 +268,7 @@ app.get('/api/haulmp', async (req, res) => {
     let applicationsList = [];
     let infoList = [];
     let convoysList = [];
+    let socialsList = [];
     let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
     if (isConnected && db) {
@@ -238,6 +280,7 @@ app.get('/api/haulmp', async (req, res) => {
             applicationsList = await applicationsColl.find({}).toArray();
             infoList = await infoColl.find({}).sort({ _id: -1 }).toArray();
             convoysList = await convoysColl.find({}).sort({ _id: -1 }).toArray();
+            socialsList = await socialsColl.find({}).toArray();
             const eotw = await eotwColl.findOne({});
             if (eotw) employeeOfTheWeek = eotw;
         } catch (e) {}
@@ -246,14 +289,15 @@ app.get('/api/haulmp', async (req, res) => {
     const formattedDrivers = accountsDatabase.map(m => {
         const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
         return {
-            username: m.username, role: m.role, color: getRoleColor(m.role), isDev: !!m.isDev,
+            username: m.username, role: m.role, color: getRoleColor(m.role), rank: getRoleRank(m.role), isDev: !!m.isDev,
+            avatar: m.avatar || null,
             deliveries: userJobs.length,
             distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
             earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
             userJobs: userJobs.slice(0, 15),
             badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
         };
-    });
+    }).sort((a, b) => b.rank - a.rank); // Automatisch hoogste rang bovenaan!
 
     const weeklyChartData = {};
     allJobsHistory.forEach(j => {
@@ -264,7 +308,7 @@ app.get('/api/haulmp', async (req, res) => {
         weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
     });
 
-    res.json({
+    cachedData = {
         deliveries: totalDeliveries.toString(),
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
         companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
@@ -273,13 +317,97 @@ app.get('/api/haulmp', async (req, res) => {
         recent_jobs: allJobsHistory.slice(0, 10),
         gallery: galleryPhotos, badges: customBadges,
         announcements: announcementsList, applications: applicationsList,
-        infoList, convoysList, employeeOfTheWeek,
+        infoList, convoysList, employeeOfTheWeek, socials: socialsList,
         weeklyChartData: Object.values(weeklyChartData).reverse().slice(0, 8)
+    };
+}
+
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    let accountsDatabase = defaultAccounts;
+    if (isConnected && accountsColl) {
+        accountsDatabase = await accountsColl.find({}).toArray();
+    }
+    const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
+    if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
+    res.json({ 
+        success: true, username: account.username, role: account.role, avatar: account.avatar || null,
+        color: getRoleColor(account.role), canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) 
     });
 });
 
+app.get('/api/haulmp', (req, res) => {
+    res.json(cachedData);
+});
+
+// DISCORD OAUTH2 PFP LINKING
+app.get('/api/auth/discord/login', (req, res) => {
+    const user = req.query.user;
+    const redirectUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify&state=${encodeURIComponent(user)}`;
+    res.redirect(redirectUrl);
+});
+
+app.get('/api/auth/discord/callback', async (req, res) => {
+    const { code, state } = req.query;
+    if (!code) return res.redirect('/?error=no_code');
+    try {
+        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams({
+                client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET,
+                grant_type: 'authorization_code', code, redirect_uri: DISCORD_REDIRECT_URI
+            }),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        const tokens = await tokenRes.json();
+        
+        const userRes = await fetch('https://discord.com/api/users/@me', {
+            headers: { authorization: `${tokens.token_type} ${tokens.access_token}` }
+        });
+        const discordUser = await userRes.json();
+
+        let avatarUrl = `https://cdn.discordapp.com/embed/avatars/0.png`;
+        if (discordUser.avatar) {
+            avatarUrl = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`;
+        }
+
+        if (isConnected && accountsColl && state) {
+            await accountsColl.updateOne(
+                { username: { $regex: new RegExp(`^${state}$`, 'i') } },
+                { $set: { avatar: avatarUrl, discordId: discordUser.id } }
+            );
+            await updateCache();
+        }
+        res.redirect('/?discord_success=true');
+    } catch (e) {
+        res.redirect('/?error=oauth_failed');
+    }
+});
+
+// SOCIALS API
+app.post('/api/socials', async (req, res) => {
+    const { platform, url, channelName } = req.body;
+    const socObj = { id: "soc-" + Date.now(), platform, url, channelName };
+    if (isConnected && socialsColl) {
+        await socialsColl.insertOne(socObj);
+        await updateCache();
+    }
+    res.json({ success: true });
+});
+
+app.delete('/api/socials/:id', async (req, res) => {
+    if (isConnected && socialsColl) {
+        await socialsColl.deleteOne({ id: req.params.id });
+        await updateCache();
+    }
+    res.json({ success: true });
+});
+
 app.post('/api/applications/complete', async (req, res) => {
-    if (isConnected && applicationsColl) await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
+    if (isConnected && applicationsColl) {
+        await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
+        await updateCache();
+    }
     res.json({ success: true });
 });
 
@@ -296,12 +424,18 @@ app.post('/api/badges', async (req, res) => {
     if (alreadyHas) return res.status(400).json({ success: false, message: 'Deze werknemer heeft deze badge al!' });
 
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
-    if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
+    if (isConnected && badgesColl) {
+        await badgesColl.insertOne(badgeObj);
+        await updateCache();
+    }
     res.json({ success: true });
 });
 
 app.post('/api/badges/delete', async (req, res) => {
-    if (isConnected && badgesColl) await badgesColl.deleteOne({ id: req.body.badgeId });
+    if (isConnected && badgesColl) {
+        await badgesColl.deleteOne({ id: req.body.badgeId });
+        await updateCache();
+    }
     res.json({ success: true });
 });
 
@@ -319,13 +453,19 @@ app.post('/api/info', upload.single('file'), async (req, res) => {
         username: req.body.username, 
         date: new Date().toLocaleDateString('nl-NL') 
     };
-    if (isConnected && infoColl) await infoColl.insertOne(infoObj);
+    if (isConnected && infoColl) {
+        await infoColl.insertOne(infoObj);
+        await updateCache();
+    }
     res.json({ success: true });
 });
 
 app.post('/api/convoys', async (req, res) => {
     const convObj = { id: "conv-" + Date.now(), ...req.body };
-    if (isConnected && convoysColl) await convoysColl.insertOne(convObj);
+    if (isConnected && convoysColl) {
+        await convoysColl.insertOne(convObj);
+        await updateCache();
+    }
     res.json({ success: true });
 });
 
@@ -333,19 +473,24 @@ app.post('/api/eotw', async (req, res) => {
     if (isConnected && eotwColl) {
         await eotwColl.deleteMany({});
         await eotwColl.insertOne({ username: req.body.targetUser, reason: req.body.reason, setBy: req.body.username });
+        await updateCache();
     }
     res.json({ success: true });
 });
 
 app.post('/api/announcements', async (req, res) => {
     const annObj = { id: "ann-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') };
-    if (isConnected && announcementsColl) await announcementsColl.insertOne(annObj);
+    if (isConnected && announcementsColl) {
+        await announcementsColl.insertOne(annObj);
+        await updateCache();
+    }
     res.json({ success: true });
 });
 
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
+        await updateCache();
     }
     res.json({ success: true });
 });
@@ -357,6 +502,7 @@ app.post('/api/staff/add', async (req, res) => {
         const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
         if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
         await accountsColl.insertOne(newAcc);
+        await updateCache();
     }
     res.json({ success: true, message: pw });
 });
@@ -364,6 +510,7 @@ app.post('/api/staff/add', async (req, res) => {
 app.post('/api/staff/update-role', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
+        await updateCache();
     }
     res.json({ success: true });
 });
@@ -371,6 +518,7 @@ app.post('/api/staff/update-role', async (req, res) => {
 app.delete('/api/staff/:targetUser', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
+        await updateCache();
     }
     res.json({ success: true });
 });
@@ -382,6 +530,7 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     
     if (isConnected && galleryColl) {
         await galleryColl.insertOne(photoObj);
+        await updateCache();
     }
     res.json({ success: true });
 });
