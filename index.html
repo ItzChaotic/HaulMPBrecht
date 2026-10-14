@@ -66,56 +66,57 @@
         .page-view { display: none; }
         .page-view.active { display: block; }
 
-        .portal-layout { display: flex; min-height: 100vh; position: relative; }
+        .portal-layout { display: flex; min-height: 100vh; position: relative; width: 100%; }
         
-        /* Zijbalk lay-out geoptimaliseerd: Profiel bovenaan */
+        /* Zijbalk strak in de linkerhoek aangesloten */
         .sidebar {
-            width: 270px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
+            width: 290px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
             padding: 20px 16px; display: flex; flex-direction: column; justify-content: flex-start; gap: 15px;
-            position: fixed; height: 100vh; z-index: 100; transition: left 0.3s ease; color: #fff;
+            position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; color: #fff;
             overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
         }
         .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
-        .sidebar-section-title { font-size: 0.68rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 10px 0 4px 8px; }
-        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+        .sidebar-section-title { font-size: 0.7rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 10px 0 4px 8px; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
         .sidebar-menu li button {
-            display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 8px;
-            color: #caa8a8; text-decoration: none; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
+            display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 8px;
+            color: #caa8a8; text-decoration: none; font-size: 0.9rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; transition: 0.2s;
         }
-        .sidebar-menu li button i { color: var(--accent-red); width: 18px; text-align: center; }
+        .sidebar-menu li button i { color: var(--accent-red); width: 20px; text-align: center; font-size: 1rem; }
         .sidebar-menu li:hover button, .sidebar-menu li.active button {
             background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red);
         }
 
-        .portal-content { margin-left: 270px; flex: 1; padding: 30px; width: calc(100% - 270px); }
+        /* Rechtergedeelte iets ruimer opgeschaald */
+        .portal-content { margin-left: 290px; flex: 1; padding: 35px; width: calc(100% - 290px); }
 
-        .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 25px; }
         .dash-card {
-            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px;
+            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 24px;
             display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: var(--glass-blur); transition: 0.2s;
         }
         .dash-card:hover { border-color: rgba(255, 51, 51, 0.4); transform: translateY(-2px); }
         .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .dash-card-title { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
-        .dash-card-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,51,51,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--accent-red); font-size: 0.95rem; }
-        .dash-card-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 700; color: #fff; }
+        .dash-card-title { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+        .dash-card-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,51,51,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--accent-red); font-size: 1.1rem; }
+        .dash-card-num { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: #fff; }
 
-        .dash-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .dash-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
         @media (max-width: 1200px) { .dash-main-row { grid-template-columns: 1fr; } }
 
-        .analytics-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 22px; backdrop-filter: var(--glass-blur); }
-        .live-feed-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 22px; backdrop-filter: var(--glass-blur); }
-        .feed-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .analytics-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px; padding: 26px; backdrop-filter: var(--glass-blur); }
+        .live-feed-box { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px; padding: 26px; backdrop-filter: var(--glass-blur); }
+        .feed-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
         .feed-item:hover { border-color: var(--border-red); background: rgba(204,0,0,0.08); }
 
-        .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 20px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
-        .gallery-img, .fleet-img { width: 100%; height: 190px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
+        .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 24px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
+        .gallery-img, .fleet-img { width: 100%; height: 210px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
 
         .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-        .member-avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); overflow: hidden; aspect-ratio: 1/1; }
+        .member-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); overflow: hidden; aspect-ratio: 1/1; }
         .member-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-        .member-role { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
+        .member-role { display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-top: 4px; }
 
         .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
         .role-orange { background: rgba(221, 107, 32, 0.22); color: #ff9d42; border: 1px solid rgba(221, 107, 32, 0.5); }
@@ -126,10 +127,10 @@
         .role-cyan { background: rgba(0, 181, 216, 0.18); color: #76e4f7; border: 1px solid rgba(0, 181, 216, 0.4); }
         .role-gray { background: rgba(160, 174, 192, 0.18); color: #cbd5e0; border: 1px solid rgba(160, 174, 192, 0.4); }
 
-        .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-red); }
-        .form-input { width: 100%; padding: 10px 14px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 8px; font-size: 0.9rem; }
+        .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border-red); }
+        .form-input { width: 100%; padding: 12px 16px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 10px; font-size: 0.95rem; }
         .form-input:focus { outline: none; border-color: var(--accent-red); }
-        .btn-red { background: var(--primary-light); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-red { background: var(--primary-light); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
         .btn-red:hover { background: var(--accent-red); }
 
         #login-modal, #password-modal, #discord-modal {
@@ -138,14 +139,14 @@
         }
         .login-box {
             background: rgba(18, 4, 4, 0.94); border: 1px solid var(--border-red); border-radius: 20px;
-            max-width: 400px; width: 100%; padding: 28px; text-align: center; color: #fff; backdrop-filter: blur(12px);
+            max-width: 420px; width: 100%; padding: 30px; text-align: center; color: #fff; backdrop-filter: blur(12px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
         }
 
-        .staff-table-wrapper { width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 16px; padding: 10px; }
-        .staff-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
-        .staff-table th, .staff-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .staff-table th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+        .staff-table-wrapper { width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 12px; }
+        .staff-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
+        .staff-table th, .staff-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .staff-table th { color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase; font-weight: 700; }
         .staff-table tr:last-child td { border-bottom: none; }
 
         .hero { text-align: center; padding: 35px 0 25px 0; }
@@ -199,21 +200,21 @@
         }
         footer p { margin: 3px 0; }
 
-        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--border-red); padding-bottom: 10px; flex-wrap: wrap; }
-        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-red); padding-bottom: 12px; flex-wrap: wrap; }
+        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 9px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
         .sub-tab-btn.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
 
         .sidebar-user-card {
             background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px;
-            padding: 10px; display: flex; align-items: center; gap: 10px; width: 100%;
+            padding: 12px; display: flex; align-items: center; gap: 12px; width: 100%;
         }
-        .user-avatar-circle { width: 38px; height: 38px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow: hidden; aspect-ratio: 1/1; }
+        .user-avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; overflow: hidden; aspect-ratio: 1/1; }
         .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-        .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 15px; }
-        .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 12px; padding: 15px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
+        .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 15px; }
+        .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 14px; padding: 18px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.2s; }
         .social-card:hover { border-color: var(--accent-red); background: rgba(204,0,0,0.1); transform: translateY(-2px); }
-        .social-card i { font-size: 1.8rem; color: var(--accent-red); }
+        .social-card i { font-size: 2rem; color: var(--accent-red); }
 
         @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
@@ -363,25 +364,25 @@
         <!-- PERSONEELSPORTAAL -->
         <div id="portal-view" class="page-view">
             <div class="portal-layout">
-                <!-- DESKTOP SIDEBAR: Profiel netjes bovenaan en strakke indeling -->
+                <!-- DESKTOP SIDEBAR: Strak links aangesloten -->
                 <div class="sidebar" id="portal-sidebar">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom: 5px;" class="sidebar-brand" onclick="goHome()">
-                        <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:26px;">
-                        <span style="font-size:0.8rem; line-height:1.2; font-weight:bold;">Brecht Transport Portaal</span>
+                        <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:28px;">
+                        <span style="font-size:0.85rem; line-height:1.2; font-weight:bold;">Brecht Transport Portaal</span>
                     </div>
 
                     <!-- Gebruiker Profielkaart bovenaan -->
                     <div class="sidebar-user-card">
                         <div class="user-avatar-circle" id="sidebar-avatar-container"><i class="fa-solid fa-user"></i></div>
                         <div style="overflow:hidden; flex:1;">
-                            <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.82rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
-                            <div id="sidebar-role-txt" style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
+                            <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.85rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
+                            <div id="sidebar-role-txt" style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
                         </div>
                     </div>
 
-                    <div style="display:flex; flex-direction:column; gap:4px; width:100%;">
-                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:6px 8px; font-size:0.75rem; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-crop"></i> Profielfoto Croppen</button>
-                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:6px 8px; font-size:0.75rem;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
+                    <div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-crop"></i> Profielfoto Croppen</button>
+                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
                     </div>
 
                     <div class="sidebar-section-title">HOOFDMENU</div>
@@ -401,10 +402,10 @@
                         <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
                     </ul>
 
-                    <div style="margin-top:auto; padding-top:10px; border-top:1px solid var(--border-red); display:flex; flex-direction:column; gap:4px; width:100%;">
-                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:6px 8px; font-size:0.75rem;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
-                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; padding:6px 8px; font-size:0.75rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
-                        <div style="text-align:center; font-size:0.68rem; color:var(--text-muted); margin-top:4px;">
+                    <div style="margin-top:auto; padding-top:12px; border-top:1px solid var(--border-red); display:flex; flex-direction:column; gap:6px; width:100%;">
+                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
+                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                        <div style="text-align:center; font-size:0.72rem; color:var(--text-muted); margin-top:6px;">
                             <div>&copy; Alle rechten behouden 2026</div>
                             <div>Gemaakt door ItzChaotic_</div>
                         </div>
@@ -425,9 +426,9 @@
                         <button id="mob-staff-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel</button>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid var(--border-red); padding-bottom:16px;">
                         <div>
-                            <h1 style="font-size:1.6rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1>
+                            <h1 style="font-size:1.8rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1>
                         </div>
                     </div>
 
@@ -437,53 +438,53 @@
                             <div class="dash-card">
                                 <div class="dash-card-header"><span class="dash-card-title">TOTALE AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-distance">0 km</div>
-                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">▲ Groeiend</span>
+                                <span style="font-size:0.75rem; color:#68d391; font-weight:bold; margin-top:4px;">▲ Groeiend</span>
                             </div>
                             <div class="dash-card">
                                 <div class="dash-card-header"><span class="dash-card-title">ACTIEVE CHAUFFEURS</span><div class="dash-card-icon"><i class="fa-solid fa-user-group"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-drivers">0</div>
-                                <span style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">Actieve VTC Leden</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Actieve VTC Leden</span>
                             </div>
                             <div class="dash-card">
                                 <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
-                                <span style="font-size:0.7rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Wekelijkse Inkomsten</span>
+                                <span style="font-size:0.75rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Wekelijkse Inkomsten</span>
                             </div>
                             <div class="dash-card">
                                 <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
                                 <div class="dash-card-num" id="user-stat-distance">0 km</div>
-                                <span style="font-size:0.7rem; color:var(--accent-red); font-weight:bold; margin-top:4px;" id="user-stat-deliveries-label">0 Leveringen Volbracht</span>
+                                <span style="font-size:0.75rem; color:var(--accent-red); font-weight:bold; margin-top:4px;" id="user-stat-deliveries-label">0 Leveringen Volbracht</span>
                             </div>
                         </div>
 
                         <div class="dash-main-row">
                             <div>
-                                <div class="analytics-box" style="margin-bottom:20px;">
+                                <div class="analytics-box" style="margin-bottom:24px;">
                                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                                        <h3><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Prestatie Analyse</h3>
+                                        <h3 style="font-size: 1.1rem;"><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Prestatie Analyse</h3>
                                         <span style="font-size:0.75rem; background:rgba(56,161,105,0.2); color:#68d391; padding:4px 10px; border-radius:8px; border:1px solid rgba(56,161,105,0.4); font-weight:bold;">● VTC ACTIEF</span>
                                     </div>
-                                    <div style="height: 220px; width: 100%;"><canvas id="earningsChart"></canvas></div>
+                                    <div style="height: 250px; width: 100%;"><canvas id="earningsChart"></canvas></div>
                                 </div>
 
-                                <div id="eotw-display-card" class="gallery-card" style="background: linear-gradient(135deg, rgba(128,0,0,0.35), rgba(204,0,0,0.12)); border: 1px solid var(--accent-red); display:none; text-align:center; padding:20px; margin-bottom:20px;">
-                                    <h3 style="color:#f6e05e; font-size:1.1rem; margin-bottom:6px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
-                                    <h2 id="eotw-username" style="font-size:1.6rem; margin-bottom:4px;">Chauffeur</h2>
-                                    <p id="eotw-reason" style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">"Uitstekende prestaties!"</p>
+                                <div id="eotw-display-card" class="gallery-card" style="background: linear-gradient(135deg, rgba(128,0,0,0.35), rgba(204,0,0,0.12)); border: 1px solid var(--accent-red); display:none; text-align:center; padding:24px; margin-bottom:24px;">
+                                    <h3 style="color:#f6e05e; font-size:1.2rem; margin-bottom:6px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
+                                    <h2 id="eotw-username" style="font-size:1.8rem; margin-bottom:4px;">Chauffeur</h2>
+                                    <p id="eotw-reason" style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">"Uitstekende prestaties!"</p>
                                 </div>
                             </div>
 
                             <div>
                                 <div class="live-feed-box">
-                                    <h3 style="margin-bottom:12px; font-size:1rem; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
-                                    <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:15px;">Meest recente ritten van onze chauffeurs.</p>
+                                    <h3 style="margin-bottom:12px; font-size:1.1rem; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
+                                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Meest recente ritten van onze chauffeurs.</p>
                                     <div id="live-feed-container">
-                                        <p style="text-align:center; color:var(--text-muted); font-size:0.8rem;">Geen recente activiteit.</p>
+                                        <p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Geen recente activiteit.</p>
                                     </div>
                                 </div>
 
-                                <div class="gallery-card" style="margin-top:20px;">
-                                    <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Mijn Badges</h3>
+                                <div class="gallery-card" style="margin-top:24px;">
+                                    <h3 style="font-size: 1.1rem;"><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Mijn Badges</h3>
                                     <div id="my-badges-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
                                 </div>
                             </div>
@@ -513,17 +514,17 @@
                             <div class="gallery-card" style="margin-bottom:20px;">
                                 <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Nieuwe Mededeling Plaatsen</h3>
                                 <input type="text" id="ann-title" placeholder="Titel van mededeling..." class="form-input">
-                                <textarea id="ann-content" placeholder="Inhoud van de mededeling..." class="form-input" style="height:80px; resize:vertical;"></textarea>
+                                <textarea id="ann-content" placeholder="Inhoud van de mededeling..." class="form-input" style="height:90px; resize:vertical;"></textarea>
                                 <button onclick="postAnnouncement()" class="btn-red">Publiceren op Portaal</button>
                             </div>
 
                             <div class="gallery-card">
                                 <h3><i class="fa-solid fa-file-arrow-up" style="color:var(--accent-red);"></i> Nieuwe Informatie of Mod Posten</h3>
                                 <input type="text" id="info-title" placeholder="Titel..." class="form-input">
-                                <textarea id="info-content" placeholder="Omschrijving..." class="form-input" style="height:70px;"></textarea>
-                                <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:4px;">Bestand selecteren uit verkenner (optioneel):</label>
+                                <textarea id="info-content" placeholder="Omschrijving..." class="form-input" style="height:80px;"></textarea>
+                                <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-top:6px;">Bestand selecteren uit verkenner (optioneel):</label>
                                 <input type="file" id="info-file" class="form-input" accept=".zip,.scs,.rar,.pdf,.png,.jpg,.jpeg">
-                                <button onclick="postInfo()" class="btn-red" style="margin-top:10px;">Informatie Opslaan</button>
+                                <button onclick="postInfo()" class="btn-red" style="margin-top:12px;">Informatie Opslaan</button>
                             </div>
                         </div>
                     </div>
@@ -532,14 +533,14 @@
                     <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
                         <div id="convoy-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
                             <h3><i class="fa-solid fa-calendar-plus" style="color:var(--accent-red);"></i> Nieuw Konvooi Inplannen</h3>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                                 <input type="text" id="conv-title" placeholder="Titel..." class="form-input">
                                 <input type="text" id="conv-server" placeholder="Server..." class="form-input">
                                 <input type="date" id="conv-date" class="form-input">
                                 <input type="time" id="conv-time" class="form-input">
                             </div>
                             <input type="text" id="conv-route" placeholder="Route..." class="form-input">
-                            <textarea id="conv-details" placeholder="Overige details..." class="form-input" style="height:60px;"></textarea>
+                            <textarea id="conv-details" placeholder="Overige details..." class="form-input" style="height:80px;"></textarea>
                             <button onclick="postConvoy()" class="btn-red">Inplannen</button>
                         </div>
                         <div class="gallery-card">
@@ -552,7 +553,7 @@
                     <div id="p-tab-socials" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="margin-bottom:20px;">
                             <h3><i class="fa-solid fa-share-nodes" style="color:var(--accent-red);"></i> Social Media Link Toevoegen</h3>
-                            <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px; margin-top:10px;">
+                            <div style="display:grid; grid-template-columns: 1fr 2fr; gap:12px; margin-top:10px;">
                                 <select id="social-platform" class="form-input" style="margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);">
                                     <option value="TikTok">TikTok</option>
                                     <option value="Instagram">Instagram</option>
@@ -563,12 +564,12 @@
                                 </select>
                                 <input type="url" id="social-url" placeholder="https://..." class="form-input" style="margin:0;">
                             </div>
-                            <button onclick="addSocialLink()" class="btn-red" style="margin-top:12px;">Toevoegen aan Hoofdpagina</button>
+                            <button onclick="addSocialLink()" class="btn-red" style="margin-top:14px;">Toevoegen aan Hoofdpagina</button>
                         </div>
 
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-list" style="color:var(--accent-red);"></i> Beheerde Socials</h3>
-                            <div id="portal-socials-list" style="margin-top:12px;"></div>
+                            <div id="portal-socials-list" style="margin-top:14px;"></div>
                         </div>
                     </div>
 
@@ -576,9 +577,9 @@
                     <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-file-signature" style="color:var(--accent-red);"></i> Actieve Sollicitaties</h3>
-                            <div id="applications-open-container" style="margin-top:12px;"></div>
+                            <div id="applications-open-container" style="margin-top:14px;"></div>
                             <div style="margin-top:25px; border-top:1px solid var(--border-red); padding-top:15px;">
-                                <button onclick="toggleCompletedApps()" class="btn-portal" style="width:100%; justify-content:space-between;">
+                                <button onclick="toggleCompletedApps()" class="btn-portal" style="width:100%; justify-content:space-between; padding:10px 14px;">
                                     <span><i class="fa-solid fa-box-archive"></i> Afgeronde Sollicitaties</span>
                                     <i id="completed-icon" class="fa-solid fa-chevron-down rotate-arrow"></i>
                                 </button>
@@ -592,8 +593,8 @@
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-pen-to-square" style="color:var(--accent-red);"></i> Afwezigheid Melden</h3>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
-                                <div><label style="font-size:0.8rem; color:var(--text-muted);">Van:</label><input type="date" id="abs-from" class="form-input"></div>
-                                <div><label style="font-size:0.8rem; color:var(--text-muted);">Tot:</label><input type="date" id="abs-to" class="form-input"></div>
+                                <div><label style="font-size:0.85rem; color:var(--text-muted);">Van:</label><input type="date" id="abs-from" class="form-input"></div>
+                                <div><label style="font-size:0.85rem; color:var(--text-muted);">Tot:</label><input type="date" id="abs-to" class="form-input"></div>
                             </div>
                             <input type="text" id="abs-reason" placeholder="Reden..." class="form-input">
                             <button onclick="submitAbsence()" class="btn-red">Aanvraag Indienen</button>
@@ -613,9 +614,9 @@
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="margin-bottom:20px;">
                             <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuw Personeelslid Toevoegen</h3>
-                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                                <input type="text" id="new-staff-user" placeholder="Gebruikersnaam" class="form-input" style="flex:1; min-width:180px; margin:0;">
-                                <select id="new-staff-role" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);">
+                            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+                                <input type="text" id="new-staff-user" placeholder="Gebruikersnaam" class="form-input" style="flex:1; min-width:200px; margin:0;">
+                                <select id="new-staff-role" class="form-input" style="flex:1; min-width:200px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);">
                                     <option value="Directeur">Directeur</option>
                                     <option value="Onder Directeur">Onder Directeur</option>
                                     <option value="Management">Management</option>
@@ -629,7 +630,7 @@
                             </div>
                         </div>
 
-                        <h3 style="margin-bottom:12px; font-size:1.1rem;"><i class="fa-solid fa-users-gear" style="color:var(--accent-red);"></i> Personeelsoverzicht & Beheer</h3>
+                        <h3 style="margin-bottom:14px; font-size:1.2rem;"><i class="fa-solid fa-users-gear" style="color:var(--accent-red);"></i> Personeelsoverzicht & Beheer</h3>
                         <div class="staff-table-wrapper">
                             <table class="staff-table">
                                 <thead>
@@ -648,20 +649,20 @@
 
                     <!-- TAB: BADGES & EOTW -->
                     <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card" style="margin-bottom:16px;">
+                        <div class="gallery-card" style="margin-bottom:20px;">
                             <h3><i class="fa-solid fa-crown" style="color:var(--accent-red);"></i> Chauffeur van de Week</h3>
-                            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                                <select id="eotw-select-user" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
-                                <input type="text" id="eotw-input-reason" placeholder="Reden..." class="form-input" style="flex:2; min-width:200px; margin:0;">
+                            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+                                <select id="eotw-select-user" class="form-input" style="flex:1; min-width:200px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
+                                <input type="text" id="eotw-input-reason" placeholder="Reden..." class="form-input" style="flex:2; min-width:220px; margin:0;">
                                 <button onclick="setEmployeeOfWeek()" class="btn-red">Instellen</button>
                             </div>
                         </div>
 
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Badge Beheer & Toekennen</h3>
-                            <div style="display:flex; gap:10px; margin:12px 0; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;">
-                                <input type="text" id="badge-title" placeholder="Badge Naam (bijv. Nachtwaker)" class="form-input" style="flex:1; min-width:180px; margin:0;">
-                                <select id="badge-user-select" class="form-input" style="flex:1; min-width:180px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
+                            <div style="display:flex; gap:12px; margin:14px 0; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:14px; border-radius:12px;">
+                                <input type="text" id="badge-title" placeholder="Badge Naam (bijv. Nachtwaker)" class="form-input" style="flex:1; min-width:200px; margin:0;">
+                                <select id="badge-user-select" class="form-input" style="flex:1; min-width:200px; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
                                 <button onclick="awardBadge()" class="btn-red">+ Toevoegen</button>
                             </div>
                             <div id="badges-tree-container" style="margin-top:15px;"></div>
@@ -687,16 +688,16 @@
             <input type="file" id="pfp-file-input" accept="image/*" class="form-input" onchange="previewCropImage(this)">
             
             <div id="crop-preview-area" style="display:none; margin:12px 0; text-align:center;">
-                <div style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; margin: 0 auto; border: 2px solid var(--accent-red); background: #000;">
-                    <canvas id="cropCanvas" width="140" height="140" style="cursor: grab;"></canvas>
+                <div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; margin: 0 auto; border: 2px solid var(--accent-red); background: #000;">
+                    <canvas id="cropCanvas" width="150" height="150" style="cursor: grab;"></canvas>
                 </div>
-                <div style="display:flex; justify-content:center; gap:10px; margin-top:8px;">
-                    <button type="button" onclick="zoomCrop(0.9)" class="btn-portal" style="padding:4px 10px; font-size:0.75rem;">Zoom -</button>
-                    <button type="button" onclick="zoomCrop(1.1)" class="btn-portal" style="padding:4px 10px; font-size:0.75rem;">Zoom +</button>
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+                    <button type="button" onclick="zoomCrop(0.9)" class="btn-portal" style="padding:5px 12px; font-size:0.8rem;">Zoom -</button>
+                    <button type="button" onclick="zoomCrop(1.1)" class="btn-portal" style="padding:5px 12px; font-size:0.8rem;">Zoom +</button>
                 </div>
             </div>
 
-            <button onclick="saveCroppedProfilePicture()" class="btn-red" style="width:100%; margin-top:8px;">Foto Opslaan in Database</button>
+            <button onclick="saveCroppedProfilePicture()" class="btn-red" style="width:100%; margin-top:10px;">Foto Opslaan in Database</button>
             <button onclick="closeDiscordModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:10px; cursor:pointer; font-size:0.85rem;">Annuleren</button>
         </div>
     </div>
@@ -735,7 +736,6 @@
         let currentLang = 'NL';
         const MAIN_DOMAIN = "brechttransport.nl";
 
-        // Cropper state variables
         let cropImageObj = new Image();
         let cropScale = 1;
         let cropOffsetX = 0;
@@ -1029,15 +1029,15 @@
                         else if (pLower.includes('twitter') || pLower.includes('x')) iconClass = "fa-brands fa-x-twitter";
 
                         if (pubSocials) {
-                            pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="${iconClass}"></i><span style="font-weight:bold;">${s.platform}</span><span style="font-size:0.75rem; color:var(--text-muted);">Van: ${s.addedBy}</span><span style="font-size:0.72rem; color:var(--accent-red);">Bekijk kanaal →</span></a>`);
+                            pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="${iconClass}"></i><span style="font-weight:bold; font-size:1rem;">${s.platform}</span><span style="font-size:0.8rem; color:var(--text-muted);">Van: ${s.addedBy}</span><span style="font-size:0.78rem; color:var(--accent-red); font-weight:bold;">Bekijk kanaal →</span></a>`);
                         }
                         if (portalSocials) {
-                            portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:8px; margin-bottom:8px;"><div><b>${s.platform}</b> (door ${s.addedBy}): <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button></div>`);
+                            portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b> (door ${s.addedBy}): <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button></div>`);
                         }
                     });
                 } else {
-                    if (pubSocials) pubSocials.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:0.85rem;">Nog geen social media kanalen toegevoegd.</p>';
-                    if (portalSocials) portalSocials.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Nog geen socials.</p>';
+                    if (pubSocials) pubSocials.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:0.9rem;">Nog geen social media kanalen toegevoegd.</p>';
+                    if (portalSocials) portalSocials.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Nog geen socials.</p>';
                 }
 
                 if (Array.isArray(data.drivers_list)) {
@@ -1046,7 +1046,7 @@
                         teamContainer.innerHTML = '';
                         data.drivers_list.filter(m => !m.isDev).forEach(m => {
                             const avatarHtml = m.avatarUrl ? `<img src="${m.avatarUrl}" alt="Avatar">` : `<i class="fa-solid fa-user"></i>`;
-                            teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div style="display:flex; align-items:center; gap:12px;"><div class="member-avatar">${avatarHtml}</div><div><div style="font-weight:bold; font-size:0.9rem;">${m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div></div>`);
+                            teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div style="display:flex; align-items:center; gap:14px;"><div class="member-avatar">${avatarHtml}</div><div><div style="font-weight:bold; font-size:0.95rem;">${m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div></div>`);
                         });
                     }
                 }
@@ -1056,7 +1056,7 @@
                     if (container) {
                         container.innerHTML = '';
                         data.recent_jobs.forEach(job => {
-                            container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.9rem;">${job.from} → ${job.to}</div><div style="font-size:0.78rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.85rem;">${job.distance}</div></div>`);
+                            container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.95rem;">${job.from} → ${job.to}</div><div style="font-size:0.8rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.9rem;">${job.distance}</div></div>`);
                         });
                     }
                 }
@@ -1076,7 +1076,7 @@
             const annContainer = document.getElementById('announcements-display-container');
             annContainer.innerHTML = '';
             data.announcements?.forEach(a => {
-                annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px; border-left:3px solid var(--accent-red);"><h4><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> ${a.title}</h4><p style="font-size:0.88rem; margin-top:4px;">${a.content}</p><small style="color:#888; font-size:0.75rem;">Door ${a.username || 'Admin'} - ${a.date || ''}</small></div>`);
+                annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><h4 style="font-size:1.05rem;"><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> ${a.title}</h4><p style="font-size:0.92rem; margin-top:6px;">${a.content}</p><small style="color:#888; font-size:0.78rem;">Door ${a.username || 'Admin'} - ${a.date || ''}</small></div>`);
             });
 
             const liveFeedContainer = document.getElementById('live-feed-container');
@@ -1086,10 +1086,10 @@
                     liveFeedContainer.insertAdjacentHTML('beforeend', `
                         <div class="feed-item">
                             <div>
-                                <div style="font-weight:bold; font-size:0.85rem;"><i class="fa-solid fa-truck" style="color:var(--accent-red); margin-right:6px;"></i> ${j.driver}</div>
-                                <div style="font-size:0.75rem; color:var(--text-muted);">${j.from} → ${j.to}</div>
+                                <div style="font-weight:bold; font-size:0.9rem;"><i class="fa-solid fa-truck" style="color:var(--accent-red); margin-right:6px;"></i> ${j.driver}</div>
+                                <div style="font-size:0.78rem; color:var(--text-muted);">${j.from} → ${j.to}</div>
                             </div>
-                            <div style="color:#68d391; font-weight:bold; font-size:0.85rem;">+${j.distance}</div>
+                            <div style="color:#68d391; font-weight:bold; font-size:0.9rem;">+${j.distance}</div>
                         </div>
                     `);
                 });
@@ -1101,19 +1101,19 @@
                 let fileAction = '';
                 if (i.link) {
                     if (i.link.startsWith('data:')) {
-                        fileAction = `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;"><i class="fa-solid fa-download"></i> Download ${i.fileName || 'Bestand'}</a>`;
+                        fileAction = `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:6px 12px; font-size:0.8rem; margin-top:6px;"><i class="fa-solid fa-download"></i> Download ${i.fileName || 'Bestand'}</a>`;
                     } else {
-                        fileAction = `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;"><i class="fa-solid fa-download"></i> Download</a>`;
+                        fileAction = `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:6px 12px; font-size:0.8rem; margin-top:6px;"><i class="fa-solid fa-download"></i> Download</a>`;
                     }
                 }
-                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:10px; border-left:3px solid var(--accent-red);"><b>${i.title}</b><p style="font-size:0.85rem; margin:4px 0;">${i.content}</p><small style="color:#888; font-size:0.75rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small>${fileAction}</div>`);
+                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><b style="font-size:1rem;">${i.title}</b><p style="font-size:0.9rem; margin:6px 0;">${i.content}</p><small style="color:#888; font-size:0.78rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small><br>${fileAction}</div>`);
             });
 
             const convContainer = document.getElementById('convoys-list-container');
             convContainer.innerHTML = '';
             data.convoysList?.forEach(c => {
                 const formattedDate = formatDateToNL(c.date);
-                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:10px; border:1px solid var(--border-red);"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red);">${c.title}</b><span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:6px;">${formattedDate} ${c.time || ''}</span></div><div style="font-size:0.85rem; margin-top:6px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:4px;">${c.details}</div></div></div>`);
+                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-red);"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red); font-size:1.05rem;">${c.title}</b><span style="font-size:0.82rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:6px;">${formattedDate} ${c.time || ''}</span></div><div style="font-size:0.9rem; margin-top:8px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:6px;">${c.details}</div></div></div>`);
             });
 
             const appsOpen = document.getElementById('applications-open-container');
@@ -1121,9 +1121,9 @@
             appsOpen.innerHTML = ''; appsComp.innerHTML = '';
             data.applications?.forEach(app => {
                 if (app.status === 'completed') {
-                    appsComp.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="opacity:0.6; padding:12px; margin-bottom:8px;"><b>${app.applicant} (Afgerond)</b></div>`);
+                    appsComp.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="opacity:0.6; padding:14px; margin-bottom:10px;"><b>${app.applicant} (Afgerond)</b></div>`);
                 } else {
-                    appsOpen.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="padding:12px; margin-bottom:10px;"><b>${app.applicant} heeft gesolliciteerd!</b><div style="font-size:0.88rem; color:var(--text-muted); margin:8px 0;">"${app.content}"</div><div style="display:flex; justify-content:space-between;"><a href="${app.link}" target="_blank" class="btn-portal" style="padding:4px 10px; font-size:0.75rem;">Bekijk</a><button onclick="completeApp('${app.id}')" class="btn-red" style="padding:4px 10px; font-size:0.75rem;">Afronden</button></div></div>`);
+                    appsOpen.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="padding:16px; margin-bottom:12px;"><b style="font-size:1rem;">${app.applicant} heeft gesolliciteerd!</b><div style="font-size:0.92rem; color:var(--text-muted); margin:10px 0;">"${app.content}"</div><div style="display:flex; justify-content:space-between;"><a href="${app.link}" target="_blank" class="btn-portal" style="padding:6px 12px; font-size:0.8rem;">Bekijk</a><button onclick="completeApp('${app.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;">Afronden</button></div></div>`);
                 }
             });
 
@@ -1136,10 +1136,10 @@
                 
                 if (myStats.badges && myStats.badges.length > 0) {
                     myStats.badges.forEach(b => {
-                        myBadgesContainer.insertAdjacentHTML('beforeend', `<span style="background:rgba(255,51,51,0.2); border:1px solid var(--accent-red); padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:bold;">🛡️ ${b.title}</span>`);
+                        myBadgesContainer.insertAdjacentHTML('beforeend', `<span style="background:rgba(255,51,51,0.2); border:1px solid var(--accent-red); padding:6px 12px; border-radius:8px; font-size:0.85rem; font-weight:bold;">🛡️ ${b.title}</span>`);
                     });
                 } else {
-                    myBadgesContainer.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Nog geen badges ontvangen.</p>';
+                    myBadgesContainer.innerHTML = '<p style="font-size:0.9rem; color:var(--text-muted);">Nog geen badges ontvangen.</p>';
                 }
             }
             if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
@@ -1167,16 +1167,16 @@
                 treeContainer.innerHTML = '';
                 for (const [badgeTitle, badgeList] of Object.entries(badgeGroups)) {
                     const groupHtml = `
-                        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-red); border-radius:10px; padding:12px; margin-bottom:10px;">
+                        <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-red); border-radius:12px; padding:14px; margin-bottom:12px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleBadgeGroup('${badgeTitle}')">
-                                <b style="color:var(--accent-red); font-size:1rem;">🏆 ${badgeTitle} (${badgeList.length})</b>
+                                <b style="color:var(--accent-red); font-size:1.05rem;">🏆 ${badgeTitle} (${badgeList.length})</b>
                                 <div>
-                                    <button onclick="event.stopPropagation(); quickAddBadgeUser('${badgeTitle}')" class="btn-portal" style="padding:2px 8px; font-size:0.75rem;">+ Voeg toe</button>
+                                    <button onclick="event.stopPropagation(); quickAddBadgeUser('${badgeTitle}')" class="btn-portal" style="padding:4px 10px; font-size:0.8rem;">+ Voeg toe</button>
                                     <span id="arrow-${badgeTitle}" class="rotate-arrow">▼</span>
                                 </div>
                             </div>
-                            <div id="list-${badgeTitle}" style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-                                ${badgeList.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:0.85rem;"><span>- ${b.targetUser}</span><button onclick="deleteBadge('${b.id}')" class="btn-red" style="padding:2px 6px; font-size:0.7rem;">[Badge intrekken]</button></div>`).join('')}
+                            <div id="list-${badgeTitle}" style="display:none; margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
+                                ${badgeList.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:0.9rem;"><span>- ${b.targetUser}</span><button onclick="deleteBadge('${b.id}')" class="btn-red" style="padding:3px 8px; font-size:0.75rem;">[Badge intrekken]</button></div>`).join('')}
                             </div>
                         </div>
                     `;
@@ -1191,10 +1191,10 @@
                     const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
                     tableBody.insertAdjacentHTML('beforeend', `
                         <tr>
-                            <td><b>${m.username}</b></td>
+                            <td><b style="font-size:0.95rem;">${m.username}</b></td>
                             <td><span class="member-role role-${m.color}">${m.role}</span></td>
                             <td>
-                                <select id="role-select-${m.username}" class="form-input" style="padding:4px 8px; margin:0; font-size:0.8rem; background:rgba(0,0,0,0.5);" onchange="updateStaffRole('${m.username}')" ${isSelf ? 'disabled' : ''}>
+                                <select id="role-select-${m.username}" class="form-input" style="padding:6px 10px; margin:0; font-size:0.85rem; background:rgba(0,0,0,0.5);" onchange="updateStaffRole('${m.username}')" ${isSelf ? 'disabled' : ''}>
                                     <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
                                     <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
                                     <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
@@ -1206,13 +1206,13 @@
                                 </select>
                             </td>
                             <td>
-                                <div style="display:flex; gap:6px;">
-                                    <input type="password" id="pass-input-${m.username}" placeholder="Nieuw..." class="form-input" style="padding:4px 8px; margin:0; font-size:0.8rem; min-width:110px;">
-                                    <button onclick="updateStaffPassword('${m.username}')" class="btn-portal" style="padding:4px 8px; font-size:0.75rem;">🔑 Opslaan</button>
+                                <div style="display:flex; gap:8px;">
+                                    <input type="password" id="pass-input-${m.username}" placeholder="Nieuw..." class="form-input" style="padding:6px 10px; margin:0; font-size:0.85rem; min-width:120px;">
+                                    <button onclick="updateStaffPassword('${m.username}')" class="btn-portal" style="padding:6px 10px; font-size:0.8rem;">🔑 Opslaan</button>
                                 </div>
                             </td>
                             <td>
-                                ${!isSelf ? `<button onclick="fireStaffMember('${m.username}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Ontslaan</button>` : '<span style="color:#666; font-size:0.75rem;">(Jijzelf)</span>'}
+                                ${!isSelf ? `<button onclick="fireStaffMember('${m.username}')" class="btn-red" style="padding:6px 10px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Ontslaan</button>` : '<span style="color:#666; font-size:0.8rem;">(Jijzelf)</span>'}
                             </td>
                         </tr>
                     `);
@@ -1273,15 +1273,14 @@
             const ctx = document.getElementById('earningsChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
 
-            // Correcte chronologische sortering van weken op basis van nummer
             const sortedData = [...weeklyData].sort((a, b) => {
                 const numA = parseInt(a.week.replace(/\D/g, '')) || 0;
                 const numB = parseInt(b.week.replace(/\D/g, '')) || 0;
                 return numA - numB;
             });
 
-            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-            gradient.addColorStop(0, 'rgba(255, 51, 51, 0.4)');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+            gradient.addColorStop(0, 'rgba(255, 51, 51, 0.45)');
             gradient.addColorStop(1, 'rgba(255, 51, 51, 0.0)');
 
             chartInstance = new Chart(ctx, {
@@ -1290,10 +1289,10 @@
                     labels: sortedData.map(w => w.week),
                     datasets: [
                         { label: 'Bedrijf (€)', data: sortedData.map(w => w.company), borderColor: '#ff3333', backgroundColor: gradient, borderWidth: 3, fill: true, tension: 0.4 },
-                        { label: 'Mijn Inkomsten (€)', data: sortedData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.4 }
+                        { label: 'Mijn Inkomsten (€)', data: sortedData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2.5, fill: false, tension: 0.4 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8', font: { size: 12 } } } } }
             });
         }
 
