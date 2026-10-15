@@ -29,7 +29,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         html, body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; width: 100%; overflow-x: hidden; display: flex; flex-direction: column; }
 
-        /* Vaste achtergrondfoto gefixeerd en zichtbaar */
         body::before {
             content: "";
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -145,7 +144,6 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
         .btn-red:hover { background: var(--accent-red); }
 
-        /* Dikke Schlüppi-stijl Hero met slechts één strakke Discord knop en één HaulMP VTC knop */
         .hero-schlüppi {
             text-align: left; padding: 60px 20px 40px 20px; max-width: 1200px; margin: 0 auto;
         }
@@ -163,7 +161,6 @@
         }
         .hero-btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
 
-        /* Discord Community Banner */
         .discord-community-banner {
             background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px;
             padding: 35px; backdrop-filter: var(--glass-blur); margin: 30px 0;
@@ -334,24 +331,22 @@
         <!-- OPENBARE HOOFDPAGINA -->
         <div id="home-view" class="page-view active">
             
-            <!-- DIKKE SCHLÜPPI-STIJL HERO MET SLECHTS ÉÉN DISCORD EN ÉÉN HAULMP VTC KNOP -->
+            <!-- HERO MET ENKEL HAULMP VTC KNOP -->
             <section class="hero-schlüppi">
                 <div class="hero-badge">ETS2 & ATS VTC</div>
                 <h1 class="hero-title">Brecht<br>Transport</h1>
                 <p class="hero-desc-text" data-i18n="hero_desc">Virtuele Transportonderneming met hart en gezelligheid. Samen onderweg op TruckersMP, bij konvooien en in een actieve community.</p>
                 <div class="hero-btn-group">
-                    <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord" style="padding:10px 20px; font-size:0.9rem !important;"><i class="fa-brands fa-discord"></i> Discord</a>
                     <a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-portal" style="padding:10px 20px; font-size:0.9rem !important; border-color:var(--accent-red);"><i class="fa-solid fa-truck"></i> HaulMP VTC</a>
                 </div>
             </section>
 
-            <!-- DISCORD COMMUNITY BANNER -->
+            <!-- DISCORD COMMUNITY BANNER (ZONDER DE EXTRA BLAUWE KNOP ONDERIN) -->
             <div class="discord-community-banner">
                 <div>
                     <span style="background:rgba(229,62,62,0.2); color:#ff6b6b; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; border:1px solid rgba(229,62,62,0.4); text-transform:uppercase;">OFFICIËLE DISCORD</span>
                     <h2 style="font-family:'Space Grotesk', sans-serif; font-size:2.2rem; margin:12px 0 10px 0;">Samen rijden, nooit alleen.</h2>
                     <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">Ontmoet het team, volg konvooi-aankondigingen en blijf verbonden voor en na elke rit.</p>
-                    <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-red" style="background:#5865F2; display:inline-flex; align-items:center; gap:8px;"><i class="fa-brands fa-discord"></i> Join Discord</a>
                 </div>
                 <div class="discord-banner-right">
                     <div style="display:flex; align-items:center; gap:12px;">
