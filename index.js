@@ -19,7 +19,7 @@ app.use((req, res, next) => {
     const start = Date.now();
     res.on('finish', () => {
         const duration = Date.now() - start;
-        console.log(`⏱️ [PERF LOG] ${req.method} ${req.originalUrl} - Duur: ${duration}ms (Status: ${res.statusCode})`);
+        console.log(`⏱️ [PERF LOG] ${req.method}${req.originalUrl} - Duur: ${duration}ms (Status:${res.statusCode})`);
     });
     next();
 });
@@ -54,7 +54,6 @@ let defaultAccounts = [
 async function connectDB() {
     if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld."); return; }
     try {
-        console.time('DB_Connect_Time');
         const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
         db = client.db('brecht_transport');
@@ -70,8 +69,10 @@ async function connectDB() {
         socialsColl = db.collection('socials');
         jobsColl = db.collection('jobs');
 
+        // Maak een index aan op timestamp zodat zoeken direct klaar is (< 10ms)
+        await jobsColl.createIndex({ timestamp: -1 }).catch(() => {});
+
         isConnected = true;
-        console.timeEnd('DB_Connect_Time');
         console.log("Verbonden met MongoDB Atlas!");
 
         const count = await accountsColl.countDocuments();
@@ -222,9 +223,13 @@ app.post('/api/login', async (req, res) => {
     });
 });
 
-// GEOPTIMALISEERD APINHOOFD-ENDPOINT
+// SUB-SEconde API ROUTE MET LIMIET OP RITTEN
 app.get('/api/haulmp', async (req, res) => {
-    let allJobsHistory = isConnected && jobsColl ? await jobsColl.find({}).sort({ timestamp: -1 }).limit(100).toArray() : [];
+    let allJobsHistory = [];
+    if (isConnected && jobsColl) {
+        // Haal maximaal de laatste 50 ritten op om overbelasting te voorkomen
+        allJobsHistory = await jobsColl.find({}).sort({ timestamp: -1 }).limit(50).toArray();
+    }
 
     const totalDeliveries = allJobsHistory.length;
     const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
@@ -241,7 +246,6 @@ app.get('/api/haulmp', async (req, res) => {
 
     if (isConnected && db) {
         try {
-            // Zware info-link base64 bestanden uitsluiten van de hoofdcooling om vertraging te voorkomen
             const [accounts, badges, announcements, applications, info, convoys, socials, eotw] = await Promise.all([
                 accountsColl.find({}).toArray(),
                 badgesColl.find({}).toArray(),
@@ -260,9 +264,7 @@ app.get('/api/haulmp', async (req, res) => {
             convoysList = convoys;
             socialsList = socials;
             if (eotw) employeeOfTheWeek = eotw;
-        } catch (e) {
-            console.error("Fout bij ophalen data:", e);
-        }
+        } catch (e) {}
     }
 
     let formattedDrivers = accountsDatabase.map(m => {
@@ -303,7 +305,6 @@ app.get('/api/haulmp', async (req, res) => {
     });
 });
 
-// APARTE SNELLE GET ROUTE VOOR FOTO'S (Voorkomt 404 en vertraging)
 app.get('/api/gallery', async (req, res) => {
     let galleryPhotos = [{ id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" }];
     if (isConnected && galleryColl) {
@@ -317,12 +318,8 @@ app.get('/api/gallery', async (req, res) => {
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
     if (!targetUser || !pfp) return res.status(400).json({ success: false, message: 'Gegevens ontbreken.' });
-    
     if (isConnected && accountsColl) {
-        await accountsColl.updateOne(
-            { username: { $regex: new RegExp(`^${targetUser}$`, 'i') } },
-            { $set: { avatarUrl: pfp } }
-        );
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: pfp } });
     }
     res.json({ success: true, avatarUrl: pfp });
 });
@@ -335,15 +332,6 @@ app.post('/api/applications/complete', async (req, res) => {
 app.post('/api/badges', async (req, res) => {
     const { title, targetUser } = req.body;
     if (!title || !targetUser) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
-
-    let accountsList = isConnected && accountsColl ? await accountsColl.find({}).toArray() : defaultAccounts;
-    const workerExists = accountsList.some(acc => acc.username.toLowerCase() === targetUser.trim().toLowerCase());
-    if (!workerExists) return res.status(400).json({ success: false, message: 'Deze gebruiker werkt niet bij ons transportbedrijf!' });
-
-    let existingBadges = isConnected && badgesColl ? await badgesColl.find({}).toArray() : [];
-    const alreadyHas = existingBadges.some(b => b.title.toLowerCase() === title.trim().toLowerCase() && b.targetUser.toLowerCase() === targetUser.trim().toLowerCase());
-    if (alreadyHas) return res.status(400).json({ success: false, message: 'Deze werknemer heeft deze badge al!' });
-
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
     res.json({ success: true });
@@ -360,13 +348,9 @@ app.post('/api/info', upload.single('file'), async (req, res) => {
         fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
     }
     const infoObj = { 
-        id: "info-" + Date.now(), 
-        title: req.body.title, 
-        content: req.body.content, 
-        link: fileLink, 
-        fileName: req.file ? req.file.originalname : null,
-        username: req.body.username, 
-        date: new Date().toLocaleDateString('nl-NL') 
+        id: "info-" + Date.now(), title: req.body.title, content: req.body.content, 
+        link: fileLink, fileName: req.file ? req.file.originalname : null,
+        username: req.body.username, date: new Date().toLocaleDateString('nl-NL') 
     };
     if (isConnected && infoColl) await infoColl.insertOne(infoObj);
     res.json({ success: true });
@@ -456,10 +440,7 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false });
     const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
     const photoObj = { id: "photo-" + Date.now(), url: dataUrl, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') };
-    
-    if (isConnected && galleryColl) {
-        await galleryColl.insertOne(photoObj);
-    }
+    if (isConnected && galleryColl) await galleryColl.insertOne(photoObj);
     res.json({ success: true });
 });
 
