@@ -31,7 +31,6 @@ const MONGO_URI = process.env.MONGO_URI;
 let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl, socialsColl, jobsColl;
 let isConnected = false;
 
-// Snelle geheugen-cache voor bliksemsnel inloggen
 let cachedAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
@@ -144,7 +143,6 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', async () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    // Haal in de achtergrond veilig de ritten van de afgelopen 10 dagen op
     fetch10DaysDiscordJobs();
 });
 
@@ -178,7 +176,6 @@ async function fetch10DaysDiscordJobs() {
             lastId = messages.last()?.id;
             if (messages.size < 50) break;
         }
-        console.log("✅ 10-dagen rittenhistorie succesvol ingeladen!");
     } catch (e) {}
 }
 
@@ -229,7 +226,6 @@ async function parseAndAddJob(message) {
     } catch(e) {}
 }
 
-// Blitz-snelle inlog via geheugen-cache (0ms wachten)
 app.post('/api/login', (req, res) => {
     try {
         const { username, password } = req.body;
@@ -279,7 +275,7 @@ app.get('/api/haulmp', async (req, res) => {
                     badgesColl.find({}).toArray(),
                     announcementsColl.find({}).sort({ _id: -1 }).toArray(),
                     applicationsColl.find({}).toArray(),
-                    infoColl.find({}, { projection: { link: 0 } }).sort({ _id: -1 }).toArray(),
+                    infoColl.find({}).sort({ _id: -1 }).toArray(),
                     convoysColl.find({}).sort({ _id: -1 }).toArray(),
                     socialsColl.find({}).sort({ _id: -1 }).toArray(),
                     eotwColl.findOne({})
@@ -350,7 +346,7 @@ app.post('/api/staff/upload-pfp', async (req, res) => {
     if (!targetUser || !pfp) return res.status(400).json({ success: false, message: 'Gegevens ontbreken.' });
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: pfp } });
-        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+        cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true, avatarUrl: pfp });
 });
@@ -438,7 +434,7 @@ app.delete('/api/socials/:id', async (req, res) => {
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
-        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+        cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true });
 });
@@ -450,7 +446,7 @@ app.post('/api/staff/add', async (req, res) => {
         const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
         if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
         await accountsColl.insertOne(newAcc);
-        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+        cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true, message: pw });
 });
@@ -458,7 +454,7 @@ app.post('/api/staff/add', async (req, res) => {
 app.post('/api/staff/update-role', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
-        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+        cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true });
 });
@@ -466,7 +462,7 @@ app.post('/api/staff/update-role', async (req, res) => {
 app.delete('/api/staff/:targetUser', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
-        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+        cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true });
 });
@@ -480,7 +476,7 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
 });
 
 if (DISCORD_BOT_TOKEN) {
-    clientBot.login(DISCORD_BOT_TOKEN).catch(err => console.error("Bot login error:", err.message));
+    clientBot.login(DISCORD_BOT_TOKEN).catch(err => {});
 }
 
 app.listen(PORT, () => console.log(`🚀 Server actief op poort ${PORT}`));
