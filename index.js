@@ -31,7 +31,8 @@ const MONGO_URI = process.env.MONGO_URI;
 let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl, socialsColl, jobsColl;
 let isConnected = false;
 
-let defaultAccounts = [
+// Snelle geheugen-cache voor bliksemsnel inloggen
+let cachedAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
     { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
     { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
@@ -43,10 +44,7 @@ let defaultAccounts = [
 ];
 
 async function connectDB() {
-    if (!MONGO_URI) {
-        console.log("⚠️ Geen MONGO_URI ingesteld.");
-        return;
-    }
+    if (!MONGO_URI) return;
     try {
         const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
@@ -63,11 +61,16 @@ async function connectDB() {
         socialsColl = db.collection('socials');
         jobsColl = db.collection('jobs');
 
+        await jobsColl.createIndex({ timestamp: -1 }).catch(() => {});
         isConnected = true;
-        console.log("✅ Verbonden met MongoDB Atlas!");
 
         const count = await accountsColl.countDocuments();
-        if (count === 0) await accountsColl.insertMany(defaultAccounts);
+        if (count === 0) {
+            await accountsColl.insertMany(cachedAccounts);
+        } else {
+            cachedAccounts = await accountsColl.find({}).toArray();
+        }
+        console.log("✅ Verbonden met MongoDB Atlas & accounts gecached!");
     } catch (err) {
         console.error("❌ MongoDB verbinding mislukt:", err.message);
     }
@@ -139,14 +142,45 @@ function getISOWeekKey(timestamp) {
 
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-clientBot.on('clientReady', () => {
+clientBot.on('clientReady', async () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
+    // Haal in de achtergrond veilig de ritten van de afgelopen 10 dagen op
+    fetch10DaysDiscordJobs();
 });
 
 clientBot.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
+
+async function fetch10DaysDiscordJobs() {
+    try {
+        const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
+        if (!channel) return;
+        
+        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+        let lastId = undefined;
+        let keepFetching = true;
+
+        while (keepFetching) {
+            const options = { limit: 50 };
+            if (lastId) options.before = lastId;
+            const messages = await channel.messages.fetch(options);
+            if (messages.size === 0) break;
+
+            for (const msg of messages.values()) {
+                if (msg.createdTimestamp < tenDaysAgo) {
+                    keepFetching = false;
+                    break;
+                }
+                await parseAndAddJob(msg);
+            }
+            lastId = messages.last()?.id;
+            if (messages.size < 50) break;
+        }
+        console.log("✅ 10-dagen rittenhistorie succesvol ingeladen!");
+    } catch (e) {}
+}
 
 async function parseAndAddApplication(message) {
     try {
@@ -195,14 +229,11 @@ async function parseAndAddJob(message) {
     } catch(e) {}
 }
 
-app.post('/api/login', async (req, res) => {
+// Blitz-snelle inlog via geheugen-cache (0ms wachten)
+app.post('/api/login', (req, res) => {
     try {
         const { username, password } = req.body;
-        let accountsDatabase = defaultAccounts;
-        if (isConnected && accountsColl) {
-            accountsDatabase = await accountsColl.find({}).toArray();
-        }
-        const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
+        const account = cachedAccounts.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
         if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
         
         res.json({ 
@@ -234,7 +265,6 @@ app.get('/api/haulmp', async (req, res) => {
         const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
         const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
 
-        let accountsDatabase = defaultAccounts;
         let customBadges = [];
         let announcementsList = [];
         let applicationsList = [];
@@ -245,8 +275,7 @@ app.get('/api/haulmp', async (req, res) => {
 
         if (isConnected && db) {
             try {
-                const [accounts, badges, announcements, applications, info, convoys, socials, eotw] = await Promise.all([
-                    accountsColl.find({}).toArray(),
+                const [badges, announcements, applications, info, convoys, socials, eotw] = await Promise.all([
                     badgesColl.find({}).toArray(),
                     announcementsColl.find({}).sort({ _id: -1 }).toArray(),
                     applicationsColl.find({}).toArray(),
@@ -255,7 +284,6 @@ app.get('/api/haulmp', async (req, res) => {
                     socialsColl.find({}).sort({ _id: -1 }).toArray(),
                     eotwColl.findOne({})
                 ]);
-                accountsDatabase = accounts;
                 customBadges = badges;
                 announcementsList = announcements;
                 applicationsList = applications;
@@ -266,7 +294,7 @@ app.get('/api/haulmp', async (req, res) => {
             } catch (e) {}
         }
 
-        let formattedDrivers = accountsDatabase.map(m => {
+        let formattedDrivers = cachedAccounts.map(m => {
             const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
             return {
                 username: m.username, role: m.role, weight: getRoleWeight(m.role), color: getRoleColor(m.role), isDev: !!m.isDev,
@@ -315,6 +343,140 @@ app.get('/api/gallery', async (req, res) => {
         } catch(e) {}
     }
     res.json(galleryPhotos);
+});
+
+app.post('/api/staff/upload-pfp', async (req, res) => {
+    const { targetUser, pfp } = req.body;
+    if (!targetUser || !pfp) return res.status(400).json({ success: false, message: 'Gegevens ontbreken.' });
+    if (isConnected && accountsColl) {
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: pfp } });
+        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+    }
+    res.json({ success: true, avatarUrl: pfp });
+});
+
+app.post('/api/applications/complete', async (req, res) => {
+    if (isConnected && applicationsColl) await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
+    res.json({ success: true });
+});
+
+app.post('/api/badges', async (req, res) => {
+    const { title, targetUser } = req.body;
+    if (!title || !targetUser) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
+    const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
+    if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
+    res.json({ success: true });
+});
+
+app.post('/api/badges/delete', async (req, res) => {
+    if (isConnected && badgesColl) await badgesColl.deleteOne({ id: req.body.badgeId });
+    res.json({ success: true });
+});
+
+app.post('/api/info', upload.single('file'), async (req, res) => {
+    let fileLink = req.body.link || '';
+    if (req.file) {
+        fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+    }
+    const infoObj = { 
+        id: "info-" + Date.now(), title: req.body.title, content: req.body.content, 
+        link: fileLink, fileName: req.file ? req.file.originalname : null,
+        username: req.body.username, date: new Date().toLocaleDateString('nl-NL') 
+    };
+    if (isConnected && infoColl) await infoColl.insertOne(infoObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/info/:id', async (req, res) => {
+    if (isConnected && infoColl) await infoColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.post('/api/convoys', async (req, res) => {
+    const convObj = { id: "conv-" + Date.now(), ...req.body };
+    if (isConnected && convoysColl) await convoysColl.insertOne(convObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/convoys/:id', async (req, res) => {
+    if (isConnected && convoysColl) await convoysColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.post('/api/eotw', async (req, res) => {
+    if (isConnected && eotwColl) {
+        await eotwColl.deleteMany({});
+        await eotwColl.insertOne({ username: req.body.targetUser, reason: req.body.reason, setBy: req.body.username });
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/announcements', async (req, res) => {
+    const annObj = { id: "ann-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') };
+    if (isConnected && announcementsColl) await announcementsColl.insertOne(annObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/announcements/:id', async (req, res) => {
+    if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.post('/api/socials', async (req, res) => {
+    const { platform, url, username } = req.body;
+    if (!platform || !url) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
+    const socialObj = { id: "soc-" + Date.now(), platform: platform.trim(), url: url.trim(), addedBy: username || 'Admin' };
+    if (isConnected && socialsColl) await socialsColl.insertOne(socialObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/socials/:id', async (req, res) => {
+    if (isConnected && socialsColl) await socialsColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.post('/api/staff/update-password', async (req, res) => {
+    if (isConnected && accountsColl) {
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
+        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/staff/add', async (req, res) => {
+    const pw = "Brecht" + Math.floor(1000 + Math.random() * 9000);
+    const newAcc = { username: req.body.username.trim(), password: pw, role: req.body.role.trim() };
+    if (isConnected && accountsColl) {
+        const exists = await accountsColl.findOne({ username: { $regex: new RegExp(`^${req.body.username.trim()}$`, 'i') } });
+        if (exists) return res.status(400).json({ success: false, message: 'Bestaat al.' });
+        await accountsColl.insertOne(newAcc);
+        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+    }
+    res.json({ success: true, message: pw });
+});
+
+app.post('/api/staff/update-role', async (req, res) => {
+    if (isConnected && accountsColl) {
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
+        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+    }
+    res.json({ success: true });
+});
+
+app.delete('/api/staff/:targetUser', async (req, res) => {
+    if (isConnected && accountsColl) {
+        await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
+        cachedAccounts = await accountsColl.find({}).toArray(); // Update cache
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/gallery', upload.single('photo'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false });
+    const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+    const photoObj = { id: "photo-" + Date.now(), url: dataUrl, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') };
+    if (isConnected && galleryColl) await galleryColl.insertOne(photoObj);
+    res.json({ success: true });
 });
 
 if (DISCORD_BOT_TOKEN) {
