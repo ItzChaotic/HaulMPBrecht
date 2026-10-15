@@ -28,7 +28,7 @@ const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '155807470319580783
 const DISCORD_APPLICATIONS_CHANNEL_ID = '1558075393729363968';
 const MONGO_URI = process.env.MONGO_URI;
 
-let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl, socialsColl;
+let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl, socialsColl, jobsColl;
 let isConnected = false;
 
 let defaultAccounts = [
@@ -58,6 +58,7 @@ async function connectDB() {
         badgesColl = db.collection('badges');
         eotwColl = db.collection('eotw');
         socialsColl = db.collection('socials');
+        jobsColl = db.collection('jobs'); // Snelle database-opslag voor ritten
 
         isConnected = true;
         console.log("Verbonden met MongoDB Atlas!");
@@ -71,8 +72,6 @@ async function connectDB() {
     }
 }
 connectDB();
-
-let allJobsHistory = [];
 
 function cleanText(text) { return text ? text.replace(/[\*\_\`]/g, '').trim() : ''; }
 function parseCurrency(str) {
@@ -141,26 +140,12 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`Discord Bot ingelogd als ${clientBot.user.tag}`);
-    setTimeout(() => {
-        fetchAllHistoricalDiscordLogs();
-        fetchApplicationsFromDiscord();
-    }, 200);
 });
 
 clientBot.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
-
-async function fetchApplicationsFromDiscord() {
-    try {
-        const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
-        if (channel) {
-            const msgs = await channel.messages.fetch({ limit: 10 });
-            msgs.forEach(msg => parseAndAddApplication(msg));
-        }
-    } catch (e) {}
-}
 
 async function parseAndAddApplication(message) {
     const applicantName = message.author ? message.author.username : "Sollicitant";
@@ -180,7 +165,7 @@ async function parseAndAddApplication(message) {
     }
 }
 
-function parseAndAddJob(message) {
+async function parseAndAddJob(message) {
     let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km', paidAmount = 0;
     let timestamp = message.createdTimestamp || Date.now();
 
@@ -200,28 +185,10 @@ function parseAndAddJob(message) {
     if (paidAmount === 0 && kmAmount > 0) paidAmount = kmAmount * 35;
 
     const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, weekKey: getISOWeekKey(timestamp), dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
-    if (!allJobsHistory.some(j => j.id === jobObj.id)) {
-        allJobsHistory.push(jobObj);
-        if (allJobsHistory.length > 100) allJobsHistory.shift(); // Geheugenoptimalisatie
+    
+    if (isConnected && jobsColl) {
+        await jobsColl.updateOne({ id: jobObj.id }, { $set: jobObj }, { upsert: true });
     }
-}
-
-async function fetchAllHistoricalDiscordLogs() {
-    try {
-        const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
-        if (channel) {
-            let lastId = undefined; let fetched = 0; allJobsHistory = [];
-            while (fetched < 30) { 
-                const opt = { limit: 30 }; if (lastId) opt.before = lastId;
-                const msgs = await channel.messages.fetch(opt);
-                if (msgs.size === 0) break;
-                msgs.forEach(msg => parseAndAddJob(msg));
-                lastId = msgs.last().id; fetched += msgs.size;
-                if (msgs.size < 30) break;
-            }
-            allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
-        }
-    } catch (e) {}
 }
 
 app.post('/api/login', async (req, res) => {
@@ -246,6 +213,11 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/api/haulmp', async (req, res) => {
+    let allJobsHistory = [];
+    if (isConnected && jobsColl) {
+        allJobsHistory = await jobsColl.find({}).sort({ timestamp: -1 }).limit(100).toArray();
+    }
+
     const totalDeliveries = allJobsHistory.length;
     const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
     const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
