@@ -28,7 +28,7 @@ const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '155807470319580783
 const DISCORD_APPLICATIONS_CHANNEL_ID = process.env.DISCORD_APPLICATIONS_CHANNEL_ID || '1558075393729363968';
 const MONGO_URI = process.env.MONGO_URI;
 
-let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, badgesColl, eotwColl, socialsColl, jobsColl;
+let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, convoySignupsColl, badgesColl, eotwColl, socialsColl, jobsColl;
 let isConnected = false;
 
 let cachedAccounts = [
@@ -55,6 +55,7 @@ async function connectDB() {
         applicationsColl = db.collection('applications');
         infoColl = db.collection('info');
         convoysColl = db.collection('convoys');
+        convoySignupsColl = db.collection('convoy_signups');
         badgesColl = db.collection('badges');
         eotwColl = db.collection('eotw');
         socialsColl = db.collection('socials');
@@ -141,53 +142,14 @@ function getISOWeekKey(timestamp) {
 
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-clientBot.on('clientReady', async () => {
+clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    // Start direct met het ophalen van de ritten en log eventuele fouten in Render
-    fetch10DaysDiscordJobs();
 });
 
 clientBot.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
-
-async function fetch10DaysDiscordJobs() {
-    try {
-        console.log(`🔍 Bezig met ophalen ritten uit kanaal ID: ${DISCORD_CHANNEL_ID}...`);
-        const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
-        if (!channel) {
-            console.log("❌ Kan het Discord-kanaal niet vinden! Controleer DISCORD_CHANNEL_ID.");
-            return;
-        }
-        
-        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
-        let lastId = undefined;
-        let keepFetching = true;
-        let count = 0;
-
-        while (keepFetching) {
-            const options = { limit: 50 };
-            if (lastId) options.before = lastId;
-            const messages = await channel.messages.fetch(options);
-            if (messages.size === 0) break;
-
-            for (const msg of messages.values()) {
-                if (msg.createdTimestamp < tenDaysAgo) {
-                    keepFetching = false;
-                    break;
-                }
-                await parseAndAddJob(msg);
-                count++;
-            }
-            lastId = messages.last()?.id;
-            if (messages.size < 50) break;
-        }
-        console.log(`✅ Succesvol ${count} ritten gecontroleerd en ingeladen uit Discord!`);
-    } catch (e) {
-        console.error("❌ Fout bij ophalen Discord historie:", e.message);
-    }
-}
 
 async function parseAndAddApplication(message) {
     try {
@@ -276,17 +238,19 @@ app.get('/api/haulmp', async (req, res) => {
         let applicationsList = [];
         let infoList = [];
         let convoysList = [];
+        let convoySignupsList = [];
         let socialsList = [];
         let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
         if (isConnected && db) {
             try {
-                const [badges, announcements, applications, info, convoys, socials, eotw] = await Promise.all([
+                const [badges, announcements, applications, info, convoys, signups, socials, eotw] = await Promise.all([
                     badgesColl.find({}).toArray(),
                     announcementsColl.find({}).sort({ _id: -1 }).toArray(),
                     applicationsColl.find({}).toArray(),
                     infoColl.find({}).sort({ _id: -1 }).toArray(),
                     convoysColl.find({}).sort({ _id: -1 }).toArray(),
+                    convoySignupsColl.find({}).toArray(),
                     socialsColl.find({}).sort({ _id: -1 }).toArray(),
                     eotwColl.findOne({})
                 ]);
@@ -295,6 +259,7 @@ app.get('/api/haulmp', async (req, res) => {
                 applicationsList = applications;
                 infoList = info;
                 convoysList = convoys;
+                convoySignupsList = signups;
                 socialsList = socials;
                 if (eotw) employeeOfTheWeek = eotw;
             } catch (e) {}
@@ -333,7 +298,7 @@ app.get('/api/haulmp', async (req, res) => {
             recent_jobs: allJobsHistory.slice(0, 10),
             badges: customBadges,
             announcements: announcementsList, applications: applicationsList,
-            infoList, convoysList, socialsList, employeeOfTheWeek,
+            infoList, convoysList, convoySignupsList, socialsList, employeeOfTheWeek,
             weeklyChartData: Object.values(weeklyChartData).reverse()
         });
     } catch(e) {
@@ -405,7 +370,31 @@ app.post('/api/convoys', async (req, res) => {
 });
 
 app.delete('/api/convoys/:id', async (req, res) => {
-    if (isConnected && convoysColl) await convoysColl.deleteOne({ id: req.params.id });
+    if (isConnected && convoysColl) {
+        await convoysColl.deleteOne({ id: req.params.id });
+        if (convoySignupsColl) await convoySignupsColl.deleteMany({ convoyId: req.params.id });
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/convoys/signup', async (req, res) => {
+    const { convoyId, username } = req.body;
+    if (!convoyId || !username) return res.status(400).json({ success: false });
+    if (isConnected && convoySignupsColl) {
+        await convoySignupsColl.updateOne(
+            { convoyId, username },
+            { $set: { convoyId, username, date: new Date().toLocaleDateString('nl-NL') } },
+            { upsert: true }
+        );
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/convoys/cancel', async (req, res) => {
+    const { convoyId, username } = req.body;
+    if (isConnected && convoySignupsColl) {
+        await convoySignupsColl.deleteOne({ convoyId, username });
+    }
     res.json({ success: true });
 });
 
@@ -486,7 +475,7 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
 });
 
 if (DISCORD_BOT_TOKEN) {
-    clientBot.login(DISCORD_BOT_TOKEN).catch(err => console.error("❌ Bot login mislukt:", err.message));
+    clientBot.login(DISCORD_BOT_TOKEN).catch(err => {});
 }
 
 app.listen(PORT, () => console.log(`🚀 Server actief op poort ${PORT}`));
