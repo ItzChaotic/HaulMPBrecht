@@ -144,12 +144,43 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
+    // Start direct in de achtergrond met ritten ophalen zodat het de serveropstart niet blokkeert
+    setTimeout(() => fetch10DaysDiscordJobs(), 2000);
 });
 
 clientBot.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
+
+async function fetch10DaysDiscordJobs() {
+    try {
+        const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
+        if (!channel) return;
+        
+        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+        let lastId = undefined;
+        let keepFetching = true;
+
+        while (keepFetching) {
+            const options = { limit: 50 };
+            if (lastId) options.before = lastId;
+            const messages = await channel.messages.fetch(options);
+            if (messages.size === 0) break;
+
+            for (const msg of messages.values()) {
+                if (msg.createdTimestamp < tenDaysAgo) {
+                    keepFetching = false;
+                    break;
+                }
+                await parseAndAddJob(msg);
+            }
+            lastId = messages.last()?.id;
+            if (messages.size < 50) break;
+        }
+        console.log("✅ Achtergrond rittenhistorie succesvol gesyncd met Discord!");
+    } catch (e) {}
+}
 
 async function parseAndAddApplication(message) {
     try {
