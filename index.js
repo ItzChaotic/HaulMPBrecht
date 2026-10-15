@@ -16,15 +16,6 @@ const upload = multer({
 });
 
 app.use((req, res, next) => {
-    const start = Date.now();
-    res.on('finish', () => {
-        const duration = Date.now() - start;
-        console.log(`⏱️ [PERF LOG] ${req.method}${req.originalUrl} - Duur: ${duration}ms (Status:${res.statusCode})`);
-    });
-    next();
-});
-
-app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -52,7 +43,7 @@ let defaultAccounts = [
 ];
 
 async function connectDB() {
-    if (!MONGO_URI) { console.log("Geen MONGO_URI ingesteld."); return; }
+    if (!MONGO_URI) return;
     try {
         const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
@@ -69,16 +60,12 @@ async function connectDB() {
         socialsColl = db.collection('socials');
         jobsColl = db.collection('jobs');
 
-        // Maak een index aan op timestamp zodat zoeken direct klaar is (< 10ms)
         await jobsColl.createIndex({ timestamp: -1 }).catch(() => {});
-
         isConnected = true;
         console.log("Verbonden met MongoDB Atlas!");
 
         const count = await accountsColl.countDocuments();
-        if (count === 0) {
-            await accountsColl.insertMany(defaultAccounts);
-        }
+        if (count === 0) await accountsColl.insertMany(defaultAccounts);
     } catch (err) {
         console.error("MongoDB verbinding mislukt:", err.message);
     }
@@ -150,14 +137,47 @@ function getISOWeekKey(timestamp) {
 
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-clientBot.on('clientReady', () => {
+clientBot.on('clientReady', async () => {
     console.log(`Discord Bot ingelogd als ${clientBot.user.tag}`);
+    // Haal eenmalig de ritten van de afgelopen 10 dagen op uit Discord en sla ze op
+    await fetch10DaysDiscordJobs();
 });
 
 clientBot.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
+
+async function fetch10DaysDiscordJobs() {
+    try {
+        const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
+        if (!channel) return;
+        
+        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+        let lastId = undefined;
+        let keepFetching = true;
+
+        while (keepFetching) {
+            const options = { limit: 50 };
+            if (lastId) options.before = lastId;
+            const messages = await channel.messages.fetch(options);
+            if (messages.size === 0) break;
+
+            for (const msg of messages.values()) {
+                if (msg.createdTimestamp < tenDaysAgo) {
+                    keepFetching = false;
+                    break;
+                }
+                await parseAndAddJob(msg);
+            }
+            lastId = messages.last()?.id;
+            if (messages.size < 50) break;
+        }
+        console.log("✅ Ritten van de afgelopen 10 dagen succesvol in MongoDB geladen!");
+    } catch (e) {
+        console.error("Fout bij ophalen 10-dagen historie:", e.message);
+    }
+}
 
 async function parseAndAddApplication(message) {
     const applicantName = message.author ? message.author.username : "Sollicitant";
@@ -210,6 +230,7 @@ app.post('/api/login', async (req, res) => {
     }
     const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
     if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
+    
     res.json({ 
         success: true, 
         username: account.username, 
@@ -223,12 +244,13 @@ app.post('/api/login', async (req, res) => {
     });
 });
 
-// SUB-SEconde API ROUTE MET LIMIET OP RITTEN
 app.get('/api/haulmp', async (req, res) => {
+    const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
     let allJobsHistory = [];
+    
     if (isConnected && jobsColl) {
-        // Haal maximaal de laatste 50 ritten op om overbelasting te voorkomen
-        allJobsHistory = await jobsColl.find({}).sort({ timestamp: -1 }).limit(50).toArray();
+        // Haal alle ritten van de afgelopen 10 dagen op
+        allJobsHistory = await jobsColl.find({ timestamp: { $gte: tenDaysAgo } }).sort({ timestamp: -1 }).toArray();
     }
 
     const totalDeliveries = allJobsHistory.length;
@@ -448,4 +470,4 @@ if (DISCORD_BOT_TOKEN) {
     clientBot.login(DISCORD_BOT_TOKEN).catch(err => {});
 }
 
-app.listen(PORT, () => console.log(`Server actief op poort ${PORT}`));
+app.listen(PORT, () => console.log(`Server actief op poort ${PORT}`));\
