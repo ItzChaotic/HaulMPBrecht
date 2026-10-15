@@ -15,12 +15,12 @@
         :root {
             --bg-base: #0a0303;
             --bg-sidebar: #0d0404;
-            --bg-card: rgba(22, 7, 7, 0.88);
-            --bg-card-hover: rgba(35, 10, 10, 0.95);
+            --bg-card: rgba(22, 7, 7, 0.90);
+            --bg-card-hover: rgba(35, 10, 10, 0.96);
             --primary: #800000;
             --primary-light: #cc0000;
             --accent-red: #ff3333;
-            --border-red: rgba(204, 0, 0, 0.22);
+            --border-red: rgba(204, 0, 0, 0.25);
             --text-main: #ffffff;
             --text-muted: #caa8a8;
             --glass-blur: blur(16px);
@@ -29,36 +29,50 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         html, body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; width: 100%; overflow-x: hidden; display: flex; flex-direction: column; }
 
+        /* Sfeervolle achtergrond met overlay */
+        body::before {
+            content: "";
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center fixed;
+            background-size: cover; z-index: -2;
+        }
+        body::after {
+            content: "";
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(10, 3, 3, 0.92); backdrop-filter: blur(8px); z-index: -1;
+        }
+
         nav {
             position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1350px; width: 96%;
             background: rgba(22, 4, 4, 0.94); backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--border-red); border-radius: 16px; padding: 10px 20px;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 15px;
+            border: 1px solid var(--border-red); border-radius: 16px; padding: 10px 18px;
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
         }
 
         .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; cursor: pointer; flex-shrink: 0; }
-        .logo-img { height: 38px; width: auto; object-fit: contain; }
-        .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; white-space: nowrap; }
-        .nav-links { display: flex; gap: 12px; list-style: none; align-items: center; flex-wrap: nowrap; }
-        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .logo-img { height: 36px; width: auto; object-fit: contain; }
+        .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+        
+        .nav-links { display: flex; gap: 8px; list-style: none; align-items: center; }
+        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .nav-links a:hover { color: #fff; }
 
         .btn-discord {
-            background: #5865F2; color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
-            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: 0.2s;
+            background: #5865F2; color: #fff !important; padding: 6px 12px; border-radius: 8px; font-weight: 700 !important; font-size: 0.78rem !important;
+            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;
         }
         .btn-discord:hover { background: #4752C4; }
 
         .btn-apply {
             background: linear-gradient(135deg, var(--primary-light), var(--primary));
-            color: #fff !important; padding: 7px 14px; border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important;
-            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+            color: #fff !important; padding: 6px 12px; border-radius: 8px; font-weight: 700 !important; font-size: 0.78rem !important;
+            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
         }
 
         .btn-portal {
-            background: rgba(255, 255, 255, 0.05); color: #fff !important; padding: 7px 12px;
-            border-radius: 8px; font-weight: 700 !important; font-size: 0.82rem !important; border: 1px solid var(--border-red);
-            display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap;
+            background: rgba(255, 255, 255, 0.05); color: #fff !important; padding: 6px 10px;
+            border-radius: 8px; font-weight: 700 !important; font-size: 0.78rem !important; border: 1px solid var(--border-red);
+            display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: 0.2s; white-space: nowrap;
         }
         .btn-portal:hover { background: rgba(204, 0, 0, 0.2); border-color: var(--accent-red); }
 
@@ -70,7 +84,7 @@
         
         .sidebar {
             width: 290px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
-            padding: 20px 16px; display: flex; flex-direction: column; justify-content: flex-start; gap: 15px;
+            padding: 20px 16px; display: flex; flex-direction: column; gap: 15px;
             position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; color: #fff;
             overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
         }
@@ -131,6 +145,18 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
         .btn-red:hover { background: var(--accent-red); }
 
+        /* Strakke Discord Community Banner (Bijlage 1) */
+        .discord-community-banner {
+            background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px;
+            padding: 35px; backdrop-filter: var(--glass-blur); margin: 30px 0;
+            display: grid; grid-template-columns: 1.3fr 1fr; gap: 30px; align-items: center;
+        }
+        @media(max-width: 900px) { .discord-community-banner { grid-template-columns: 1fr; } }
+        .discord-banner-right {
+            background: rgba(15, 3, 3, 0.85); border: 1px solid var(--border-red); border-radius: 16px; padding: 24px;
+            display: flex; flex-direction: column; gap: 18px;
+        }
+
         #login-modal, #password-modal, #discord-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px);
@@ -148,9 +174,9 @@
         .staff-table tr:last-child td { border-bottom: none; }
         .staff-table tr:hover { background: rgba(255,51,51,0.03); }
 
-        .hero { text-align: center; padding: 35px 0 25px 0; }
-        .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; }
-        .hero p { font-size: 1rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
+        .hero { text-align: center; padding: 45px 0 30px 0; }
+        .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem; font-weight: 700; margin-bottom: 12px; }
+        .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 700px; margin: 0 auto; }
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
 
@@ -223,7 +249,7 @@
             .sidebar { display: none; }
             .mobile-portal-tabs { display: flex; }
             .portal-content { margin-left: 0; width: 100%; padding: 15px; }
-            .hero h1 { font-size: 1.8rem; }
+            .hero h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -232,13 +258,13 @@
     <!-- MOBIELE HEADER -->
     <div class="mobile-header-bar">
         <div class="brand-logo" onclick="goHome()">
-            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:32px;">
-            <span style="font-weight:bold; font-size:0.9rem; color:#fff;">Brecht Transport</span>
+            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:30px;">
+            <span style="font-weight:bold; font-size:0.85rem; color:#fff;">Brecht Transport</span>
         </div>
-        <div style="display:flex; gap:6px; align-items:center;">
-            <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-brands fa-discord"></i> Discord</a>
-            <button onclick="handleNavLogin()" class="btn-portal" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-lock" style="color:var(--accent-red);"></i> Portaal</button>
-            <button onclick="toggleMobileDrawer()" class="btn-portal" style="padding:6px 10px; border-color:var(--accent-red);"><i class="fa-solid fa-bars" style="color:#fff;"></i></button>
+        <div style="display:flex; gap:5px; align-items:center;">
+            <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord" style="padding:5px 8px; font-size:0.7rem;"><i class="fa-brands fa-discord"></i> Discord</a>
+            <button onclick="handleNavLogin()" class="btn-portal" style="padding:5px 8px; font-size:0.7rem;"><i class="fa-solid fa-lock" style="color:var(--accent-red);"></i> Portaal</button>
+            <button onclick="toggleMobileDrawer()" class="btn-portal" style="padding:5px 8px; border-color:var(--accent-red);"><i class="fa-solid fa-bars" style="color:#fff;"></i></button>
         </div>
     </div>
 
@@ -267,26 +293,26 @@
         </div>
     </div>
 
-    <!-- LAPTOP NAVIGATIEBAR -->
+    <!-- LAPTOP NAVIGATIEBAR (Compacter gemaakt zodat 'Solliciteer' past) -->
     <nav id="main-nav-bar">
         <div onclick="goHome()" class="brand-logo">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img">
-            <div><div class="brand-title">BRECHT TRANSPORT B.V.</div></div>
+            <div><div class="brand-title">BRECHT TRANSPORT</div></div>
         </div>
         <ul class="nav-links">
             <li><a href="javascript:void(0);" onclick="goHome()" data-i18n="home">Home</a></li>
             <li><a href="#about-sec" data-i18n="about">Over Ons</a></li>
             <li><a href="#rules-sec" data-i18n="rules">Regels</a></li>
             <li><a href="#socials-main-sec">Socials</a></li>
-            <li><a href="#gallerij-sec" data-i18n="gallery">Fotogalerij</a></li>
-            <li><a href="#team" data-i18n="team">Het Team</a></li>
+            <li><a href="#gallerij-sec" data-i18n="gallery">Galerij</a></li>
+            <li><a href="#team" data-i18n="team">Team</a></li>
             <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
             <li><a href="#livemap-sec">Live Map</a></li>
-            <li><a href="#activiteit" data-i18n="trips">Afgeronde Ritten</a></li>
+            <li><a href="#activiteit" data-i18n="trips">Ritten</a></li>
             <li><a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
-            <li><button onclick="toggleLang()" class="btn-portal"><i class="fa-solid fa-globe"></i> <span id="lang-label">ENG</span></button></li>
+            <li><button onclick="toggleLang()" class="btn-portal"><span id="lang-label">ENG</span></button></li>
             <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
-            <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="apply">Solliciteer Direct</span></a></li>
+            <li><a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-apply"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="apply">Solliciteer</span></a></li>
         </ul>
     </nav>
 
@@ -297,6 +323,41 @@
                 <h1 data-i18n="hero_title">Brecht Transport B.V.</h1>
                 <p data-i18n="hero_desc">Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.</p>
             </section>
+
+            <!-- Strakke Discord Community Banner (Bijlage 1) -->
+            <div class="discord-community-banner">
+                <div>
+                    <span style="background:rgba(229,62,62,0.2); color:#ff6b6b; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; border:1px solid rgba(229,62,62,0.4); text-transform:uppercase;">OFFICIËLE DISCORD</span>
+                    <h2 style="font-family:'Space Grotesk', sans-serif; font-size:2.2rem; margin:12px 0 10px 0;">Drive with the community, not alone.</h2>
+                    <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">Meet the team, follow event announcements, and stay connected before every convoy.</p>
+                    <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-red" style="background:#5865F2; display:inline-flex; align-items:center; gap:8px;"><i class="fa-brands fa-discord"></i> Join Discord</a>
+                </div>
+                <div class="discord-banner-right">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="width:42px; height:42px; border-radius:50%; border:1px solid var(--border-red);">
+                        <div>
+                            <b style="font-size:0.95rem;">Brecht Transport Discord</b>
+                            <div style="font-size:0.78rem; color:var(--text-muted);">Official community server</div>
+                        </div>
+                    </div>
+                    <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-red" style="background:#c50000; text-align:center; display:block; padding:10px;">Join Discord</a>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:10px; border:1px solid var(--border-red); text-align:center;">
+                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#fff;">120+</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted);">Total members</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:10px; border:1px solid var(--border-red); text-align:center;">
+                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#68d391;">Online</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted);">Active now</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Announcements</span>
+                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Convoy planning</span>
+                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Driver support</span>
+                    </div>
+                </div>
+            </div>
 
             <div class="dashboard-grid-top">
                 <div class="dash-card">
@@ -538,7 +599,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB: KONVOOIEN -->
+                    <!-- TAB: KONVOOIEN & AANMELDEN (Bijlage 3) -->
                     <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
                         <div id="convoy-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
                             <h3><i class="fa-solid fa-calendar-plus" style="color:var(--accent-red);"></i> Nieuw Konvooi Inplannen</h3>
@@ -553,7 +614,7 @@
                             <button onclick="postConvoy()" class="btn-red">Inplannen</button>
                         </div>
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-truck-front" style="color:var(--accent-red);"></i> Geplande Konvooien</h3>
+                            <h3><i class="fa-solid fa-truck-front" style="color:var(--accent-red);"></i> Geplande Konvooien & Aanmeldingen</h3>
                             <div id="convoys-list-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
@@ -722,7 +783,7 @@
         </div>
     </div>
 
-    <!-- MODAL: INLOGGEN -->
+    <!-- MODAL: INLOGGEN (Met exact dezelfde sfeervolle achtergrond en bliksemsnel) -->
     <div id="login-modal">
         <div class="login-box">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;">
@@ -743,6 +804,7 @@
         let currentUser = null;
         let chartInstance = null;
         let currentLang = 'NL';
+        let cachedApiData = null; // Voor achtergrond preloading
         const MAIN_DOMAIN = "brechttransport.nl";
 
         let cropImageObj = new Image();
@@ -765,8 +827,8 @@
 
         const i18n = {
             NL: {
-                home: "Home", about: "Over Ons", rules: "Regels", gallery: "Fotogalerij", team: "Het Team", fleet: "Vloot", trips: "Afgeronde Ritten",
-                login: "Inloggen", apply: "Solliciteer Direct", hero_title: "Brecht Transport B.V.", rules_title: "Bedrijfsregels & Gedragscode",
+                home: "Home", about: "Over Ons", rules: "Regels", gallery: "Galerij", team: "Team", fleet: "Vloot", trips: "Ritten",
+                login: "Inloggen", apply: "Solliciteer", hero_title: "Brecht Transport B.V.", rules_title: "Bedrijfsregels & Gedragscode",
                 hero_desc: "Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.",
                 stat_dist: "Gereden Afstand", stat_deliv: "Leveringen Volbracht", stat_drivers: "Actieve Chauffeurs",
                 about_p1: "Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.",
@@ -775,8 +837,8 @@
                 gallery_full: "Bekijk Volledig Foto-Archief", loading: "Laden van recente ritten...", back: "Terug"
             },
             ENG: {
-                home: "Home", about: "About Us", rules: "Rules", gallery: "Gallery", team: "The Team", fleet: "Fleet", trips: "Completed Trips",
-                login: "Login", apply: "Apply Now", hero_title: "Brecht Transport B.V.", rules_title: "Company Rules & Code of Conduct",
+                home: "Home", about: "About Us", rules: "Rules", gallery: "Gallery", team: "Team", fleet: "Fleet", trips: "Trips",
+                login: "Login", apply: "Apply", hero_title: "Brecht Transport B.V.", rules_title: "Company Rules & Code of Conduct",
                 hero_desc: "Welcome to Brecht Transport B.V. We combine craftsmanship, professional convoys, and a great community on the European highways of Euro Truck Simulator 2.",
                 stat_dist: "Total Distance", stat_deliv: "Deliveries Completed", stat_drivers: "Active Drivers",
                 about_p1: "Brecht Transport B.V. is a close-knit and professional Virtual Trucking Company (VTC) operating on the Euro Truck Simulator 2 platform. Our goal is to provide realistic and enjoyable digital haulage.",
@@ -786,14 +848,29 @@
             }
         };
 
+        // BLIKSEMSNELE ACHTERGROND PRELOADING (Laadt direct op de achtergrond in)
+        async function preloadEverything() {
+            try {
+                const [resHaulmp, resGallery] = await Promise.all([
+                    fetch('/api/haulmp'),
+                    fetch('/api/gallery')
+                ]);
+                cachedApiData = await resHaulmp.json();
+                const galleryPhotos = await resGallery.json();
+                
+                // Direct tekenen zodat het aanvoelt alsof het 0ms duurt
+                processLoadedData(cachedApiData, galleryPhotos);
+            } catch(e) {}
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            preloadEverything(); // Start direct op de achtergrond
+            
             if (window.location.hostname.includes("personeelsportaal")) {
                 document.getElementById('main-nav-bar').style.display = 'none';
                 const savedUser = sessionStorage.getItem('brecht_user');
                 if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) { openLoginModal(); } } else openLoginModal();
             }
-            loadData();
-            loadGalleryPhotos();
             initCropperEvents();
         });
 
@@ -862,7 +939,7 @@
                 alert('Profielfoto opgeslagen!');
                 closeDiscordModal();
                 updateSidebarAvatar();
-                loadData();
+                preloadEverything();
                 refreshPortalData();
             } else {
                 alert('Kon profielfoto niet opslaan.');
@@ -932,6 +1009,7 @@
             document.getElementById('login-modal').style.display = 'none';
         }
 
+        // Bliksemsnelle inlog
         async function handleLogin() {
             const username = document.getElementById('login-user').value;
             const password = document.getElementById('login-pass').value;
@@ -987,96 +1065,89 @@
             }
         }
 
-        async function loadGalleryPhotos() {
-            try {
-                const res = await fetch('/api/gallery');
-                const photos = await res.json();
-                const pubGallery = document.getElementById('public-gallery-container');
-                const fullGallery = document.getElementById('full-gallery-container');
-                if (pubGallery) {
-                    pubGallery.innerHTML = '';
-                    photos.slice(0, 3).forEach(p => {
-                        pubGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="margin-bottom:0;"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div></div>`);
-                    });
-                }
-                if (fullGallery) {
-                    fullGallery.innerHTML = '';
-                    photos.forEach(p => {
-                        fullGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);">${p.uploadedBy} - ${formatDateToNL(p.date)}</div></div>`);
-                    });
-                }
-            } catch(e) {}
-        }
+        function processLoadedData(data, photos) {
+            const pubGallery = document.getElementById('public-gallery-container');
+            const fullGallery = document.getElementById('full-gallery-container');
+            if (pubGallery && photos) {
+                pubGallery.innerHTML = '';
+                photos.slice(0, 3).forEach(p => {
+                    pubGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="margin-bottom:0;"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-solid fa-camera"></i> ${p.uploadedBy}</div></div>`);
+                });
+            }
+            if (fullGallery && photos) {
+                fullGallery.innerHTML = '';
+                photos.forEach(p => {
+                    fullGallery.insertAdjacentHTML('beforeend', `<div class="gallery-card"><img src="${p.url}" class="gallery-img"><div style="font-size:0.8rem; color:var(--text-muted);">${p.uploadedBy} - ${formatDateToNL(p.date)}</div></div>`);
+                });
+            }
 
-        async function loadData() {
-            try {
-                const res = await fetch('/api/haulmp');
-                const data = await res.json();
-                if (data.distance) {
-                    document.getElementById('stat-distance').innerText = data.distance;
-                    if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance;
-                }
-                if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
-                if (data.drivers) {
-                    document.getElementById('stat-drivers').innerText = data.drivers;
-                    if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers;
-                }
+            if (data.distance) {
+                document.getElementById('stat-distance').innerText = data.distance;
+                if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance;
+            }
+            if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
+            if (data.drivers) {
+                document.getElementById('stat-drivers').innerText = data.drivers;
+                if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers;
+            }
 
-                const pubSocials = document.getElementById('public-socials-container');
-                const portalSocials = document.getElementById('portal-socials-list');
-                if (pubSocials) pubSocials.innerHTML = '';
-                if (portalSocials) portalSocials.innerHTML = '';
+            const pubSocials = document.getElementById('public-socials-container');
+            const portalSocials = document.getElementById('portal-socials-list');
+            if (pubSocials) pubSocials.innerHTML = '';
+            if (portalSocials) portalSocials.innerHTML = '';
 
-                if (data.socialsList && data.socialsList.length > 0) {
-                    data.socialsList.forEach(s => {
-                        let iconClass = "fa-solid fa-share-nodes";
-                        const pLower = s.platform.toLowerCase();
-                        if (pLower.includes('tiktok')) iconClass = "fa-brands fa-tiktok";
-                        else if (pLower.includes('insta')) iconClass = "fa-brands fa-instagram";
-                        else if (pLower.includes('twitch')) iconClass = "fa-brands fa-twitch";
-                        else if (pLower.includes('youtube')) iconClass = "fa-brands fa-youtube";
-                        else if (pLower.includes('discord')) iconClass = "fa-brands fa-discord";
-                        else if (pLower.includes('twitter') || pLower.includes('x')) iconClass = "fa-brands fa-x-twitter";
+            if (data.socialsList && data.socialsList.length > 0) {
+                data.socialsList.forEach(s => {
+                    let iconClass = "fa-solid fa-share-nodes";
+                    const pLower = s.platform.toLowerCase();
+                    if (pLower.includes('tiktok')) iconClass = "fa-brands fa-tiktok";
+                    else if (pLower.includes('insta')) iconClass = "fa-brands fa-instagram";
+                    else if (pLower.includes('twitch')) iconClass = "fa-brands fa-twitch";
+                    else if (pLower.includes('youtube')) iconClass = "fa-brands fa-youtube";
+                    else if (pLower.includes('discord')) iconClass = "fa-brands fa-discord";
+                    else if (pLower.includes('twitter') || pLower.includes('x')) iconClass = "fa-brands fa-x-twitter";
 
-                        if (pubSocials) {
-                            pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="${iconClass}"></i><span style="font-weight:bold; font-size:1rem;">${s.platform}</span><span style="font-size:0.8rem; color:var(--text-muted);">Van: ${s.addedBy}</span><span style="font-size:0.78rem; color:var(--accent-red); font-weight:bold;">Bekijk kanaal →</span></a>`);
-                        }
-                        if (portalSocials) {
-                            const canDel = currentUser && (currentUser.canDelete || currentUser.canManageStaff);
-                            portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b> (door ${s.addedBy}): <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div>${canDel ? `<button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
-                        }
-                    });
-                } else {
-                    if (pubSocials) pubSocials.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:0.9rem;">Nog geen social media kanalen toegevoegd.</p>';
-                    if (portalSocials) portalSocials.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Nog geen socials.</p>';
-                }
-
-                if (Array.isArray(data.drivers_list)) {
-                    const teamContainer = document.getElementById('team-container');
-                    if (teamContainer) {
-                        teamContainer.innerHTML = '';
-                        data.drivers_list.filter(m => !m.isDev).forEach(m => {
-                            const avatarHtml = m.avatarUrl ? `<img src="${m.avatarUrl}" alt="Avatar">` : `<i class="fa-solid fa-user"></i>`;
-                            teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div style="display:flex; align-items:center; gap:14px;"><div class="member-avatar">${avatarHtml}</div><div><div style="font-weight:bold; font-size:0.95rem;">${m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div></div>`);
-                        });
+                    if (pubSocials) {
+                        pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="${iconClass}"></i><span style="font-weight:bold; font-size:1rem;">${s.platform}</span><span style="font-size:0.8rem; color:var(--text-muted);">Van: ${s.addedBy}</span><span style="font-size:0.78rem; color:var(--accent-red); font-weight:bold;">Bekijk kanaal →</span></a>`);
                     }
-                }
-
-                if (Array.isArray(data.recent_jobs)) {
-                    const container = document.getElementById('trips-container');
-                    if (container) {
-                        container.innerHTML = '';
-                        data.recent_jobs.forEach(job => {
-                            container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.95rem;">${job.from} → ${job.to}</div><div style="font-size:0.8rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.9rem;">${job.distance}</div></div>`);
-                        });
+                    if (portalSocials) {
+                        const canDel = currentUser && (currentUser.canDelete || currentUser.canManageStaff);
+                        portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b> (door ${s.addedBy}): <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div>${canDel ? `<button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
                     }
+                });
+            } else {
+                if (pubSocials) pubSocials.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:0.9rem;">Nog geen social media kanalen toegevoegd.</p>';
+                if (portalSocials) portalSocials.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Nog geen socials.</p>';
+            }
+
+            if (Array.isArray(data.drivers_list)) {
+                const teamContainer = document.getElementById('team-container');
+                if (teamContainer) {
+                    teamContainer.innerHTML = '';
+                    data.drivers_list.filter(m => !m.isDev).forEach(m => {
+                        const avatarHtml = m.avatarUrl ? `<img src="${m.avatarUrl}" alt="Avatar">` : `<i class="fa-solid fa-user"></i>`;
+                        teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div style="display:flex; align-items:center; gap:14px;"><div class="member-avatar">${avatarHtml}</div><div><div style="font-weight:bold; font-size:0.95rem;">${m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div></div>`);
+                    });
                 }
-            } catch (e) {}
+            }
+
+            if (Array.isArray(data.recent_jobs)) {
+                const container = document.getElementById('trips-container');
+                if (container) {
+                    container.innerHTML = '';
+                    data.recent_jobs.forEach(job => {
+                        container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.95rem;">${job.from} → ${job.to}</div><div style="font-size:0.8rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.9rem;">${job.distance}</div></div>`);
+                    });
+                }
+            }
         }
 
         async function refreshPortalData() {
-            const res = await fetch('/api/haulmp');
-            const data = await res.json();
+            if (!cachedApiData) {
+                const res = await fetch('/api/haulmp');
+                cachedApiData = await res.json();
+            }
+            const data = cachedApiData;
 
             if (data.employeeOfTheWeek?.username) {
                 document.getElementById('eotw-display-card').style.display = 'block';
@@ -1121,11 +1192,52 @@
                 infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border-left:3px solid var(--accent-red); display:flex; justify-content:space-between; align-items:flex-start;"><div><b style="font-size:1.05rem;">${i.title}</b><p style="font-size:0.92rem; margin:6px 0; color:var(--text-muted);">${i.content}</p><small style="color:#888; font-size:0.78rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small><br>${fileAction}</div>${canDel ? `<button onclick="deleteInfo('${i.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
             });
 
+            // Konvooien & Aanmelden Logica (Bijlage 3)
             const convContainer = document.getElementById('convoys-list-container');
             convContainer.innerHTML = '';
+            const canManageConvoys = currentUser && ['directeur', 'onder directeur', 'management', 'leidinggevende'].some(r => currentUser.role.toLowerCase().includes(r));
+
             data.convoysList?.forEach(c => {
                 const formattedDate = formatDateToNL(c.date);
-                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-red); display:flex; justify-content:space-between; align-items:center;"><div><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red); font-size:1.05rem;">${c.title}</b><span style="font-size:0.82rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:6px; margin-left:10px;">${formattedDate} ${c.time || ''}</span></div><div style="font-size:0.9rem; margin-top:8px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:6px;">${c.details}</div></div></div>${canDel ? `<button onclick="deleteConvoy('${c.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
+                const signups = (data.convoySignupsList || []).filter(s => s.convoyId === c.id);
+                const isSignedUp = signups.some(s => s.username.toLowerCase() === currentUser.username.toLowerCase());
+
+                let signupsListHtml = '';
+                if (canManageConvoys) {
+                    signupsListHtml = `
+                        <div style="margin-top:12px; background:rgba(0,0,0,0.4); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+                            <b style="font-size:0.85rem; color:#68d391;"><i class="fa-solid fa-users"></i> Aangemelde Chauffeurs (${signups.length}):</b>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                                ${signups.length > 0 ? signups.map(s => `<span style="background:rgba(56,161,105,0.2); border:1px solid rgba(56,161,105,0.4); padding:3px 10px; border-radius:6px; font-size:0.78rem; font-weight:bold;">${s.username}</span>`).join('') : '<span style="color:var(--text-muted); font-size:0.8rem;">Nog geen aanmeldingen.</span>'}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                convContainer.insertAdjacentHTML('beforeend', `
+                    <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:14px; border:1px solid var(--border-red);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b style="color:var(--accent-red); font-size:1.1rem;">${c.title}</b>
+                            <span style="font-size:0.82rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:6px;">${formattedDate} ${c.time || ''}</span>
+                        </div>
+                        <div style="font-size:0.9rem; margin-top:8px;">
+                            <div><b>Server:</b> ${c.server}</div>
+                            <div><b>Route:</b> ${c.route}</div>
+                            <div style="color:var(--text-muted); margin-top:6px;">${c.details}</div>
+                        </div>
+                        <div style="margin-top:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                ${isSignedUp ? 
+                                    `<button onclick="cancelConvoySignup('${c.id}')" class="btn-portal" style="background:rgba(229,62,62,0.2); border-color:#fc8181; color:#fc8181;"><i class="fa-solid fa-check"></i> Aangemeld (Annuleren)</button>` : 
+                                    `<button onclick="signupConvoy('${c.id}')" class="btn-red" style="padding:8px 16px; font-size:0.85rem;"><i class="fa-solid fa-user-plus"></i> Aanmelden voor Konvooi</button>`
+                                }
+                                <span style="font-size:0.82rem; color:var(--text-muted); margin-left:10px;"><b>${signups.length}</b> aanmeldingen</span>
+                            </div>
+                            ${canDel ? `<button onclick="deleteConvoy('${c.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
+                        ${signupsListHtml}
+                    </div>
+                `);
             });
 
             const appsOpen = document.getElementById('applications-open-container');
@@ -1204,7 +1316,7 @@
                     const isDirectorOrSub = ['directeur', 'onder directeur'].some(r => currentUser.role.toLowerCase().includes(r));
                     const canEditRole = !isSelf || isDirectorOrSub;
 
-                    tableBody.insertAdjacentHTML('beforeend`', `
+                    tableBody.insertAdjacentHTML('beforeend', `
                         <tr>
                             <td><div style="display:flex; align-items:center; gap:10px;"><div style="width:32px; height:32px; border-radius:50%; background:#220505; border:1px solid var(--border-red); display:flex; align-items:center; justify-content:center; overflow:hidden;">${m.avatarUrl ? `<img src="${m.avatarUrl}" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fa-solid fa-user" style="font-size:0.8rem; color:#888;"></i>'}</div><b style="font-size:0.95rem;">${m.username}</b></div></td>
                             <td><span class="member-role role-${m.color}">${m.role}</span></td>
@@ -1230,9 +1342,21 @@
                                 ${!isSelf ? `<button onclick="fireStaffMember('${m.username}')" class="btn-red" style="padding:6px 10px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Ontslaan</button>` : '<span style="color:#666; font-size:0.8rem;">(Jijzelf)</span>'}
                             </td>
                         </tr>
-                    `.replace('`', ''));
+                    `);
                 });
             }
+        }
+
+        async function signupConvoy(convoyId) {
+            await fetch('/api/convoys/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ convoyId, username: currentUser.username }) });
+            cachedApiData = null;
+            refreshPortalData();
+        }
+
+        async function cancelConvoySignup(convoyId) {
+            await fetch('/api/convoys/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ convoyId, username: currentUser.username }) });
+            cachedApiData = null;
+            refreshPortalData();
         }
 
         function toggleBadgeGroup(title) {
@@ -1260,6 +1384,7 @@
             const res = await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
             const data = await res.json();
             if (!data.success) alert(data.message || 'Kon badge niet toevoegen.');
+            cachedApiData = null;
             refreshPortalData();
         }
 
@@ -1271,7 +1396,8 @@
             if (res.ok) {
                 alert('Social media link toegevoegd!');
                 document.getElementById('social-url').value = '';
-                loadData();
+                cachedApiData = null;
+                preloadEverything();
                 refreshPortalData();
             } else {
                 alert('Fout bij toevoegen.');
@@ -1280,22 +1406,26 @@
 
         async function deleteSocial(id) {
             await fetch(`/api/socials/${id}`, { method: 'DELETE' });
-            loadData();
+            cachedApiData = null;
+            preloadEverything();
             refreshPortalData();
         }
 
         async function deleteAnnouncement(id) {
             await fetch(`/api/announcements/${id}`, { method: 'DELETE' });
+            cachedApiData = null;
             refreshPortalData();
         }
 
         async function deleteInfo(id) {
             await fetch(`/api/info/${id}`, { method: 'DELETE' });
+            cachedApiData = null;
             refreshPortalData();
         }
 
         async function deleteConvoy(id) {
             await fetch(`/api/convoys/${id}`, { method: 'DELETE' });
+            cachedApiData = null;
             refreshPortalData();
         }
 
@@ -1342,6 +1472,7 @@
 
         async function completeApp(appId) {
             await fetch('/api/applications/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ appId }) });
+            cachedApiData = null;
             refreshPortalData();
         }
 
@@ -1353,11 +1484,13 @@
             const data = await res.json();
             if (!data.success) alert(data.message || 'Kon badge niet toevoegen.');
             document.getElementById('badge-title').value = '';
+            cachedApiData = null;
             refreshPortalData();
         }
 
         async function deleteBadge(badgeId) {
             await fetch('/api/badges/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ badgeId }) });
+            cachedApiData = null;
             refreshPortalData();
         }
 
@@ -1366,6 +1499,7 @@
             const reason = document.getElementById('eotw-input-reason').value;
             await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
             alert('Chauffeur van de week ingesteld!');
+            cachedApiData = null;
             refreshPortalData();
         }
 
@@ -1389,6 +1523,7 @@
                 document.getElementById('info-content').value = '';
                 fileInput.value = '';
                 switchInfoSubTab('info-sub-view', document.querySelector('.sub-tab-btn'));
+                cachedApiData = null;
                 refreshPortalData();
             } else {
                 alert('Fout bij het plaatsen van informatie.');
@@ -1403,6 +1538,7 @@
             const route = document.getElementById('conv-route').value;
             const details = document.getElementById('conv-details').value;
             await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route, details, username: currentUser.username }) });
+            cachedApiData = null;
             refreshPortalData();
         }
 
@@ -1413,7 +1549,10 @@
             const res = await fetch('/api/gallery', { method: 'POST', body: formData });
             if (res.ok) {
                 alert('📸 Foto succesvol geüpload!');
-                fileInput.value = ''; refreshPortalData(); loadGalleryPhotos();
+                fileInput.value = ''; 
+                cachedApiData = null;
+                preloadEverything();
+                refreshPortalData();
             } else {
                 alert('Er is een fout opgetreden bij het uploaden.');
             }
@@ -1427,6 +1566,7 @@
             document.getElementById('ann-title').value = '';
             document.getElementById('ann-content').value = '';
             switchInfoSubTab('info-sub-view', document.querySelector('.sub-tab-btn'));
+            cachedApiData = null;
             refreshPortalData();
         }
 
@@ -1449,15 +1589,17 @@
                 sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
                 document.getElementById('sidebar-role-txt').innerText = newRole;
             }
+            cachedApiData = null;
             refreshPortalData();
-            loadData();
+            preloadEverything();
         }
 
         async function fireStaffMember(targetUser) {
             if (!confirm(`Weet je zeker dat je ${targetUser} wilt ontslaan?`)) return;
             await fetch(`/api/staff/${targetUser}?adminUser=${currentUser.username}`, { method: 'DELETE' });
+            cachedApiData = null;
             refreshPortalData();
-            loadData();
+            preloadEverything();
         }
 
         async function addNewStaff() {
@@ -1467,8 +1609,9 @@
             const data = await res.json();
             alert(`Toegevoegd! Wachtwoord: ${data.message}`);
             document.getElementById('new-staff-user').value = '';
+            cachedApiData = null;
             refreshPortalData();
-            loadData();
+            preloadEverything();
         }
 
         async function submitAbsence() {
@@ -1476,8 +1619,10 @@
             const toDate = document.getElementById('abs-to').value;
             const reason = document.getElementById('abs-reason').value;
             await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username, fromDate, toDate, reason }) });
+            cachedApiData = null;
             refreshPortalData();
         }
     </script>
 </body>
 </html>
+    
