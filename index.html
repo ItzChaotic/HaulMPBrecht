@@ -29,7 +29,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         html, body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; width: 100%; overflow-x: hidden; display: flex; flex-direction: column; }
 
-        /* Sfeervolle achtergrond met overlay */
+        /* Sfeervolle achtergrond met de exacte RAW link */
         body::before {
             content: "";
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -39,7 +39,7 @@
         body::after {
             content: "";
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(10, 3, 3, 0.92); backdrop-filter: blur(8px); z-index: -1;
+            background: rgba(10, 3, 3, 0.88); backdrop-filter: blur(8px); z-index: -1;
         }
 
         nav {
@@ -145,7 +145,25 @@
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
         .btn-red:hover { background: var(--accent-red); }
 
-        /* Strakke Discord Community Banner (Bijlage 1) */
+        /* Dikke Schlüppi-stijl Hero (Bijlage 2) */
+        .hero-schlüppi {
+            text-align: left; padding: 60px 20px 40px 20px; max-width: 1200px; margin: 0 auto;
+        }
+        .hero-badge {
+            display: inline-block; background: rgba(204, 0, 0, 0.2); color: #ff6b6b; padding: 6px 14px;
+            border-radius: 8px; font-weight: 800; font-size: 0.78rem; border: 1px solid rgba(204, 0, 0, 0.4);
+            text-transform: uppercase; margin-bottom: 16px; letter-spacing: 1px;
+        }
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif; font-size: 4rem; font-weight: 800; line-height: 1.05; margin-bottom: 18px; color: #fff;
+        }
+        @media(max-width: 768px) { .hero-title { font-size: 2.5rem; } }
+        .hero-desc-text {
+            font-size: 1.05rem; color: var(--text-muted); max-width: 650px; line-height: 1.6; margin-bottom: 25px;
+        }
+        .hero-btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        /* Nederlandse Discord Community Banner (Bijlage 1) */
         .discord-community-banner {
             background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px;
             padding: 35px; backdrop-filter: var(--glass-blur); margin: 30px 0;
@@ -174,9 +192,6 @@
         .staff-table tr:last-child td { border-bottom: none; }
         .staff-table tr:hover { background: rgba(255,51,51,0.03); }
 
-        .hero { text-align: center; padding: 45px 0 30px 0; }
-        .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem; font-weight: 700; margin-bottom: 12px; }
-        .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 700px; margin: 0 auto; }
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
 
@@ -249,7 +264,6 @@
             .sidebar { display: none; }
             .mobile-portal-tabs { display: flex; }
             .portal-content { margin-left: 0; width: 100%; padding: 15px; }
-            .hero h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -293,7 +307,7 @@
         </div>
     </div>
 
-    <!-- LAPTOP NAVIGATIEBAR (Compacter gemaakt zodat 'Solliciteer' past) -->
+    <!-- LAPTOP NAVIGATIEBAR -->
     <nav id="main-nav-bar">
         <div onclick="goHome()" class="brand-logo">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img">
@@ -319,17 +333,24 @@
     <div class="container">
         <!-- OPENBARE HOOFDPAGINA -->
         <div id="home-view" class="page-view active">
-            <section class="hero">
-                <h1 data-i18n="hero_title">Brecht Transport B.V.</h1>
-                <p data-i18n="hero_desc">Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.</p>
+            
+            <!-- DIKKE SCHLÜPPI-STIJL HERO (Bijlage 2) -->
+            <section class="hero-schlüppi">
+                <div class="hero-badge">ETS2 & ATS VTC</div>
+                <h1 class="hero-title">Brecht<br>Transport</h1>
+                <p class="hero-desc-text" data-i18n="hero_desc">Virtuele Transportonderneming met hart en gezelligheid. Samen onderweg op TruckersMP, bij konvooien en in een actieve community.</p>
+                <div class="hero-btn-group">
+                    <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord" style="padding:10px 20px; font-size:0.9rem !important;"><i class="fa-brands fa-discord"></i> Discord</a>
+                    <a href="https://vtc.haulmp.com/Brecht" target="_blank" class="btn-portal" style="padding:10px 20px; font-size:0.9rem !important; border-color:var(--accent-red);"><i class="fa-solid fa-truck"></i> TruckersMP VTC</a>
+                </div>
             </section>
 
-            <!-- Strakke Discord Community Banner (Bijlage 1) -->
+            <!-- NEDERLANDSE DISCORD COMMUNITY BANNER (Bijlage 1 & jouw opmerking over 60+ leden) -->
             <div class="discord-community-banner">
                 <div>
                     <span style="background:rgba(229,62,62,0.2); color:#ff6b6b; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; border:1px solid rgba(229,62,62,0.4); text-transform:uppercase;">OFFICIËLE DISCORD</span>
-                    <h2 style="font-family:'Space Grotesk', sans-serif; font-size:2.2rem; margin:12px 0 10px 0;">Drive with the community, not alone.</h2>
-                    <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">Meet the team, follow event announcements, and stay connected before every convoy.</p>
+                    <h2 style="font-family:'Space Grotesk', sans-serif; font-size:2.2rem; margin:12px 0 10px 0;">Samen rijden, nooit alleen.</h2>
+                    <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">Ontmoet het team, volg konvooi-aankondigingen en blijf verbonden voor en na elke rit.</p>
                     <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-red" style="background:#5865F2; display:inline-flex; align-items:center; gap:8px;"><i class="fa-brands fa-discord"></i> Join Discord</a>
                 </div>
                 <div class="discord-banner-right">
@@ -337,24 +358,24 @@
                         <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="width:42px; height:42px; border-radius:50%; border:1px solid var(--border-red);">
                         <div>
                             <b style="font-size:0.95rem;">Brecht Transport Discord</b>
-                            <div style="font-size:0.78rem; color:var(--text-muted);">Official community server</div>
+                            <div style="font-size:0.78rem; color:var(--text-muted);">Officiële community server</div>
                         </div>
                     </div>
                     <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-red" style="background:#c50000; text-align:center; display:block; padding:10px;">Join Discord</a>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:10px; border:1px solid var(--border-red); text-align:center;">
-                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#fff;">120+</div>
-                            <div style="font-size:0.72rem; color:var(--text-muted);">Total members</div>
+                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#fff;">60+</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted);">Leden</div>
                         </div>
                         <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:10px; border:1px solid var(--border-red); text-align:center;">
                             <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#68d391;">Online</div>
-                            <div style="font-size:0.72rem; color:var(--text-muted);">Active now</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted);">Actief nu</div>
                         </div>
                     </div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Announcements</span>
-                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Convoy planning</span>
-                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Driver support</span>
+                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Aankondigingen</span>
+                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Konvooi planning</span>
+                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Chauffeur support</span>
                     </div>
                 </div>
             </div>
@@ -783,7 +804,7 @@
         </div>
     </div>
 
-    <!-- MODAL: INLOGGEN (Met exact dezelfde sfeervolle achtergrond en bliksemsnel) -->
+    <!-- MODAL: INLOGGEN -->
     <div id="login-modal">
         <div class="login-box">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;">
@@ -804,7 +825,7 @@
         let currentUser = null;
         let chartInstance = null;
         let currentLang = 'NL';
-        let cachedApiData = null; // Voor achtergrond preloading
+        let cachedApiData = null;
         const MAIN_DOMAIN = "brechttransport.nl";
 
         let cropImageObj = new Image();
@@ -829,7 +850,7 @@
             NL: {
                 home: "Home", about: "Over Ons", rules: "Regels", gallery: "Galerij", team: "Team", fleet: "Vloot", trips: "Ritten",
                 login: "Inloggen", apply: "Solliciteer", hero_title: "Brecht Transport B.V.", rules_title: "Bedrijfsregels & Gedragscode",
-                hero_desc: "Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.",
+                hero_desc: "Virtuele Transportonderneming met hart en gezelligheid. Samen onderweg op TruckersMP, bij konvooien en in een actieve community.",
                 stat_dist: "Gereden Afstand", stat_deliv: "Leveringen Volbracht", stat_drivers: "Actieve Chauffeurs",
                 about_p1: "Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.",
                 about_p2: "Met ons eigen personeelsportaal, konvooi-organisatie en actieve chauffeursgroep streven wij elke dag naar kwaliteit op de Europese wegen. Of je nu houdt van rustig kilometers maken of grote konvooien rijden: bij Brecht Transport B.V. ben je aan het juiste adres!",
@@ -839,7 +860,7 @@
             ENG: {
                 home: "Home", about: "About Us", rules: "Rules", gallery: "Gallery", team: "Team", fleet: "Fleet", trips: "Trips",
                 login: "Login", apply: "Apply", hero_title: "Brecht Transport B.V.", rules_title: "Company Rules & Code of Conduct",
-                hero_desc: "Welcome to Brecht Transport B.V. We combine craftsmanship, professional convoys, and a great community on the European highways of Euro Truck Simulator 2.",
+                hero_desc: "Virtual transport company with heart and soul. Together on the road on TruckersMP, during convoys and in an active community.",
                 stat_dist: "Total Distance", stat_deliv: "Deliveries Completed", stat_drivers: "Active Drivers",
                 about_p1: "Brecht Transport B.V. is a close-knit and professional Virtual Trucking Company (VTC) operating on the Euro Truck Simulator 2 platform. Our goal is to provide realistic and enjoyable digital haulage.",
                 about_p2: "With our custom driver portal, convoy organization, and active community of truckers, we strive for quality on the European roads every day. Whether you enjoy relaxed long hauls or driving in large convoys: Brecht Transport B.V. is the right place for you!",
@@ -848,7 +869,6 @@
             }
         };
 
-        // BLIKSEMSNELE ACHTERGROND PRELOADING (Laadt direct op de achtergrond in)
         async function preloadEverything() {
             try {
                 const [resHaulmp, resGallery] = await Promise.all([
@@ -857,15 +877,12 @@
                 ]);
                 cachedApiData = await resHaulmp.json();
                 const galleryPhotos = await resGallery.json();
-                
-                // Direct tekenen zodat het aanvoelt alsof het 0ms duurt
                 processLoadedData(cachedApiData, galleryPhotos);
             } catch(e) {}
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            preloadEverything(); // Start direct op de achtergrond
-            
+            preloadEverything();
             if (window.location.hostname.includes("personeelsportaal")) {
                 document.getElementById('main-nav-bar').style.display = 'none';
                 const savedUser = sessionStorage.getItem('brecht_user');
@@ -1009,7 +1026,6 @@
             document.getElementById('login-modal').style.display = 'none';
         }
 
-        // Bliksemsnelle inlog
         async function handleLogin() {
             const username = document.getElementById('login-user').value;
             const password = document.getElementById('login-pass').value;
@@ -1192,7 +1208,6 @@
                 infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border-left:3px solid var(--accent-red); display:flex; justify-content:space-between; align-items:flex-start;"><div><b style="font-size:1.05rem;">${i.title}</b><p style="font-size:0.92rem; margin:6px 0; color:var(--text-muted);">${i.content}</p><small style="color:#888; font-size:0.78rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small><br>${fileAction}</div>${canDel ? `<button onclick="deleteInfo('${i.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
             });
 
-            // Konvooien & Aanmelden Logica (Bijlage 3)
             const convContainer = document.getElementById('convoys-list-container');
             convContainer.innerHTML = '';
             const canManageConvoys = currentUser && ['directeur', 'onder directeur', 'management', 'leidinggevende'].some(r => currentUser.role.toLowerCase().includes(r));
@@ -1625,4 +1640,3 @@
     </script>
 </body>
 </html>
-    
