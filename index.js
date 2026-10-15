@@ -143,6 +143,7 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', async () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
+    // Start direct met het ophalen van de ritten en log eventuele fouten in Render
     fetch10DaysDiscordJobs();
 });
 
@@ -153,12 +154,17 @@ clientBot.on('messageCreate', (message) => {
 
 async function fetch10DaysDiscordJobs() {
     try {
+        console.log(`🔍 Bezig met ophalen ritten uit kanaal ID: ${DISCORD_CHANNEL_ID}...`);
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
-        if (!channel) return;
+        if (!channel) {
+            console.log("❌ Kan het Discord-kanaal niet vinden! Controleer DISCORD_CHANNEL_ID.");
+            return;
+        }
         
         const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
         let lastId = undefined;
         let keepFetching = true;
+        let count = 0;
 
         while (keepFetching) {
             const options = { limit: 50 };
@@ -172,11 +178,15 @@ async function fetch10DaysDiscordJobs() {
                     break;
                 }
                 await parseAndAddJob(msg);
+                count++;
             }
             lastId = messages.last()?.id;
             if (messages.size < 50) break;
         }
-    } catch (e) {}
+        console.log(`✅ Succesvol ${count} ritten gecontroleerd en ingeladen uit Discord!`);
+    } catch (e) {
+        console.error("❌ Fout bij ophalen Discord historie:", e.message);
+    }
 }
 
 async function parseAndAddApplication(message) {
@@ -476,7 +486,7 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
 });
 
 if (DISCORD_BOT_TOKEN) {
-    clientBot.login(DISCORD_BOT_TOKEN).catch(err => {});
+    clientBot.login(DISCORD_BOT_TOKEN).catch(err => console.error("❌ Bot login mislukt:", err.message));
 }
 
 app.listen(PORT, () => console.log(`🚀 Server actief op poort ${PORT}`));
