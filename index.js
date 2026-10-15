@@ -6,13 +6,13 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 30 * 1024 * 1024 }
+    limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 app.use((req, res, next) => {
@@ -116,6 +116,11 @@ function canManageStaff(role) {
     return r.includes('directeur') || r.includes('onder directeur');
 }
 
+function canDeleteContent(role) {
+    const r = (role || '').toLowerCase();
+    return r.includes('directeur') || r.includes('onder directeur') || r.includes('management');
+}
+
 function isDriverMatch(jobDriver, accountUsername) {
     if (!jobDriver || !accountUsername) return false;
     const j = jobDriver.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -151,7 +156,7 @@ async function fetchApplicationsFromDiscord() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
         if (channel) {
-            const msgs = await channel.messages.fetch({ limit: 30 });
+            const msgs = await channel.messages.fetch({ limit: 10 });
             msgs.forEach(msg => parseAndAddApplication(msg));
         }
     } catch (e) {}
@@ -195,7 +200,10 @@ function parseAndAddJob(message) {
     if (paidAmount === 0 && kmAmount > 0) paidAmount = kmAmount * 35;
 
     const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, weekKey: getISOWeekKey(timestamp), dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
-    if (!allJobsHistory.some(j => j.id === jobObj.id)) allJobsHistory.push(jobObj);
+    if (!allJobsHistory.some(j => j.id === jobObj.id)) {
+        allJobsHistory.push(jobObj);
+        if (allJobsHistory.length > 100) allJobsHistory.shift(); // Geheugenoptimalisatie
+    }
 }
 
 async function fetchAllHistoricalDiscordLogs() {
@@ -203,13 +211,13 @@ async function fetchAllHistoricalDiscordLogs() {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (channel) {
             let lastId = undefined; let fetched = 0; allJobsHistory = [];
-            while (fetched < 100) { 
-                const opt = { limit: 50 }; if (lastId) opt.before = lastId;
+            while (fetched < 30) { 
+                const opt = { limit: 30 }; if (lastId) opt.before = lastId;
                 const msgs = await channel.messages.fetch(opt);
                 if (msgs.size === 0) break;
                 msgs.forEach(msg => parseAndAddJob(msg));
                 lastId = msgs.last().id; fetched += msgs.size;
-                if (msgs.size < 50) break;
+                if (msgs.size < 30) break;
             }
             allJobsHistory.sort((a, b) => b.timestamp - a.timestamp);
         }
@@ -224,7 +232,17 @@ app.post('/api/login', async (req, res) => {
     }
     const account = accountsDatabase.find(acc => acc.username.toLowerCase() === (username || '').trim().toLowerCase() && acc.password === password);
     if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
-    res.json({ success: true, username: account.username, role: account.role, color: getRoleColor(account.role), discordId: account.discordId || '', avatarUrl: account.avatarUrl || '', canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role) });
+    res.json({ 
+        success: true, 
+        username: account.username, 
+        role: account.role, 
+        color: getRoleColor(account.role), 
+        discordId: account.discordId || '', 
+        avatarUrl: account.avatarUrl || '', 
+        canManageBadges: canManageBadges(account.role), 
+        canManageStaff: canManageStaff(account.role),
+        canDelete: canDeleteContent(account.role)
+    });
 });
 
 app.get('/api/haulmp', async (req, res) => {
@@ -246,7 +264,7 @@ app.get('/api/haulmp', async (req, res) => {
         try {
             accountsDatabase = await accountsColl.find({}).toArray();
             customBadges = await badgesColl.find({}).toArray();
-            galleryPhotos = await galleryColl.find({}).sort({ _id: -1 }).toArray();
+            galleryPhotos = await galleryColl.find({}).sort({ _id: -1 }).limit(20).toArray();
             announcementsList = await announcementsColl.find({}).sort({ _id: -1 }).toArray();
             applicationsList = await applicationsColl.find({}).toArray();
             infoList = await infoColl.find({}).sort({ _id: -1 }).toArray();
@@ -295,17 +313,17 @@ app.get('/api/haulmp', async (req, res) => {
     });
 });
 
-app.post('/api/staff/upload-pfp', upload.single('pfp'), async (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen afbeelding ontvangen.' });
-    const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+app.post('/api/staff/upload-pfp', async (req, res) => {
+    const { targetUser, pfp } = req.body;
+    if (!targetUser || !pfp) return res.status(400).json({ success: false, message: 'Gegevens ontbreken.' });
     
     if (isConnected && accountsColl) {
         await accountsColl.updateOne(
-            { username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } },
-            { $set: { avatarUrl: dataUrl } }
+            { username: { $regex: new RegExp(`^${targetUser}$`, 'i') } },
+            { $set: { avatarUrl: pfp } }
         );
     }
-    res.json({ success: true, avatarUrl: dataUrl });
+    res.json({ success: true, avatarUrl: pfp });
 });
 
 app.post('/api/applications/complete', async (req, res) => {
@@ -353,9 +371,19 @@ app.post('/api/info', upload.single('file'), async (req, res) => {
     res.json({ success: true });
 });
 
+app.delete('/api/info/:id', async (req, res) => {
+    if (isConnected && infoColl) await infoColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
 app.post('/api/convoys', async (req, res) => {
     const convObj = { id: "conv-" + Date.now(), ...req.body };
     if (isConnected && convoysColl) await convoysColl.insertOne(convObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/convoys/:id', async (req, res) => {
+    if (isConnected && convoysColl) await convoysColl.deleteOne({ id: req.params.id });
     res.json({ success: true });
 });
 
@@ -370,6 +398,11 @@ app.post('/api/eotw', async (req, res) => {
 app.post('/api/announcements', async (req, res) => {
     const annObj = { id: "ann-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && announcementsColl) await announcementsColl.insertOne(annObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/announcements/:id', async (req, res) => {
+    if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
     res.json({ success: true });
 });
 
