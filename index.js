@@ -15,12 +15,11 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// REQUEST TIMING MIDDLEWARE (Meet de totale duur van elk verzoek voor de Render logs)
 app.use((req, res, next) => {
     const start = Date.now();
     res.on('finish', () => {
         const duration = Date.now() - start;
-        console.log(`⏱️ [PERF LOG] ${req.method}${req.originalUrl} - Duur: ${duration}ms (Status:${res.statusCode})`);
+        console.log(`⏱️ [PERF LOG] ${req.method} ${req.originalUrl} - Duur: ${duration}ms (Status: ${res.statusCode})`);
     });
     next();
 });
@@ -223,13 +222,9 @@ app.post('/api/login', async (req, res) => {
     });
 });
 
-// MET PERFORMANCE TIMERS VOOR DATABASE OPHALEN
+// GEOPTIMALISEERD APINHOOFD-ENDPOINT
 app.get('/api/haulmp', async (req, res) => {
-    console.time('TIMER: DB_Fetch_All');
-
-    console.time('TIMER: Jobs_Query');
     let allJobsHistory = isConnected && jobsColl ? await jobsColl.find({}).sort({ timestamp: -1 }).limit(100).toArray() : [];
-    console.timeEnd('TIMER: Jobs_Query');
 
     const totalDeliveries = allJobsHistory.length;
     const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
@@ -237,7 +232,6 @@ app.get('/api/haulmp', async (req, res) => {
 
     let accountsDatabase = defaultAccounts;
     let customBadges = [];
-    let galleryPhotos = [];
     let announcementsList = [];
     let applicationsList = [];
     let infoList = [];
@@ -247,30 +241,27 @@ app.get('/api/haulmp', async (req, res) => {
 
     if (isConnected && db) {
         try {
-            console.time('TIMER: Secondary_Collections');
-            const [accounts, badges, gallery, announcements, applications, info, convoys, socials, eotw] = await Promise.all([
+            // Zware info-link base64 bestanden uitsluiten van de hoofdcooling om vertraging te voorkomen
+            const [accounts, badges, announcements, applications, info, convoys, socials, eotw] = await Promise.all([
                 accountsColl.find({}).toArray(),
                 badgesColl.find({}).toArray(),
-                galleryColl.find({}).sort({ _id: -1 }).limit(20).toArray(),
                 announcementsColl.find({}).sort({ _id: -1 }).toArray(),
                 applicationsColl.find({}).toArray(),
-                infoColl.find({}).sort({ _id: -1 }).toArray(),
+                infoColl.find({}, { projection: { link: 0 } }).sort({ _id: -1 }).toArray(),
                 convoysColl.find({}).sort({ _id: -1 }).toArray(),
                 socialsColl.find({}).sort({ _id: -1 }).toArray(),
                 eotwColl.findOne({})
             ]);
             accountsDatabase = accounts;
             customBadges = badges;
-            galleryPhotos = gallery;
             announcementsList = announcements;
             applicationsList = applications;
             infoList = info;
             convoysList = convoys;
             socialsList = socials;
             if (eotw) employeeOfTheWeek = eotw;
-            console.timeEnd('TIMER: Secondary_Collections');
         } catch (e) {
-            console.error("Fout bij ophalen secundaire collecties:", e);
+            console.error("Fout bij ophalen data:", e);
         }
     }
 
@@ -298,8 +289,6 @@ app.get('/api/haulmp', async (req, res) => {
         weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
     });
 
-    console.timeEnd('TIMER: DB_Fetch_All');
-
     res.json({
         deliveries: totalDeliveries.toString(),
         distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
@@ -307,11 +296,22 @@ app.get('/api/haulmp', async (req, res) => {
         drivers: formattedDrivers.filter(d => !d.isDev).length.toString(),
         drivers_list: formattedDrivers,
         recent_jobs: allJobsHistory.slice(0, 10),
-        gallery: galleryPhotos, badges: customBadges,
+        badges: customBadges,
         announcements: announcementsList, applications: applicationsList,
         infoList, convoysList, socialsList, employeeOfTheWeek,
         weeklyChartData: Object.values(weeklyChartData).reverse()
     });
+});
+
+// APARTE SNELLE GET ROUTE VOOR FOTO'S (Voorkomt 404 en vertraging)
+app.get('/api/gallery', async (req, res) => {
+    let galleryPhotos = [{ id: "photo-1", url: "https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg", uploadedBy: "MJGamerNL", date: "10-10-2026" }];
+    if (isConnected && galleryColl) {
+        try {
+            galleryPhotos = await galleryColl.find({}).sort({ _id: -1 }).limit(20).toArray();
+        } catch(e) {}
+    }
+    res.json(galleryPhotos);
 });
 
 app.post('/api/staff/upload-pfp', async (req, res) => {
