@@ -259,7 +259,7 @@
             <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> <span data-i18n="team">Het Team</span></a>
             <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span data-i18n="fleet">Vloot</span></a>
             <a href="#livemap-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-map-location-dot"></i> <span>Live Map</span></a>
-            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Onderweg</span></a>
+            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Afgeronde Ritten (10d)</span></a>
             <a href="https://discord.gg/UCgWxAdXRu" target="_blank" style="background:#5865F2; margin-top:8px;"><i class="fa-brands fa-discord" style="color:#fff;"></i> <span>Join Discord</span></a>
             <button onclick="toggleLang(); toggleMobileDrawer();" style="margin-top:10px;"><i class="fa-solid fa-globe"></i> <span>Taal: <b id="lang-label-mob">NL / ENG</b></span></button>
         </div>
@@ -279,7 +279,7 @@
             <li><a href="#team" data-i18n="team">Het Team</a></li>
             <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
             <li><a href="#livemap-sec">Live Map</a></li>
-            <li><a href="#activiteit" data-i18n="trips">Onderweg</a></li>
+            <li><a href="#activiteit" data-i18n="trips">Afgeronde Ritten (10d)</a></li>
             <li><a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
             <li><button onclick="toggleLang()" class="btn-portal"><i class="fa-solid fa-globe"></i> <span id="lang-label">ENG</span></button></li>
             <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
@@ -297,11 +297,11 @@
 
             <div class="dashboard-grid-top">
                 <div class="dash-card">
-                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_dist">Gereden Afstand</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
+                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_dist">Gereden Afstand (10d)</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
                     <div class="dash-card-num" id="stat-distance">0 km</div>
                 </div>
                 <div class="dash-card">
-                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_deliv">Leveringen Volbracht</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
+                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_deliv">Leveringen Volbracht (10d)</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
                     <div class="dash-card-num" id="stat-deliveries">0</div>
                 </div>
                 <div class="dash-card">
@@ -344,7 +344,7 @@
                 <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/RealDaf.png" class="fleet-img"><div style="font-weight:bold;">DAF XF Euro 6</div></div>
             </div>
 
-            <div class="section-header" id="activiteit"><h2 data-i18n="trips">Onderweg</h2></div>
+            <div class="section-header" id="activiteit"><h2 data-i18n="trips">Afgeronde Ritten (10d)</h2></div>
             <div class="trips-card" id="trips-container" style="margin-bottom:40px;">
                 <p style="text-align:center; color:var(--text-muted);" data-i18n="loading">Laden van recente ritten...</p>
             </div>
@@ -383,7 +383,7 @@
 
                     <div class="sidebar-section-title">HOOFDMENU</div>
                     <ul class="sidebar-menu">
-                        <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht</button></li>
+                        <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht (10d)</button></li>
                         <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie & Mods</button></li>
                         <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
                         <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
@@ -410,7 +410,7 @@
 
                 <div class="portal-content">
                     <div class="mobile-portal-tabs" id="mobilePortalTabs">
-                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht</button>
+                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht (10d)</button>
                         <button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Info</button>
                         <button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button>
                         <button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
@@ -423,7 +423,7 @@
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid var(--border-red); padding-bottom:16px;">
                         <div>
-                            <h1 style="font-size:1.8rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1>
+                            <h1 style="font-size:1.8rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht (10d)</h1>
                         </div>
                     </div>
 
@@ -431,7 +431,7 @@
                     <div id="p-tab-stats" class="portal-tab-content">
                         <div class="dashboard-grid-top">
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">TOTALE AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">AFSTAND (10D)</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-distance">0 km</div>
                                 <span style="font-size:0.75rem; color:#68d391; font-weight:bold; margin-top:4px;">▲ Groeiend</span>
                             </div>
@@ -441,12 +441,12 @@
                                 <span style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Actieve VTC Leden</span>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO (10D)</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
-                                <span style="font-size:0.75rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Wekelijkse Inkomsten</span>
+                                <span style="font-size:0.75rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Inkomsten</span>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE (10D)</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
                                 <div class="dash-card-num" id="user-stat-distance">0 km</div>
                                 <span style="font-size:0.75rem; color:var(--accent-red); font-weight:bold; margin-top:4px;" id="user-stat-deliveries-label">0 Leveringen Volbracht</span>
                             </div>
@@ -751,20 +751,20 @@
 
         const i18n = {
             NL: {
-                home: "Home", about: "Over Ons", gallery: "Fotogalerij", team: "Het Team", fleet: "Vloot", trips: "Onderweg",
+                home: "Home", about: "Over Ons", gallery: "Fotogalerij", team: "Het Team", fleet: "Vloot", trips: "Afgeronde Ritten (10d)",
                 login: "Inloggen", apply: "Solliciteer Direct", hero_title: "Brecht Transport B.V.",
                 hero_desc: "Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.",
-                stat_dist: "Gereden Afstand", stat_deliv: "Leveringen Volbracht", stat_drivers: "Actieve Chauffeurs",
+                stat_dist: "Gereden Afstand (10d)", stat_deliv: "Leveringen Volbracht (10d)", stat_drivers: "Actieve Chauffeurs",
                 about_p1: "Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.",
                 about_p2: "Met ons eigen personeelsportaal, konvooi-organisatie en actieve chauffeursgroep streven wij elke dag naar kwaliteit op de Europese wegen. Of je nu houdt van rustig kilometers maken of grote konvooien rijden: bij Brecht Transport B.V. ben je aan het juiste adres!",
                 map_desc: "Volg al onze actieve chauffeurs realtime via de HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
                 gallery_full: "Bekijk Volledig Foto-Archief", loading: "Laden van recente ritten...", back: "Terug"
             },
             ENG: {
-                home: "Home", about: "About Us", gallery: "Gallery", team: "The Team", fleet: "Fleet", trips: "On The Road",
+                home: "Home", about: "About Us", gallery: "Gallery", team: "The Team", fleet: "Fleet", trips: "Completed Trips (10d)",
                 login: "Login", apply: "Apply Now", hero_title: "Brecht Transport B.V.",
                 hero_desc: "Welcome to Brecht Transport B.V. We combine craftsmanship, professional convoys, and a great community on the European highways of Euro Truck Simulator 2.",
-                stat_dist: "Total Distance", stat_deliv: "Deliveries Completed", stat_drivers: "Active Drivers",
+                stat_dist: "Total Distance (10d)", stat_deliv: "Deliveries Completed (10d)", stat_drivers: "Active Drivers",
                 about_p1: "Brecht Transport B.V. is a close-knit and professional Virtual Trucking Company (VTC) operating on the Euro Truck Simulator 2 platform. Our goal is to provide realistic and enjoyable digital haulage.",
                 about_p2: "With our custom driver portal, convoy organization, and active community of truckers, we strive for quality on the European roads every day. Whether you enjoy relaxed long hauls or driving in large convoys: Brecht Transport B.V. is the right place for you!",
                 map_desc: "Track all our active drivers in real-time via the HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
