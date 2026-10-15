@@ -110,7 +110,7 @@
         .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 24px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
         .gallery-img, .fleet-img { width: 100%; height: 210px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
 
-        .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-red); border-radius: 14px; padding: 16px; }
         .member-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); overflow: hidden; aspect-ratio: 1/1; }
         .member-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
@@ -143,9 +143,10 @@
 
         .staff-table-wrapper { width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 12px; }
         .staff-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
-        .staff-table th, .staff-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .staff-table th { color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase; font-weight: 700; }
+        .staff-table th, .staff-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .staff-table th { color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase; font-weight: 700; background: rgba(0,0,0,0.2); }
         .staff-table tr:last-child td { border-bottom: none; }
+        .staff-table tr:hover { background: rgba(255,51,51,0.03); }
 
         .hero { text-align: center; padding: 35px 0 25px 0; }
         .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; }
@@ -254,12 +255,13 @@
         <div class="mobile-drawer-menu">
             <a href="javascript:void(0);" onclick="goHome(); toggleMobileDrawer();"><i class="fa-solid fa-house"></i> <span>Home</span></a>
             <a href="#about-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-circle-info"></i> <span data-i18n="about">Over Ons</span></a>
+            <a href="#rules-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-book"></i> <span data-i18n="rules">Regels</span></a>
             <a href="#socials-main-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-share-nodes"></i> <span>Socials</span></a>
             <a href="#gallerij-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-camera"></i> <span data-i18n="gallery">Fotogalerij</span></a>
             <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> <span data-i18n="team">Het Team</span></a>
             <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span data-i18n="fleet">Vloot</span></a>
             <a href="#livemap-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-map-location-dot"></i> <span>Live Map</span></a>
-            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Afgeronde Ritten (10d)</span></a>
+            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Afgeronde Ritten</span></a>
             <a href="https://discord.gg/UCgWxAdXRu" target="_blank" style="background:#5865F2; margin-top:8px;"><i class="fa-brands fa-discord" style="color:#fff;"></i> <span>Join Discord</span></a>
             <button onclick="toggleLang(); toggleMobileDrawer();" style="margin-top:10px;"><i class="fa-solid fa-globe"></i> <span>Taal: <b id="lang-label-mob">NL / ENG</b></span></button>
         </div>
@@ -274,12 +276,13 @@
         <ul class="nav-links">
             <li><a href="javascript:void(0);" onclick="goHome()" data-i18n="home">Home</a></li>
             <li><a href="#about-sec" data-i18n="about">Over Ons</a></li>
+            <li><a href="#rules-sec" data-i18n="rules">Regels</a></li>
             <li><a href="#socials-main-sec">Socials</a></li>
             <li><a href="#gallerij-sec" data-i18n="gallery">Fotogalerij</a></li>
             <li><a href="#team" data-i18n="team">Het Team</a></li>
             <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
             <li><a href="#livemap-sec">Live Map</a></li>
-            <li><a href="#activiteit" data-i18n="trips">Afgeronde Ritten (10d)</a></li>
+            <li><a href="#activiteit" data-i18n="trips">Afgeronde Ritten</a></li>
             <li><a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
             <li><button onclick="toggleLang()" class="btn-portal"><i class="fa-solid fa-globe"></i> <span id="lang-label">ENG</span></button></li>
             <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
@@ -297,11 +300,11 @@
 
             <div class="dashboard-grid-top">
                 <div class="dash-card">
-                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_dist">Gereden Afstand (10d)</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
+                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_dist">Gereden Afstand</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
                     <div class="dash-card-num" id="stat-distance">0 km</div>
                 </div>
                 <div class="dash-card">
-                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_deliv">Leveringen Volbracht (10d)</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
+                    <div class="dash-card-header"><span class="dash-card-title" data-i18n="stat_deliv">Leveringen Volbracht</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
                     <div class="dash-card-num" id="stat-deliveries">0</div>
                 </div>
                 <div class="dash-card">
@@ -314,6 +317,17 @@
             <div class="gallery-card" style="line-height:1.7; padding:25px;">
                 <p style="margin-bottom:12px;" data-i18n="about_p1">Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.</p>
                 <p data-i18n="about_p2">Met ons eigen personeelsportaal, konvooi-organisatie en actieve chauffeursgroep streven wij elke dag naar kwaliteit op de Europese wegen. Of je nu houdt van rustig kilometers maken of grote konvooien rijden: bij Brecht Transport B.V. ben je aan het juiste adres!</p>
+            </div>
+
+            <div class="section-header" id="rules-sec"><h2 data-i18n="rules_title">Bedrijfsregels & Gedragscode</h2></div>
+            <div class="gallery-card" style="line-height:1.7; padding:25px;">
+                <h3 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-shield-halved"></i> Algemene VTC Regels</h3>
+                <ul style="list-style-type: disc; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--text-muted);">
+                    <li><b>Gezelligheid & Respect:</b> Behandel alle collega-chauffeurs met respect, zowel in de VTC als op TruckersMP. Geen toxic gedrag of pesterijen.</li>
+                    <li><b>Realistisch Rijgedrag:</b> Houd je aan de verkeersregels en rijd netjes binnen de geldende snelheidslimieten (zowel singleplayer als multiplayer).</li>
+                    <li><b>Inactivity Policy:</b> Ben je langer dan 2 weken afwezig zonder afwezigheidsmelding via het portaal? Dan kan je lidmaatschap worden herzien.</li>
+                    <li><b>Discord Aanwezigheid:</b> Zorg dat je bereikbaar bent via onze officiële Discord-server voor konvooi-aankondigingen en mededelingen.</li>
+                </ul>
             </div>
 
             <div class="section-header" id="socials-main-sec"><h2>Check Onze Socials</h2></div>
@@ -344,7 +358,7 @@
                 <div class="fleet-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/RealDaf.png" class="fleet-img"><div style="font-weight:bold;">DAF XF Euro 6</div></div>
             </div>
 
-            <div class="section-header" id="activiteit"><h2 data-i18n="trips">Afgeronde Ritten (10d)</h2></div>
+            <div class="section-header" id="activiteit"><h2 data-i18n="trips">Afgeronde Ritten</h2></div>
             <div class="trips-card" id="trips-container" style="margin-bottom:40px;">
                 <p style="text-align:center; color:var(--text-muted);" data-i18n="loading">Laden van recente ritten...</p>
             </div>
@@ -383,19 +397,19 @@
 
                     <div class="sidebar-section-title">HOOFDMENU</div>
                     <ul class="sidebar-menu">
-                        <li class="active"><button onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht (10d)</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Informatie & Mods</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-socials', this)"><i class="fa-solid fa-share-nodes"></i> Socials Beheren</button></li>
-                        <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
+                        <li class="active"><button onclick="switchPortalTab('p-tab-stats', this, 'Overzicht')"><i class="fa-solid fa-chart-pie"></i> Overzicht</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-info', this, 'Informatie & Mods')"><i class="fa-solid fa-book-open"></i> Informatie & Mods</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien')"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid')"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-upload', this, 'Foto Galerij')"><i class="fa-solid fa-file-arrow-up"></i> Foto Galerij</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-socials', this, 'Socials Beheren')"><i class="fa-solid fa-share-nodes"></i> Socials Beheren</button></li>
+                        <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this, 'Sollicitaties')"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
                     </ul>
 
                     <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER</div>
                     <ul class="sidebar-menu">
-                        <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
-                        <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
+                        <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this, 'Badges & EOTW')"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
+                        <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this, 'Personeel Beheren')"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
                     </ul>
 
                     <div style="margin-top:auto; padding-top:12px; border-top:1px solid var(--border-red); display:flex; flex-direction:column; gap:6px; width:100%;">
@@ -410,20 +424,20 @@
 
                 <div class="portal-content">
                     <div class="mobile-portal-tabs" id="mobilePortalTabs">
-                        <button class="active" onclick="switchPortalTab('p-tab-stats', this)"><i class="fa-solid fa-chart-pie"></i> Overzicht (10d)</button>
-                        <button onclick="switchPortalTab('p-tab-info', this)"><i class="fa-solid fa-book-open"></i> Info</button>
-                        <button onclick="switchPortalTab('p-tab-convoys', this)"><i class="fa-solid fa-truck-front"></i> Konvooien</button>
-                        <button onclick="switchPortalTab('p-tab-absence', this)"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
-                        <button onclick="switchPortalTab('p-tab-upload', this)"><i class="fa-solid fa-file-arrow-up"></i> Upload</button>
-                        <button onclick="switchPortalTab('p-tab-socials', this)"><i class="fa-solid fa-share-nodes"></i> Socials</button>
-                        <button id="mob-apps-btn" onclick="switchPortalTab('p-tab-apps', this)"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button>
-                        <button id="mob-mgt-btn" style="display:none;" onclick="switchPortalTab('p-tab-mgt', this)"><i class="fa-solid fa-award"></i> Badges</button>
-                        <button id="mob-staff-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff', this)"><i class="fa-solid fa-user-gear"></i> Personeel</button>
+                        <button class="active" onclick="switchPortalTab('p-tab-stats', this, 'Overzicht')"><i class="fa-solid fa-chart-pie"></i> Overzicht</button>
+                        <button onclick="switchPortalTab('p-tab-info', this, 'Informatie & Mods')"><i class="fa-solid fa-book-open"></i> Info</button>
+                        <button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien')"><i class="fa-solid fa-truck-front"></i> Konvooien</button>
+                        <button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid')"><i class="fa-solid fa-calendar-minus"></i> Afwezigheid</button>
+                        <button onclick="switchPortalTab('p-tab-upload', this, 'Foto Galerij')"><i class="fa-solid fa-file-arrow-up"></i> Upload</button>
+                        <button onclick="switchPortalTab('p-tab-socials', this, 'Socials')"><i class="fa-solid fa-share-nodes"></i> Socials</button>
+                        <button id="mob-apps-btn" onclick="switchPortalTab('p-tab-apps', this, 'Sollicitaties')"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button>
+                        <button id="mob-mgt-btn" style="display:none;" onclick="switchPortalTab('p-tab-mgt', this, 'Badges')"><i class="fa-solid fa-award"></i> Badges</button>
+                        <button id="mob-staff-btn" style="display:none;" onclick="switchPortalTab('p-tab-staff', this, 'Personeel')"><i class="fa-solid fa-user-gear"></i> Personeel</button>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid var(--border-red); padding-bottom:16px;">
                         <div>
-                            <h1 style="font-size:1.8rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht (10d)</h1>
+                            <h1 id="portal-dynamic-title" style="font-size:1.8rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1>
                         </div>
                     </div>
 
@@ -431,7 +445,7 @@
                     <div id="p-tab-stats" class="portal-tab-content">
                         <div class="dashboard-grid-top">
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">AFSTAND (10D)</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-distance">0 km</div>
                                 <span style="font-size:0.75rem; color:#68d391; font-weight:bold; margin-top:4px;">▲ Groeiend</span>
                             </div>
@@ -441,12 +455,12 @@
                                 <span style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Actieve VTC Leden</span>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO (10D)</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
                                 <span style="font-size:0.75rem; color:#68d391; font-weight:bold; margin-top:4px;">+ Inkomsten</span>
                             </div>
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE (10D)</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">MIJN CARRIÈRE</span><div class="dash-card-icon"><i class="fa-solid fa-id-card"></i></div></div>
                                 <div class="dash-card-num" id="user-stat-distance">0 km</div>
                                 <span style="font-size:0.75rem; color:var(--accent-red); font-weight:bold; margin-top:4px;" id="user-stat-deliveries-label">0 Leveringen Volbracht</span>
                             </div>
@@ -632,7 +646,7 @@
                                     <tr>
                                         <th>Gebruiker</th>
                                         <th>Huidige Rol</th>
-                                        <th>Rol Wijzigen (Auto-Save)</th>
+                                        <th>Rol Wijzigen</th>
                                         <th>Wachtwoord Herstellen</th>
                                         <th>Acties</th>
                                     </tr>
@@ -751,20 +765,20 @@
 
         const i18n = {
             NL: {
-                home: "Home", about: "Over Ons", gallery: "Fotogalerij", team: "Het Team", fleet: "Vloot", trips: "Afgeronde Ritten (10d)",
-                login: "Inloggen", apply: "Solliciteer Direct", hero_title: "Brecht Transport B.V.",
+                home: "Home", about: "Over Ons", rules: "Regels", gallery: "Fotogalerij", team: "Het Team", fleet: "Vloot", trips: "Afgeronde Ritten",
+                login: "Inloggen", apply: "Solliciteer Direct", hero_title: "Brecht Transport B.V.", rules_title: "Bedrijfsregels & Gedragscode",
                 hero_desc: "Welkom bij Brecht Transport B.V. Wij combineren vakmanschap, professionele konvooien en gezelligheid op de Europese snelwegen van Euro Truck Simulator 2.",
-                stat_dist: "Gereden Afstand (10d)", stat_deliv: "Leveringen Volbracht (10d)", stat_drivers: "Actieve Chauffeurs",
+                stat_dist: "Gereden Afstand", stat_deliv: "Leveringen Volbracht", stat_drivers: "Actieve Chauffeurs",
                 about_p1: "Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.",
                 about_p2: "Met ons eigen personeelsportaal, konvooi-organisatie en actieve chauffeursgroep streven wij elke dag naar kwaliteit op de Europese wegen. Of je nu houdt van rustig kilometers maken of grote konvooien rijden: bij Brecht Transport B.V. ben je aan het juiste adres!",
                 map_desc: "Volg al onze actieve chauffeurs realtime via de HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
                 gallery_full: "Bekijk Volledig Foto-Archief", loading: "Laden van recente ritten...", back: "Terug"
             },
             ENG: {
-                home: "Home", about: "About Us", gallery: "Gallery", team: "The Team", fleet: "Fleet", trips: "Completed Trips (10d)",
-                login: "Login", apply: "Apply Now", hero_title: "Brecht Transport B.V.",
+                home: "Home", about: "About Us", rules: "Rules", gallery: "Gallery", team: "The Team", fleet: "Fleet", trips: "Completed Trips",
+                login: "Login", apply: "Apply Now", hero_title: "Brecht Transport B.V.", rules_title: "Company Rules & Code of Conduct",
                 hero_desc: "Welcome to Brecht Transport B.V. We combine craftsmanship, professional convoys, and a great community on the European highways of Euro Truck Simulator 2.",
-                stat_dist: "Total Distance (10d)", stat_deliv: "Deliveries Completed (10d)", stat_drivers: "Active Drivers",
+                stat_dist: "Total Distance", stat_deliv: "Deliveries Completed", stat_drivers: "Active Drivers",
                 about_p1: "Brecht Transport B.V. is a close-knit and professional Virtual Trucking Company (VTC) operating on the Euro Truck Simulator 2 platform. Our goal is to provide realistic and enjoyable digital haulage.",
                 about_p2: "With our custom driver portal, convoy organization, and active community of truckers, we strive for quality on the European roads every day. Whether you enjoy relaxed long hauls or driving in large convoys: Brecht Transport B.V. is the right place for you!",
                 map_desc: "Track all our active drivers in real-time via the HaulMP Live Map.", map_btn: "Open HaulMP Live Map",
@@ -794,9 +808,7 @@
                 reader.onload = function(e) {
                     cropImageObj.onload = function() {
                         document.getElementById('crop-preview-area').style.display = 'block';
-                        cropScale = 1;
-                        cropOffsetX = 0;
-                        cropOffsetY = 0;
+                        cropScale = 1; cropOffsetX = 0; cropOffsetY = 0;
                         drawCropCanvas();
                     };
                     cropImageObj.src = e.target.result;
@@ -809,23 +821,17 @@
             const canvas = document.getElementById('cropCanvas');
             if (!canvas) return;
             canvas.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startX = e.clientX - cropOffsetX;
-                startY = e.clientY - cropOffsetY;
+                isDragging = true; startX = e.clientX - cropOffsetX; startY = e.clientY - cropOffsetY;
             });
             window.addEventListener('mousemove', (e) => {
                 if (!isDragging) return;
-                cropOffsetX = e.clientX - startX;
-                cropOffsetY = e.clientY - startY;
+                cropOffsetX = e.clientX - startX; cropOffsetY = e.clientY - startY;
                 drawCropCanvas();
             });
             window.addEventListener('mouseup', () => { isDragging = false; });
         }
 
-        function zoomCrop(factor) {
-            cropScale *= factor;
-            drawCropCanvas();
-        }
+        function zoomCrop(factor) { cropScale *= factor; drawCropCanvas(); }
 
         function drawCropCanvas() {
             const canvas = document.getElementById('cropCanvas');
@@ -853,7 +859,7 @@
             if (res.ok && data.success) {
                 currentUser.avatarUrl = data.avatarUrl;
                 sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
-                alert('Profielfoto opgeslagen in database!');
+                alert('Profielfoto opgeslagen!');
                 closeDiscordModal();
                 updateSidebarAvatar();
                 loadData();
@@ -965,12 +971,16 @@
             switchView('portal-view');
         }
 
-        function switchPortalTab(tabId, btnElement) {
+        function switchPortalTab(tabId, btnElement, titleText) {
             document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.mobile-portal-tabs button').forEach(el => el.classList.remove('active'));
             
             document.getElementById(tabId).style.display = 'block';
+            if (titleText) {
+                document.getElementById('portal-dynamic-title').innerHTML = `<i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> ${titleText}`;
+            }
+
             if (btnElement) {
                 if (btnElement.tagName === 'BUTTON' && btnElement.parentElement.tagName === 'LI') btnElement.parentElement.classList.add('active');
                 else btnElement.classList.add('active');
@@ -1103,12 +1113,12 @@
                 let fileAction = '';
                 if (i.link) {
                     if (i.link.startsWith('data:')) {
-                        fileAction = `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:6px 12px; font-size:0.8rem; margin-top:6px;"><i class="fa-solid fa-download"></i> Download ${i.fileName || 'Bestand'}</a>`;
+                        fileAction = `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:6px 14px; font-size:0.8rem; margin-top:8px; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-download"></i> Download ${i.fileName || 'Bestand'}</a>`;
                     } else {
-                        fileAction = `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:6px 12px; font-size:0.8rem; margin-top:6px;"><i class="fa-solid fa-download"></i> Download</a>`;
+                        fileAction = `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:6px 14px; font-size:0.8rem; margin-top:8px; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-download"></i> Download Bestand</a>`;
                     }
                 }
-                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red); display:flex; justify-content:space-between; align-items:flex-start;"><div><b style="font-size:1rem;">${i.title}</b><p style="font-size:0.9rem; margin:6px 0;">${i.content}</p><small style="color:#888; font-size:0.78rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small><br>${fileAction}</div>${canDel ? `<button onclick="deleteInfo('${i.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
+                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border-left:3px solid var(--accent-red); display:flex; justify-content:space-between; align-items:flex-start;"><div><b style="font-size:1.05rem;">${i.title}</b><p style="font-size:0.92rem; margin:6px 0; color:var(--text-muted);">${i.content}</p><small style="color:#888; font-size:0.78rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small><br>${fileAction}</div>${canDel ? `<button onclick="deleteInfo('${i.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
             });
 
             const convContainer = document.getElementById('convoys-list-container');
@@ -1194,9 +1204,9 @@
                     const isDirectorOrSub = ['directeur', 'onder directeur'].some(r => currentUser.role.toLowerCase().includes(r));
                     const canEditRole = !isSelf || isDirectorOrSub;
 
-                    tableBody.insertAdjacentHTML('beforeend', `
+                    tableBody.insertAdjacentHTML('beforeend`', `
                         <tr>
-                            <td><b style="font-size:0.95rem;">${m.username}</b></td>
+                            <td><div style="display:flex; align-items:center; gap:10px;"><div style="width:32px; height:32px; border-radius:50%; background:#220505; border:1px solid var(--border-red); display:flex; align-items:center; justify-content:center; overflow:hidden;">${m.avatarUrl ? `<img src="${m.avatarUrl}" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fa-solid fa-user" style="font-size:0.8rem; color:#888;"></i>'}</div><b style="font-size:0.95rem;">${m.username}</b></div></td>
                             <td><span class="member-role role-${m.color}">${m.role}</span></td>
                             <td>
                                 <select id="role-select-${m.username}" class="form-input" style="padding:6px 10px; margin:0; font-size:0.85rem; background:rgba(0,0,0,0.5);" onchange="updateStaffRole('${m.username}')" ${!canEditRole ? 'disabled' : ''}>
@@ -1220,7 +1230,7 @@
                                 ${!isSelf ? `<button onclick="fireStaffMember('${m.username}')" class="btn-red" style="padding:6px 10px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Ontslaan</button>` : '<span style="color:#666; font-size:0.8rem;">(Jijzelf)</span>'}
                             </td>
                         </tr>
-                    `);
+                    `.replace('`', ''));
                 });
             }
         }
@@ -1308,11 +1318,25 @@
                 data: {
                     labels: sortedData.map(w => w.week),
                     datasets: [
-                        { label: 'Bedrijf (€)', data: sortedData.map(w => w.company), borderColor: '#ff3333', backgroundColor: gradient, borderWidth: 3, fill: true, tension: 0.4 },
-                        { label: 'Mijn Inkomsten (€)', data: sortedData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2.5, fill: false, tension: 0.4 }
+                        { label: 'Bedrijf (€)', data: sortedData.map(w => w.company), borderColor: '#ff3333', backgroundColor: gradient, borderWidth: 3, fill: true, tension: 0.3 },
+                        { label: 'Mijn Inkomsten (€)', data: sortedData.map(w => w.drivers[username.toLowerCase().replace(/[^a-z0-9]/g, '')] || 0), borderColor: '#68d391', borderWidth: 2.5, fill: false, tension: 0.3 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8', font: { size: 12 } } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { labels: { color: '#caa8a8', font: { size: 12 } } } },
+                    scales: {
+                        y: {
+                            ticks: { color: '#caa8a8', font: { size: 11 } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#caa8a8', font: { size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
             });
         }
 
@@ -1341,7 +1365,7 @@
             const targetUser = document.getElementById('eotw-select-user').value;
             const reason = document.getElementById('eotw-input-reason').value;
             await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
-            alert('Chauffeur van de week succesvol ingesteld!');
+            alert('Chauffeur van de week ingesteld!');
             refreshPortalData();
         }
 
