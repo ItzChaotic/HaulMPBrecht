@@ -68,7 +68,6 @@
 
         .portal-layout { display: flex; min-height: 100vh; position: relative; width: 100%; }
         
-        /* Zijbalk strak in de linkerhoek aangesloten */
         .sidebar {
             width: 290px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red);
             padding: 20px 16px; display: flex; flex-direction: column; justify-content: flex-start; gap: 15px;
@@ -87,7 +86,6 @@
             background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red);
         }
 
-        /* Rechtergedeelte iets ruimer opgeschaald */
         .portal-content { margin-left: 290px; flex: 1; padding: 35px; width: calc(100% - 290px); }
 
         .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 25px; }
@@ -846,7 +844,7 @@
         async function saveCroppedProfilePicture() {
             const canvas = document.getElementById('cropCanvas');
             if (!canvas || !cropImageObj.src) return alert('Selecteer eerst een afbeelding!');
-            const dataUrl = canvas.toDataURL('image/png');
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
             const res = await fetch('/api/staff/upload-pfp', {
                 method: 'POST',
@@ -1032,7 +1030,8 @@
                             pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="${iconClass}"></i><span style="font-weight:bold; font-size:1rem;">${s.platform}</span><span style="font-size:0.8rem; color:var(--text-muted);">Van: ${s.addedBy}</span><span style="font-size:0.78rem; color:var(--accent-red); font-weight:bold;">Bekijk kanaal →</span></a>`);
                         }
                         if (portalSocials) {
-                            portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b> (door ${s.addedBy}): <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button></div>`);
+                            const canDel = currentUser && (currentUser.canDelete || currentUser.canManageStaff);
+                            portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b> (door ${s.addedBy}): <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div>${canDel ? `<button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
                         }
                     });
                 } else {
@@ -1073,10 +1072,11 @@
                 document.getElementById('eotw-reason').innerText = `"${data.employeeOfTheWeek.reason}"`;
             }
 
+            const canDel = currentUser && (currentUser.canDelete || currentUser.canManageStaff);
             const annContainer = document.getElementById('announcements-display-container');
             annContainer.innerHTML = '';
             data.announcements?.forEach(a => {
-                annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><h4 style="font-size:1.05rem;"><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> ${a.title}</h4><p style="font-size:0.92rem; margin-top:6px;">${a.content}</p><small style="color:#888; font-size:0.78rem;">Door ${a.username || 'Admin'} - ${a.date || ''}</small></div>`);
+                annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red); display:flex; justify-content:space-between; align-items:center;"><div><h4 style="font-size:1.05rem;"><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> ${a.title}</h4><p style="font-size:0.92rem; margin-top:6px;">${a.content}</p><small style="color:#888; font-size:0.78rem;">Door ${a.username || 'Admin'} - ${a.date || ''}</small></div>${canDel ? `<button onclick="deleteAnnouncement('${a.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
             });
 
             const liveFeedContainer = document.getElementById('live-feed-container');
@@ -1106,14 +1106,14 @@
                         fileAction = `<a href="${i.link}" target="_blank" class="btn-portal" style="padding:6px 12px; font-size:0.8rem; margin-top:6px;"><i class="fa-solid fa-download"></i> Download</a>`;
                     }
                 }
-                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><b style="font-size:1rem;">${i.title}</b><p style="font-size:0.9rem; margin:6px 0;">${i.content}</p><small style="color:#888; font-size:0.78rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small><br>${fileAction}</div>`);
+                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red); display:flex; justify-content:space-between; align-items:flex-start;"><div><b style="font-size:1rem;">${i.title}</b><p style="font-size:0.9rem; margin:6px 0;">${i.content}</p><small style="color:#888; font-size:0.78rem;">Door ${i.username || 'Admin'} - ${i.date || ''}</small><br>${fileAction}</div>${canDel ? `<button onclick="deleteInfo('${i.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
             });
 
             const convContainer = document.getElementById('convoys-list-container');
             convContainer.innerHTML = '';
             data.convoysList?.forEach(c => {
                 const formattedDate = formatDateToNL(c.date);
-                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-red);"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red); font-size:1.05rem;">${c.title}</b><span style="font-size:0.82rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:6px;">${formattedDate} ${c.time || ''}</span></div><div style="font-size:0.9rem; margin-top:8px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:6px;">${c.details}</div></div></div>`);
+                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-red); display:flex; justify-content:space-between; align-items:center;"><div><div style="display:flex; justify-content:space-between; align-items:center;"><b style="color:var(--accent-red); font-size:1.05rem;">${c.title}</b><span style="font-size:0.82rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:6px; margin-left:10px;">${formattedDate} ${c.time || ''}</span></div><div style="font-size:0.9rem; margin-top:8px;"><div><b>Server:</b> ${c.server}</div><div><b>Route:</b> ${c.route}</div><div style="color:var(--text-muted); margin-top:6px;">${c.details}</div></div></div>${canDel ? `<button onclick="deleteConvoy('${c.id}')" class="btn-red" style="padding:6px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`);
             });
 
             const appsOpen = document.getElementById('applications-open-container');
@@ -1189,12 +1189,15 @@
                 tableBody.innerHTML = '';
                 data.drivers_list.filter(m => !m.isDev).forEach(m => {
                     const isSelf = m.username.toLowerCase() === currentUser.username.toLowerCase();
+                    const isDirectorOrSub = ['directeur', 'onder directeur'].some(r => currentUser.role.toLowerCase().includes(r));
+                    const canEditRole = !isSelf || isDirectorOrSub;
+
                     tableBody.insertAdjacentHTML('beforeend', `
                         <tr>
                             <td><b style="font-size:0.95rem;">${m.username}</b></td>
                             <td><span class="member-role role-${m.color}">${m.role}</span></td>
                             <td>
-                                <select id="role-select-${m.username}" class="form-input" style="padding:6px 10px; margin:0; font-size:0.85rem; background:rgba(0,0,0,0.5);" onchange="updateStaffRole('${m.username}')" ${isSelf ? 'disabled' : ''}>
+                                <select id="role-select-${m.username}" class="form-input" style="padding:6px 10px; margin:0; font-size:0.85rem; background:rgba(0,0,0,0.5);" onchange="updateStaffRole('${m.username}')" ${!canEditRole ? 'disabled' : ''}>
                                     <option value="Directeur" ${m.role === 'Directeur' ? 'selected' : ''}>Directeur</option>
                                     <option value="Onder Directeur" ${m.role === 'Onder Directeur' ? 'selected' : ''}>Onder Directeur</option>
                                     <option value="Management" ${m.role === 'Management' ? 'selected' : ''}>Management</option>
@@ -1266,6 +1269,21 @@
         async function deleteSocial(id) {
             await fetch(`/api/socials/${id}`, { method: 'DELETE' });
             loadData();
+            refreshPortalData();
+        }
+
+        async function deleteAnnouncement(id) {
+            await fetch(`/api/announcements/${id}`, { method: 'DELETE' });
+            refreshPortalData();
+        }
+
+        async function deleteInfo(id) {
+            await fetch(`/api/info/${id}`, { method: 'DELETE' });
+            refreshPortalData();
+        }
+
+        async function deleteConvoy(id) {
+            await fetch(`/api/convoys/${id}`, { method: 'DELETE' });
             refreshPortalData();
         }
 
@@ -1397,6 +1415,14 @@
         async function updateStaffRole(targetUser) {
             const newRole = document.getElementById(`role-select-${targetUser}`).value;
             await fetch('/api/staff/update-role', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, newRole, adminUser: currentUser.username }) });
+            if (targetUser.toLowerCase() === currentUser.username.toLowerCase()) {
+                currentUser.role = newRole;
+                currentUser.canManageBadges = currentUser.canManageBadges || (newRole.toLowerCase().includes('directeur') || newRole.toLowerCase().includes('management') || newRole.toLowerCase().includes('leidinggevende'));
+                currentUser.canManageStaff = currentUser.canManageStaff || (newRole.toLowerCase().includes('directeur') || newRole.toLowerCase().includes('onder directeur'));
+                currentUser.canDelete = currentUser.canDelete || (newRole.toLowerCase().includes('directeur') || newRole.toLowerCase().includes('onder directeur') || newRole.toLowerCase().includes('management'));
+                sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                document.getElementById('sidebar-role-txt').innerText = newRole;
+            }
             refreshPortalData();
             loadData();
         }
