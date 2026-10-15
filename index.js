@@ -144,7 +144,6 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    // Start direct in de achtergrond met ritten ophalen zodat het de serveropstart niet blokkeert
     setTimeout(() => fetch10DaysDiscordJobs(), 2000);
 });
 
