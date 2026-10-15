@@ -145,7 +145,15 @@
         .btn-red:hover { background: var(--accent-red); }
 
         .hero-schlüppi {
-            text-align: left; padding: 60px 20px 40px 20px; max-width: 1200px; margin: 0 auto;
+            text-align: left; 
+            padding: 70px 35px; 
+            max-width: 1200px; 
+            margin: 0 auto;
+            background: linear-gradient(rgba(10, 3, 3, 0.78), rgba(10, 3, 3, 0.88)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png') no-repeat center center;
+            background-size: cover;
+            border: 1px solid var(--border-red);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
         }
         .hero-badge {
             display: inline-block; background: rgba(204, 0, 0, 0.2); color: #ff6b6b; padding: 6px 14px;
@@ -331,7 +339,7 @@
         <!-- OPENBARE HOOFDPAGINA -->
         <div id="home-view" class="page-view active">
             
-            <!-- HERO MET ENKEL HAULMP VTC KNOP -->
+            <!-- HERO MET ACHTERGRONDFOTO EN ENKEL HAULMP VTC KNOP -->
             <section class="hero-schlüppi">
                 <div class="hero-badge">ETS2 & ATS VTC</div>
                 <h1 class="hero-title">Brecht<br>Transport</h1>
@@ -341,36 +349,36 @@
                 </div>
             </section>
 
-            <!-- DISCORD COMMUNITY BANNER (ZONDER DE EXTRA BLAUWE KNOP ONDERIN) -->
+            <!-- DISCORD COMMUNITY BANNER (MET VERTALENDE TEKSTEN) -->
             <div class="discord-community-banner">
                 <div>
-                    <span style="background:rgba(229,62,62,0.2); color:#ff6b6b; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; border:1px solid rgba(229,62,62,0.4); text-transform:uppercase;">OFFICIËLE DISCORD</span>
-                    <h2 style="font-family:'Space Grotesk', sans-serif; font-size:2.2rem; margin:12px 0 10px 0;">Samen rijden, nooit alleen.</h2>
-                    <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">Ontmoet het team, volg konvooi-aankondigingen en blijf verbonden voor en na elke rit.</p>
+                    <span data-i18n="disc_badge" style="background:rgba(229,62,62,0.2); color:#ff6b6b; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; border:1px solid rgba(229,62,62,0.4); text-transform:uppercase; display:inline-block;">OFFICIËLE DISCORD</span>
+                    <h2 data-i18n="disc_title" style="font-family:'Space Grotesk', sans-serif; font-size:2.2rem; margin:12px 0 10px 0;">Samen rijden, nooit alleen.</h2>
+                    <p data-i18n="disc_desc" style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">Ontmoet het team, volg konvooi-aankondigingen en blijf verbonden voor en na elke rit.</p>
                 </div>
                 <div class="discord-banner-right">
                     <div style="display:flex; align-items:center; gap:12px;">
                         <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="width:42px; height:42px; border-radius:50%; border:1px solid var(--border-red);">
                         <div>
                             <b style="font-size:0.95rem;">Brecht Transport Discord</b>
-                            <div style="font-size:0.78rem; color:var(--text-muted);">Officiële community server</div>
+                            <div data-i18n="disc_server_sub" style="font-size:0.78rem; color:var(--text-muted);">Officiële community server</div>
                         </div>
                     </div>
-                    <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-red" style="background:#c50000; text-align:center; display:block; padding:10px;">Join Discord</a>
+                    <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-red" data-i18n="disc_join_btn" style="background:#c50000; text-align:center; display:block; padding:10px;">Join Discord</a>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:10px; border:1px solid var(--border-red); text-align:center;">
                             <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#fff;">60+</div>
-                            <div style="font-size:0.72rem; color:var(--text-muted);">Leden</div>
+                            <div data-i18n="disc_members" style="font-size:0.72rem; color:var(--text-muted);">Leden</div>
                         </div>
                         <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:10px; border:1px solid var(--border-red); text-align:center;">
-                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#68d391;">Online</div>
-                            <div style="font-size:0.72rem; color:var(--text-muted);">Actief nu</div>
+                            <div data-i18n="disc_online_status" style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:bold; color:#68d391;">Online</div>
+                            <div data-i18n="disc_online_lbl" style="font-size:0.72rem; color:var(--text-muted);">Actief nu</div>
                         </div>
                     </div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Aankondigingen</span>
-                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Konvooi planning</span>
-                        <span style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Chauffeur support</span>
+                        <span data-i18n="disc_tag1" style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Aankondigingen</span>
+                        <span data-i18n="disc_tag2" style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Konvooi planning</span>
+                        <span data-i18n="disc_tag3" style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; font-size:0.72rem; color:var(--text-muted);">Chauffeur support</span>
                     </div>
                 </div>
             </div>
@@ -846,6 +854,9 @@
                 home: "Home", about: "Over Ons", rules: "Regels", gallery: "Galerij", team: "Team", fleet: "Vloot", trips: "Ritten",
                 login: "Inloggen", apply: "Solliciteer", hero_title: "Brecht Transport B.V.", rules_title: "Bedrijfsregels & Gedragscode",
                 hero_desc: "Virtuele Transportonderneming met hart en gezelligheid. Samen onderweg op TruckersMP, bij konvooien en in een actieve community.",
+                disc_badge: "OFFICIËLE DISCORD", disc_title: "Samen rijden, nooit alleen.", disc_desc: "Ontmoet het team, volg konvooi-aankondigingen en blijf verbonden voor en na elke rit.",
+                disc_server_sub: "Officiële community server", disc_join_btn: "Join Discord", disc_members: "Leden", disc_online_status: "Online", disc_online_lbl: "Actief nu",
+                disc_tag1: "Aankondigingen", disc_tag2: "Konvooi planning", disc_tag3: "Chauffeur support",
                 stat_dist: "Gereden Afstand", stat_deliv: "Leveringen Volbracht", stat_drivers: "Actieve Chauffeurs",
                 about_p1: "Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2. Ons doel is om realistisch en gezellig digitaal vrachtvervoer neer te zetten.",
                 about_p2: "Met ons eigen personeelsportaal, konvooi-organisatie en actieve chauffeursgroep streven wij elke dag naar kwaliteit op de Europese wegen. Of je nu houdt van rustig kilometers maken of grote konvooien rijden: bij Brecht Transport B.V. ben je aan het juiste adres!",
@@ -856,6 +867,9 @@
                 home: "Home", about: "About Us", rules: "Rules", gallery: "Gallery", team: "Team", fleet: "Fleet", trips: "Trips",
                 login: "Login", apply: "Apply", hero_title: "Brecht Transport B.V.", rules_title: "Company Rules & Code of Conduct",
                 hero_desc: "Virtual transport company with heart and soul. Together on the road on TruckersMP, during convoys and in an active community.",
+                disc_badge: "OFFICIAL DISCORD", disc_title: "Drive together, never alone.", disc_desc: "Meet the team, follow convoy announcements and stay connected before and after every trip.",
+                disc_server_sub: "Official community server", disc_join_btn: "Join Discord", disc_members: "Members", disc_online_status: "Online", disc_online_lbl: "Active now",
+                disc_tag1: "Announcements", disc_tag2: "Convoy planning", disc_tag3: "Driver support",
                 stat_dist: "Total Distance", stat_deliv: "Deliveries Completed", stat_drivers: "Active Drivers",
                 about_p1: "Brecht Transport B.V. is a close-knit and professional Virtual Trucking Company (VTC) operating on the Euro Truck Simulator 2 platform. Our goal is to provide realistic and enjoyable digital haulage.",
                 about_p2: "With our custom driver portal, convoy organization, and active community of truckers, we strive for quality on the European roads every day. Whether you enjoy relaxed long hauls or driving in large convoys: Brecht Transport B.V. is the right place for you!",
