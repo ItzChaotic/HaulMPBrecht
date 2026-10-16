@@ -573,11 +573,6 @@
         const MAIN_DOMAIN = "brechttransport.nl";
 
         let cropImageObj = new Image();
-        let cropScale = 1;
-        let cropOffsetX = 0;
-        let cropOffsetY = 0;
-        let isDragging = false;
-        let startX = 0, startY = 0;
 
         function formatDateToNL(dateStr) {
             if (!dateStr) return '';
@@ -595,15 +590,36 @@
             ENG: { home: "Home", about: "About Us", rules: "Rules", gallery: "Gallery", team: "Team", fleet: "Fleet", trips: "Trips", login: "Login", apply: "Apply" }
         };
 
+        // CLIENT-SIDE BROWSER CACHING (LocalStorage Implementatie)
         async function preloadEverything() {
+            // 1. Toon direct opgeslagen data uit de browser indien aanwezig (INSTANT LAADTIJD)
+            const cachedJobs = localStorage.getItem('brecht_cached_jobs');
+            const cachedHaulmp = localStorage.getItem('brecht_cached_haulmp');
+            
+            if (cachedHaulmp) {
+                try {
+                    cachedApiData = JSON.parse(cachedHaulmp);
+                    processLoadedData(cachedApiData, JSON.parse(localStorage.getItem('brecht_cached_gallery') || '[]'));
+                } catch(e) {}
+            }
+
             try {
+                // 2. Haal op de achtergrond de verse gegevens op van de server
                 const [resHaulmp, resGallery] = await Promise.all([
                     fetch('/api/haulmp'),
                     fetch('/api/gallery')
                 ]);
+                
                 cachedApiData = await resHaulmp.json();
                 const galleryPhotos = await resGallery.json();
+
+                // 3. Sla de nieuwe gegevens direct op in LocalStorage voor de volgende keer
+                localStorage.setItem('brecht_cached_haulmp', JSON.stringify(cachedApiData));
+                localStorage.setItem('brecht_cached_gallery', JSON.stringify(galleryPhotos));
+
+                // 4. Ververs de pagina met de meest recente data
                 processLoadedData(cachedApiData, galleryPhotos);
+                if (currentUser) refreshPortalData();
             } catch(e) {}
         }
 
