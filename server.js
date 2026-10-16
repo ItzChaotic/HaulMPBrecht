@@ -2,7 +2,7 @@ const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const multer = require('multer');
-const sharp = require('sharp'); // Automatische beeldcompressie
+const sharp = require('sharp');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -13,7 +13,7 @@ app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 } // Accepteert tot 10MB, maar comprimeert direct
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 app.use((req, res, next) => {
@@ -145,42 +145,12 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    setTimeout(() => fetch10DaysDiscordJobs(), 2000);
 });
 
 clientBot.on('messageCreate', (message) => {
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
-
-async function fetch10DaysDiscordJobs() {
-    try {
-        const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
-        if (!channel) return;
-        
-        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
-        let lastId = undefined;
-        let keepFetching = true;
-
-        while (keepFetching) {
-            const options = { limit: 50 };
-            if (lastId) options.before = lastId;
-            const messages = await channel.messages.fetch(options);
-            if (messages.size === 0) break;
-
-            for (const msg of messages.values()) {
-                if (msg.createdTimestamp < tenDaysAgo) {
-                    keepFetching = false;
-                    break;
-                }
-                await parseAndAddJob(msg);
-            }
-            lastId = messages.last()?.id;
-            if (messages.size < 50) break;
-        }
-        console.log("✅ Achtergrond rittenhistorie succesvol gesyncd met Discord!");
-    } catch (e) {}
-}
 
 async function parseAndAddApplication(message) {
     try {
@@ -228,8 +198,6 @@ async function parseAndAddJob(message) {
         }
     } catch(e) {}
 }
-
-// API ENDPOINTS
 
 app.post('/api/login', (req, res) => {
     try {
@@ -349,11 +317,9 @@ app.get('/api/gallery', async (req, res) => {
     res.json(galleryPhotos);
 });
 
-// GEOPTIMALISEERDE FOTO UPLOAD MET AUTOMATISCHE COMPRESSIE (OPTIE 1)
 app.post('/api/gallery', upload.single('photo'), async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand ontvangen.' });
     try {
-        // Comprimeer de afbeelding automatisch met Sharp (max 1280px, 80% JPEG kwaliteit)
         const compressedBuffer = await sharp(req.file.buffer)
             .resize(1280, 1280, { fit: 'inside', withoutEnlargement: true })
             .jpeg({ quality: 80 })
@@ -370,7 +336,6 @@ app.post('/api/gallery', upload.single('photo'), async (req, res) => {
         if (isConnected && galleryColl) await galleryColl.insertOne(photoObj);
         res.json({ success: true });
     } catch (e) {
-        console.error("Fout bij comprimeren foto:", e);
         res.status(500).json({ success: false, message: 'Fout bij verwerken van foto.' });
     }
 });
