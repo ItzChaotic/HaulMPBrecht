@@ -2,7 +2,6 @@ const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const multer = require('multer');
-const sharp = require('sharp');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -13,7 +12,7 @@ app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }
+    limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 app.use((req, res, next) => {
@@ -31,6 +30,11 @@ const MONGO_URI = process.env.MONGO_URI;
 
 let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, convoySignupsColl, badgesColl, eotwColl, socialsColl, jobsColl;
 let isConnected = false;
+
+// Geheugen-cache om zware berekeningen direct op te lossen
+let cachedHaulmpResponse = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 30000; // 30 seconden cache
 
 let cachedAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
@@ -145,6 +149,7 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
+    // Geen trage fetch-loops meer bij opstarten!
 });
 
 clientBot.on('messageCreate', (message) => {
@@ -167,6 +172,7 @@ async function parseAndAddApplication(message) {
                     date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL'),
                     link: "https://vtc.haulmp.com/Brecht#applications"
                 });
+                cachedHaulmpResponse = null;
             }
         }
     } catch(e) {}
@@ -195,6 +201,7 @@ async function parseAndAddJob(message) {
         const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, weekKey: getISOWeekKey(timestamp), dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
         if (isConnected && jobsColl) {
             await jobsColl.updateOne({ id: jobObj.id }, { $set: jobObj }, { upsert: true });
+            cachedHaulmpResponse = null;
         }
     } catch(e) {}
 }
@@ -223,6 +230,10 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/haulmp', async (req, res) => {
     try {
+        if (cachedHaulmpResponse && (Date.now() - cacheTimestamp < CACHE_TTL)) {
+            return res.json(cachedHaulmpResponse);
+        }
+
         const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
         let allJobsHistory = [];
         
@@ -290,7 +301,7 @@ app.get('/api/haulmp', async (req, res) => {
             weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
         });
 
-        res.json({
+        const responsePayload = {
             deliveries: totalDeliveries.toString(),
             distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
             companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
@@ -301,7 +312,12 @@ app.get('/api/haulmp', async (req, res) => {
             announcements: announcementsList, applications: applicationsList,
             infoList, convoysList, convoySignupsList, socialsList, employeeOfTheWeek,
             weeklyChartData: Object.values(weeklyChartData).reverse()
-        });
+        };
+
+        cachedHaulmpResponse = responsePayload;
+        cacheTimestamp = Date.now();
+
+        res.json(responsePayload);
     } catch(e) {
         res.status(500).json({ error: e.message });
     }
@@ -317,57 +333,20 @@ app.get('/api/gallery', async (req, res) => {
     res.json(galleryPhotos);
 });
 
-app.post('/api/gallery', upload.single('photo'), async (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand ontvangen.' });
-    try {
-        const compressedBuffer = await sharp(req.file.buffer)
-            .resize(1280, 1280, { fit: 'inside', withoutEnlargement: true })
-            .jpeg({ quality: 80 })
-            .toBuffer();
-
-        const dataUrl = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
-        const photoObj = { 
-            id: "photo-" + Date.now(), 
-            url: dataUrl, 
-            uploadedBy: req.body.username || "Chauffeur", 
-            date: new Date().toLocaleDateString('nl-NL') 
-        };
-
-        if (isConnected && galleryColl) await galleryColl.insertOne(photoObj);
-        res.json({ success: true });
-    } catch (e) {
-        res.status(500).json({ success: false, message: 'Fout bij verwerken van foto.' });
-    }
-});
-
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
     if (!targetUser || !pfp) return res.status(400).json({ success: false, message: 'Gegevens ontbreken.' });
-    
-    try {
-        let finalPfp = pfp;
-        if (pfp.startsWith('data:image')) {
-            const base64Data = pfp.replace(/^data:image\/\w+;base64,/, '');
-            const imgBuffer = Buffer.from(base64Data, 'base64');
-            const compressedPfp = await sharp(imgBuffer)
-                .resize(250, 250, { fit: 'cover' })
-                .jpeg({ quality: 85 })
-                .toBuffer();
-            finalPfp = `data:image/jpeg;base64,${compressedPfp.toString('base64')}`;
-        }
-
-        if (isConnected && accountsColl) {
-            await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: finalPfp } });
-            cachedAccounts = await accountsColl.find({}).toArray();
-        }
-        res.json({ success: true, avatarUrl: finalPfp });
-    } catch(e) {
-        res.status(500).json({ success: false });
+    if (isConnected && accountsColl) {
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: pfp } });
+        cachedAccounts = await accountsColl.find({}).toArray();
+        cachedHaulmpResponse = null;
     }
+    res.json({ success: true, avatarUrl: pfp });
 });
 
 app.post('/api/applications/complete', async (req, res) => {
     if (isConnected && applicationsColl) await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -376,23 +355,20 @@ app.post('/api/badges', async (req, res) => {
     if (!title || !targetUser) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
 app.post('/api/badges/delete', async (req, res) => {
     if (isConnected && badgesColl) await badgesColl.deleteOne({ id: req.body.badgeId });
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
 app.post('/api/info', upload.single('file'), async (req, res) => {
     let fileLink = req.body.link || '';
     if (req.file) {
-        if (req.file.mimetype.startsWith('image/')) {
-            const compressed = await sharp(req.file.buffer).resize(1280, 1280, { fit: 'inside' }).jpeg({ quality: 80 }).toBuffer();
-            fileLink = `data:image/jpeg;base64,${compressed.toString('base64')}`;
-        } else {
-            fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
-        }
+        fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
     }
     const infoObj = { 
         id: "info-" + Date.now(), title: req.body.title, content: req.body.content, 
@@ -400,17 +376,20 @@ app.post('/api/info', upload.single('file'), async (req, res) => {
         username: req.body.username, date: new Date().toLocaleDateString('nl-NL') 
     };
     if (isConnected && infoColl) await infoColl.insertOne(infoObj);
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
 app.delete('/api/info/:id', async (req, res) => {
     if (isConnected && infoColl) await infoColl.deleteOne({ id: req.params.id });
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
 app.post('/api/convoys', async (req, res) => {
     const convObj = { id: "conv-" + Date.now(), ...req.body };
     if (isConnected && convoysColl) await convoysColl.insertOne(convObj);
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -419,6 +398,7 @@ app.delete('/api/convoys/:id', async (req, res) => {
         await convoysColl.deleteOne({ id: req.params.id });
         if (convoySignupsColl) await convoySignupsColl.deleteMany({ convoyId: req.params.id });
     }
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -432,6 +412,7 @@ app.post('/api/convoys/signup', async (req, res) => {
             { upsert: true }
         );
     }
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -440,6 +421,7 @@ app.post('/api/convoys/cancel', async (req, res) => {
     if (isConnected && convoySignupsColl) {
         await convoySignupsColl.deleteOne({ convoyId, username });
     }
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -448,17 +430,20 @@ app.post('/api/eotw', async (req, res) => {
         await eotwColl.deleteMany({});
         await eotwColl.insertOne({ username: req.body.targetUser, reason: req.body.reason, setBy: req.body.username });
     }
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
 app.post('/api/announcements', async (req, res) => {
     const annObj = { id: "ann-" + Date.now(), ...req.body, date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && announcementsColl) await announcementsColl.insertOne(annObj);
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
 app.delete('/api/announcements/:id', async (req, res) => {
     if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -467,11 +452,13 @@ app.post('/api/socials', async (req, res) => {
     if (!platform || !url) return res.status(400).json({ success: false, message: 'Vul alle velden in.' });
     const socialObj = { id: "soc-" + Date.now(), platform: platform.trim(), url: url.trim(), addedBy: username || 'Admin' };
     if (isConnected && socialsColl) await socialsColl.insertOne(socialObj);
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
 app.delete('/api/socials/:id', async (req, res) => {
     if (isConnected && socialsColl) await socialsColl.deleteOne({ id: req.params.id });
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -492,6 +479,7 @@ app.post('/api/staff/add', async (req, res) => {
         await accountsColl.insertOne(newAcc);
         cachedAccounts = await accountsColl.find({}).toArray();
     }
+    cachedHaulmpResponse = null;
     res.json({ success: true, message: pw });
 });
 
@@ -500,6 +488,7 @@ app.post('/api/staff/update-role', async (req, res) => {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
         cachedAccounts = await accountsColl.find({}).toArray();
     }
+    cachedHaulmpResponse = null;
     res.json({ success: true });
 });
 
@@ -508,6 +497,15 @@ app.delete('/api/staff/:targetUser', async (req, res) => {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
         cachedAccounts = await accountsColl.find({}).toArray();
     }
+    cachedHaulmpResponse = null;
+    res.json({ success: true });
+});
+
+app.post('/api/gallery', upload.single('photo'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false });
+    const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+    const photoObj = { id: "photo-" + Date.now(), url: dataUrl, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') };
+    if (isConnected && galleryColl) await galleryColl.insertOne(photoObj);
     res.json({ success: true });
 });
 
