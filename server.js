@@ -1,6 +1,6 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
-const { Pool } = require('pg');
+const mongoose = require('mongoose');
 const multer = require('multer');
 
 const app = express();
@@ -25,78 +25,64 @@ app.use((req, res, next) => {
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
-const DATABASE_URL = process.env.DATABASE_URL;
+const MONGO_URI = process.env.MONGO_URI;
 
-// Verbinding maken met Supabase PostgreSQL
-const pool = new Pool({
-    connectionString: DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // Vereist voor veilige cloud-verbindingen met Supabase
+// Verbinding maken met MongoDB Atlas
+mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 10000,
+}).then(() => {
+    console.log("✅ Verbonden met MongoDB Atlas!");
+    initMongoDefaults();
+}).catch(err => {
+    console.error("❌ Fout bij verbinden met MongoDB:", err.message);
 });
 
-pool.connect((err, client, release) => {
-    if (err) {
-        console.error('❌ Fout bij verbinden met Supabase PostgreSQL:', err.stack);
-    } else {
-        console.log('✅ Succesvol verbonden met Supabase PostgreSQL!');
-        release();
-        initPostgresTables();
-    }
+// Schema's en Modellen voor MongoDB
+const accountSchema = new mongoose.Schema({
+    username: { type: String, unique: true },
+    password: String,
+    role: String,
+    isDev: Number,
+    avatarUrl: String,
+    discordId: String
 });
+const Account = mongoose.model('Account', accountSchema);
 
-// Automatisch tabellen aanmaken in Supabase
-async function initPostgresTables() {
+const jobSchema = new mongoose.Schema({
+    id: { type: String, unique: true },
+    from_loc: String,
+    to_loc: String,
+    driver: String,
+    cargo: String,
+    distance: String,
+    kmAmount: Number,
+    paidAmount: Number,
+    timestamp: Number,
+    weekKey: String,
+    dateFormatted: String
+});
+const Job = mongoose.model('Job', jobSchema);
+
+// Standaard accounts inladen als de collectie leeg is
+async function initMongoDefaults() {
     try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS accounts (
-                username TEXT PRIMARY KEY,
-                password TEXT,
-                role TEXT,
-                isDev INTEGER,
-                avatarUrl TEXT,
-                discordId TEXT
-            );
-        `);
-
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS jobs (
-                id TEXT PRIMARY KEY,
-                from_loc TEXT,
-                to_loc TEXT,
-                driver TEXT,
-                cargo TEXT,
-                distance TEXT,
-                kmAmount INTEGER,
-                paidAmount REAL,
-                timestamp BIGINT,
-                weekKey TEXT,
-                dateFormatted TEXT
-            );
-        `);
-
-        // Standaard accounts invoeren als de tabel leeg is
-        const res = await pool.query('SELECT COUNT(*) FROM accounts');
-        if (parseInt(res.rows[0].count) === 0) {
+        const count = await Account.countDocuments();
+        if (count === 0) {
             const defaultAccounts = [
-                ["DEV ACCOUNT", "DEVACC123", "Directeur", 1, "", ""],
-                ["MJGamerNL", "Wachtwoord123", "Directeur", 0, "", ""],
-                ["ItzChaotic_", "ChaoticPassword!", "Onder Directeur & Development", 0, "", ""],
-                ["Ramona", "RamonaPass2026", "Onder Directeur", 0, "", ""],
-                ["JoeyKj", "JoeyPassword", "Management", 0, "", ""],
-                ["Jellybear", "JellyBearPass", "Management", 0, "", ""],
-                ["Dansco54", "DanscoPass", "Leidinggevende", 0, "", ""],
-                ["Zinnorax", "ZinnoraxPass", "Leidinggevende", 0, "", ""]
+                { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: 1, avatarUrl: "", discordId: "" },
+                { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur", isDev: 0, avatarUrl: "", discordId: "" },
+                { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development", isDev: 0, avatarUrl: "", discordId: "" },
+                { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur", isDev: 0, avatarUrl: "", discordId: "" },
+                { username: "JoeyKj", password: "JoeyPassword", role: "Management", isDev: 0, avatarUrl: "", discordId: "" },
+                { username: "Jellybear", password: "JellyBearPass", role: "Management", isDev: 0, avatarUrl: "", discordId: "" },
+                { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende", isDev: 0, avatarUrl: "", discordId: "" },
+                { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende", isDev: 0, avatarUrl: "", discordId: "" }
             ];
-
-            for (let acc of defaultAccounts) {
-                await pool.query(
-                    `INSERT INTO accounts (username, password, role, isDev, avatarUrl, discordId) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (username) DO NOTHING`,
-                    acc
-                );
-            }
-            console.log("✅ Standaard accounts ingeladen in Supabase!");
+            await Account.insertMany(defaultAccounts);
+            console.log("✅ Standaard accounts ingeladen in MongoDB!");
         }
-    } catch (err) {
-        console.error("❌ Fout bij initialiseren van tabellen:", err.message);
+    } catch (e) {
+        console.error("Fout bij laden standaard accounts:", e.message);
     }
 }
 
@@ -167,11 +153,10 @@ async function parseAndAddJob(message) {
         const weekKey = getISOWeekKey(timestamp);
         const dateFormatted = new Date(timestamp).toLocaleDateString('nl-NL');
 
-        await pool.query(
-            `INSERT INTO jobs (id, from_loc, to_loc, driver, cargo, distance, kmAmount, paidAmount, timestamp, weekKey, dateFormatted) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-             ON CONFLICT (id) DO UPDATE SET from_loc = $2, to_loc = $3, driver = $4, cargo = $5, distance = $6, kmAmount = $7, paidAmount = $8`,
-            [jobId, from, to, driver, cargo, `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, weekKey, dateFormatted]
+        await Job.findOneAndUpdate(
+            { id: jobId },
+            { from_loc: from, to_loc: to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, weekKey, dateFormatted },
+            { upsert: true, new: true }
         );
     } catch(e) {}
 }
@@ -179,19 +164,18 @@ async function parseAndAddJob(message) {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        const result = await pool.query(
-            `SELECT * FROM accounts WHERE LOWER(username) = LOWER($1) AND password = $2`,
-            [(username || '').trim(), password]
-        );
-        if (result.rows.length === 0) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
-
-        const account = result.rows[0];
+        const account = await Account.findOne({ 
+            username: { $regex: new RegExp(`^${(username || '').trim()}$`, 'i') }, 
+            password: password 
+        });
+        if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
+        
         res.json({ 
             success: true, 
             username: account.username, 
             role: account.role, 
             color: getRoleColor(account.role), 
-            avatarUrl: account.avatarurl || ''
+            avatarUrl: account.avatarUrl || ''
         });
     } catch(e) {
         res.status(500).json({ success: false, message: 'Serverfout' });
@@ -201,28 +185,21 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/haulmp', async (req, res) => {
     try {
         const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
-
-        const jobsResult = await pool.query(
-            `SELECT * FROM jobs WHERE timestamp >= $1 ORDER BY timestamp DESC LIMIT 50`,
-            [tenDaysAgo]
-        );
-        const allJobsHistory = jobsResult.rows;
-
-        const accountsResult = await pool.query(`SELECT * FROM accounts`);
-        const accountsList = accountsResult.rows;
+        const allJobsHistory = await Job.find({ timestamp: { $gte: tenDaysAgo } }).sort({ timestamp: -1 }).limit(50);
+        const accountsList = await Account.find({});
 
         const totalDeliveries = allJobsHistory.length;
-        const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmamount, 0);
-        const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidamount, 0);
+        const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
+        const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
 
         let formattedDrivers = accountsList.map(m => {
             const userJobs = allJobsHistory.filter(j => j.driver && j.driver.toLowerCase().includes(m.username.toLowerCase()));
             return {
-                username: m.username, role: m.role, weight: getRoleWeight(m.role), color: getRoleColor(m.role), isDev: !!m.isdev,
-                avatarUrl: m.avatarurl || '',
+                username: m.username, role: m.role, weight: getRoleWeight(m.role), color: getRoleColor(m.role), isDev: !!m.isDev,
+                avatarUrl: m.avatarUrl || '',
                 deliveries: userJobs.length,
-                distance: `${userJobs.reduce((a, c) => a + c.kmamount, 0).toLocaleString('nl-NL')} km`,
-                earnings: `€ ${userJobs.reduce((a, c) => a + c.paidamount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`
+                distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
+                earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`
             };
         });
 
@@ -250,4 +227,4 @@ if (DISCORD_BOT_TOKEN) {
     clientBot.login(DISCORD_BOT_TOKEN).catch(err => {});
 }
 
-app.listen(PORT, () => console.log(`🚀 Server actief op poort ${PORT} met Supabase PostgreSQL`));
+app.listen(PORT, () => console.log(`🚀 Server actief op poort ${PORT} met MongoDB`));
