@@ -2,6 +2,7 @@ const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const multer = require('multer');
+const sharp = require('sharp'); // Automatische beeldcompressie
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -12,7 +13,7 @@ app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }
+    limits: { fileSize: 10 * 1024 * 1024 } // Accepteert tot 10MB, maar comprimeert direct
 });
 
 app.use((req, res, next) => {
@@ -228,6 +229,8 @@ async function parseAndAddJob(message) {
     } catch(e) {}
 }
 
+// API ENDPOINTS
+
 app.post('/api/login', (req, res) => {
     try {
         const { username, password } = req.body;
@@ -346,14 +349,56 @@ app.get('/api/gallery', async (req, res) => {
     res.json(galleryPhotos);
 });
 
+// GEOPTIMALISEERDE FOTO UPLOAD MET AUTOMATISCHE COMPRESSIE (OPTIE 1)
+app.post('/api/gallery', upload.single('photo'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false, message: 'Geen bestand ontvangen.' });
+    try {
+        // Comprimeer de afbeelding automatisch met Sharp (max 1280px, 80% JPEG kwaliteit)
+        const compressedBuffer = await sharp(req.file.buffer)
+            .resize(1280, 1280, { fit: 'inside', withoutEnlargement: true })
+            .jpeg({ quality: 80 })
+            .toBuffer();
+
+        const dataUrl = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
+        const photoObj = { 
+            id: "photo-" + Date.now(), 
+            url: dataUrl, 
+            uploadedBy: req.body.username || "Chauffeur", 
+            date: new Date().toLocaleDateString('nl-NL') 
+        };
+
+        if (isConnected && galleryColl) await galleryColl.insertOne(photoObj);
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Fout bij comprimeren foto:", e);
+        res.status(500).json({ success: false, message: 'Fout bij verwerken van foto.' });
+    }
+});
+
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
     if (!targetUser || !pfp) return res.status(400).json({ success: false, message: 'Gegevens ontbreken.' });
-    if (isConnected && accountsColl) {
-        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: pfp } });
-        cachedAccounts = await accountsColl.find({}).toArray();
+    
+    try {
+        let finalPfp = pfp;
+        if (pfp.startsWith('data:image')) {
+            const base64Data = pfp.replace(/^data:image\/\w+;base64,/, '');
+            const imgBuffer = Buffer.from(base64Data, 'base64');
+            const compressedPfp = await sharp(imgBuffer)
+                .resize(250, 250, { fit: 'cover' })
+                .jpeg({ quality: 85 })
+                .toBuffer();
+            finalPfp = `data:image/jpeg;base64,${compressedPfp.toString('base64')}`;
+        }
+
+        if (isConnected && accountsColl) {
+            await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: finalPfp } });
+            cachedAccounts = await accountsColl.find({}).toArray();
+        }
+        res.json({ success: true, avatarUrl: finalPfp });
+    } catch(e) {
+        res.status(500).json({ success: false });
     }
-    res.json({ success: true, avatarUrl: pfp });
 });
 
 app.post('/api/applications/complete', async (req, res) => {
@@ -377,7 +422,12 @@ app.post('/api/badges/delete', async (req, res) => {
 app.post('/api/info', upload.single('file'), async (req, res) => {
     let fileLink = req.body.link || '';
     if (req.file) {
-        fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+        if (req.file.mimetype.startsWith('image/')) {
+            const compressed = await sharp(req.file.buffer).resize(1280, 1280, { fit: 'inside' }).jpeg({ quality: 80 }).toBuffer();
+            fileLink = `data:image/jpeg;base64,${compressed.toString('base64')}`;
+        } else {
+            fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
+        }
     }
     const infoObj = { 
         id: "info-" + Date.now(), title: req.body.title, content: req.body.content, 
@@ -493,14 +543,6 @@ app.delete('/api/staff/:targetUser', async (req, res) => {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
         cachedAccounts = await accountsColl.find({}).toArray();
     }
-    res.json({ success: true });
-});
-
-app.post('/api/gallery', upload.single('photo'), async (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false });
-    const dataUrl = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
-    const photoObj = { id: "photo-" + Date.now(), url: dataUrl, uploadedBy: req.body.username || "Chauffeur", date: new Date().toLocaleDateString('nl-NL') };
-    if (isConnected && galleryColl) await galleryColl.insertOne(photoObj);
     res.json({ success: true });
 });
 
