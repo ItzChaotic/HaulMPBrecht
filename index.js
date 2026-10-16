@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 const DISCORD_APPLICATIONS_CHANNEL_ID = process.env.DISCORD_APPLICATIONS_CHANNEL_ID || '1558075393729363968';
-const TARGET_BOT_ID = '1558075057417494582'; // De specifieke bot ID die getracked moet worden
+const TARGET_BOT_ID = '1558075057417494582';
 const MONGO_URI = process.env.MONGO_URI;
 
 let db, accountsColl, announcementsColl, applicationsColl, infoColl, convoysColl, convoySignupsColl, badgesColl, eotwColl, socialsColl, jobsColl;
@@ -44,6 +44,7 @@ let cachedAccounts = [
 ];
 
 async function connectDB() {
+    const startT = Date.now();
     if (!MONGO_URI) return;
     try {
         const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
@@ -70,7 +71,7 @@ async function connectDB() {
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-        console.log("✅ Verbonden met MongoDB Atlas & accounts gecached!");
+        console.log(`⏱️ [PERF] MongoDB verbinding & accounts ingeladen in ${Date.now() - startT}ms`);
     } catch (err) {
         console.error("❌ MongoDB verbinding mislukt:", err.message);
     }
@@ -144,23 +145,22 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    // PRIORITEIT 1: Inladen van alle jobs van de afgelopen 10 dagen direct bij start
-    setTimeout(() => fetch10DaysDiscordJobs(), 1000);
+    // PRIORITEIT 1: Inladen van de afgelopen 7 dagen aan ritten
+    setTimeout(() => fetch7DaysDiscordJobs(), 500);
 });
 
 clientBot.on('messageCreate', (message) => {
-    // Filter alleen berichten van de opgegeven bot ID
     if (message.author.id !== TARGET_BOT_ID) return;
-
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
 
-async function fetch10DaysDiscordJobs() {
+async function fetch7DaysDiscordJobs() {
+    const startT = Date.now();
     try {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // Beperkt tot 7 dagen
         let lastId = undefined;
         let keepFetching = true;
 
@@ -171,8 +171,7 @@ async function fetch10DaysDiscordJobs() {
             if (messages.size === 0) break;
 
             for (const msg of messages.values()) {
-                if (msg.createdTimestamp < tenDaysAgo) { keepFetching = false; break; }
-                // Alleen berichten verwerken van de specifieke bot ID
+                if (msg.createdTimestamp < sevenDaysAgo) { keepFetching = false; break; }
                 if (msg.author.id === TARGET_BOT_ID) {
                     await parseAndAddJob(msg);
                 }
@@ -180,8 +179,10 @@ async function fetch10DaysDiscordJobs() {
             lastId = messages.last()?.id;
             if (messages.size < 50) break;
         }
-        console.log("✅ [PRIORITEIT 1] Afgelopen 10 dagen aan jobs succesvol ingeladen!");
-    } catch (e) {}
+        console.log(`⏱️ [PERF] Afgelopen 7 dagen Discord jobs gesyncd in ${Date.now() - startT}ms`);
+    } catch (e) {
+        console.error("❌ Fout bij ophalen Discord jobs:", e.message);
+    }
 }
 
 async function parseAndAddApplication(message) {
@@ -249,11 +250,16 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/haulmp', async (req, res) => {
+    const requestStart = Date.now();
     try {
-        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         let allJobsHistory = [];
+        
+        // PRIORITEIT 1: Haal direct de eerste 10 ritten op voor de hoofdpagina (snelle respons)
         if (isConnected && jobsColl) {
-            allJobsHistory = await jobsColl.find({ timestamp: { $gte: tenDaysAgo } }).sort({ timestamp: -1 }).toArray();
+            const stepT = Date.now();
+            allJobsHistory = await jobsColl.find({ timestamp: { $gte: sevenDaysAgo } }).sort({ timestamp: -1 }).toArray();
+            console.log(`⏱️ [PERF] /api/haulmp - Jobs ophalen uit DB duurde: ${Date.now() - stepT}ms`);
         }
 
         const totalDeliveries = allJobsHistory.length;
@@ -271,8 +277,9 @@ app.get('/api/haulmp', async (req, res) => {
 
         if (isConnected && db) {
             try {
-                // PRIORITEIT 2 & 3: Direct op volgorde ophalen uit de database
-                const socials = await socialsColl.find({}).sort({ _id: -1 }).toArray(); // Plek 2: Socials
+                const stepT2 = Date.now();
+                // PRIORITEIT 2 & 3: Socials en overige portaaldata ophalen
+                const socials = await socialsColl.find({}).sort({ _id: -1 }).toArray();
                 socialsList = socials;
 
                 const [badges, announcements, applications, info, convoys, signups, eotw] = await Promise.all([
@@ -287,6 +294,7 @@ app.get('/api/haulmp', async (req, res) => {
                 customBadges = badges; announcementsList = announcements; applicationsList = applications;
                 infoList = info; convoysList = convoys; convoySignupsList = signups;
                 if (eotw) employeeOfTheWeek = eotw;
+                console.log(`⏱️ [PERF] /api/haulmp - Overige collecties ophalen duurde: ${Date.now() - stepT2}ms`);
             } catch (e) {}
         }
 
@@ -313,23 +321,26 @@ app.get('/api/haulmp', async (req, res) => {
             weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
         });
 
+        console.log(`⏱️ [PERF] Totale /api/haulmp request verwerkt in: ${Date.now() - requestStart}ms`);
+
         res.json({
             deliveries: totalDeliveries.toString(),
             distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
             companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
             drivers: formattedDrivers.filter(d => !d.isDev).length.toString(),
             drivers_list: formattedDrivers,
-            recent_jobs: allJobsHistory.slice(0, 10),
+            recent_jobs: allJobsHistory.slice(0, 10), // Eerste 10 ritten voor de mainwebsite
             badges: customBadges, announcements: announcementsList, applications: applicationsList,
             infoList, convoysList, convoySignupsList, socialsList, employeeOfTheWeek,
             weeklyChartData: Object.values(weeklyChartData).reverse()
         });
     } catch(e) {
+        console.error("❌ Fout in /api/haulmp:", e.message);
         res.status(500).json({ error: e.message });
     }
 });
 
-// Overige routes voor info, konvooien, personeel, etc. blijven hieronder ongewijzigd...
+// Overige beheer- en api routes blijven onaangeroerd...
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
     if (!targetUser || !pfp) return res.status(400).json({ success: false });
