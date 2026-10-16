@@ -1,14 +1,13 @@
 {
-  "name": "brecht-transport-portaal",
-  "version": "2.5.0",
-  "main": "server.js",
+  "name": "haulmp-brecht",
+  "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.14.0",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "mongoose": "^8.3.1",
-    "multer": "^1.4.5-lts.1"
+    "mongoose": "^8.3.1"
   }
 }
