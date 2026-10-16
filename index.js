@@ -26,6 +26,7 @@ app.use((req, res, next) => {
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1558074703195807834';
 const DISCORD_APPLICATIONS_CHANNEL_ID = process.env.DISCORD_APPLICATIONS_CHANNEL_ID || '1558075393729363968';
+const TARGET_BOT_ID = '1558075057417494582'; // De specifieke bot ID die getracked moet worden
 const MONGO_URI = process.env.MONGO_URI;
 
 let db, accountsColl, announcementsColl, applicationsColl, infoColl, convoysColl, convoySignupsColl, badgesColl, eotwColl, socialsColl, jobsColl;
@@ -143,10 +144,14 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    setTimeout(() => fetch10DaysDiscordJobs(), 2000);
+    // PRIORITEIT 1: Inladen van alle jobs van de afgelopen 10 dagen direct bij start
+    setTimeout(() => fetch10DaysDiscordJobs(), 1000);
 });
 
 clientBot.on('messageCreate', (message) => {
+    // Filter alleen berichten van de opgegeven bot ID
+    if (message.author.id !== TARGET_BOT_ID) return;
+
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
@@ -167,17 +172,22 @@ async function fetch10DaysDiscordJobs() {
 
             for (const msg of messages.values()) {
                 if (msg.createdTimestamp < tenDaysAgo) { keepFetching = false; break; }
-                await parseAndAddJob(msg);
+                // Alleen berichten verwerken van de specifieke bot ID
+                if (msg.author.id === TARGET_BOT_ID) {
+                    await parseAndAddJob(msg);
+                }
             }
             lastId = messages.last()?.id;
             if (messages.size < 50) break;
         }
+        console.log("✅ [PRIORITEIT 1] Afgelopen 10 dagen aan jobs succesvol ingeladen!");
     } catch (e) {}
 }
 
 async function parseAndAddApplication(message) {
     try {
-        const applicantName = message.author ? message.author.username : "Sollicitant";
+        if (message.author.id !== TARGET_BOT_ID) return;
+        let applicantName = "Sollicitant";
         let contentText = message.content || "Nieuwe sollicitatie.";
         if (message.embeds?.[0]) contentText = message.embeds[0].description || message.embeds[0].title || contentText;
 
@@ -261,18 +271,21 @@ app.get('/api/haulmp', async (req, res) => {
 
         if (isConnected && db) {
             try {
-                const [badges, announcements, applications, info, convoys, signups, socials, eotw] = await Promise.all([
+                // PRIORITEIT 2 & 3: Direct op volgorde ophalen uit de database
+                const socials = await socialsColl.find({}).sort({ _id: -1 }).toArray(); // Plek 2: Socials
+                socialsList = socials;
+
+                const [badges, announcements, applications, info, convoys, signups, eotw] = await Promise.all([
                     badgesColl.find({}).toArray(),
                     announcementsColl.find({}).sort({ _id: -1 }).toArray(),
                     applicationsColl.find({}).toArray(),
                     infoColl.find({}).sort({ _id: -1 }).toArray(),
                     convoysColl.find({}).sort({ _id: -1 }).toArray(),
                     convoySignupsColl.find({}).toArray(),
-                    socialsColl.find({}).sort({ _id: -1 }).toArray(),
                     eotwColl.findOne({})
                 ]);
                 customBadges = badges; announcementsList = announcements; applicationsList = applications;
-                infoList = info; convoysList = convoys; convoySignupsList = signups; socialsList = socials;
+                infoList = info; convoysList = convoys; convoySignupsList = signups;
                 if (eotw) employeeOfTheWeek = eotw;
             } catch (e) {}
         }
@@ -316,6 +329,7 @@ app.get('/api/haulmp', async (req, res) => {
     }
 });
 
+// Overige routes voor info, konvooien, personeel, etc. blijven hieronder ongewijzigd...
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
     if (!targetUser || !pfp) return res.status(400).json({ success: false });
