@@ -33,7 +33,7 @@ let isConnected = false;
 
 let cachedHaulmpResponse = null;
 let cacheTimestamp = 0;
-const CACHE_TTL = 30000; // 30 seconden server-cache
+const CACHE_TTL = 30000;
 
 let cachedAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
@@ -49,6 +49,7 @@ let cachedAccounts = [
 async function connectDB() {
     if (!MONGO_URI) return;
     try {
+        console.time("⏱️ [DB] Verbinding & Indexen aanmaken");
         const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
         db = client.db('brecht_transport');
@@ -65,7 +66,6 @@ async function connectDB() {
         socialsColl = db.collection('socials');
         jobsColl = db.collection('jobs');
 
-        // ULTRA-SNELLE MONGODB INDEXES TOEGEVOEGD
         await Promise.all([
             jobsColl.createIndex({ timestamp: -1 }).catch(() => {}),
             jobsColl.createIndex({ driver: 1 }).catch(() => {}),
@@ -75,14 +75,13 @@ async function connectDB() {
         ]);
 
         isConnected = true;
-
         const count = await accountsColl.countDocuments();
         if (count === 0) {
             await accountsColl.insertMany(cachedAccounts);
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-        console.log("✅ Verbonden met MongoDB Atlas & Indexen geoptimaliseerd!");
+        console.timeEnd("⏱️ [DB] Verbinding & Indexen aanmaken");
     } catch (err) {
         console.error("❌ MongoDB verbinding mislukt:", err.message);
     }
@@ -235,17 +234,22 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/haulmp', async (req, res) => {
+    console.time("⏱️ [SERVER] /api/haulmp totale verwerkingstijd");
     try {
         if (cachedHaulmpResponse && (Date.now() - cacheTimestamp < CACHE_TTL)) {
+            console.log("⚡ [SERVER] /api/haulmp geserveerd vanuit RAM Cache!");
+            console.timeEnd("⏱️ [SERVER] /api/haulmp totale verwerkingstijd");
             return res.json(cachedHaulmpResponse);
         }
 
         const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
         let allJobsHistory = [];
         
+        console.time("⏱️ [DB] Ophalen ritten");
         if (isConnected && jobsColl) {
             allJobsHistory = await jobsColl.find({ timestamp: { $gte: tenDaysAgo } }).sort({ timestamp: -1 }).toArray();
         }
+        console.timeEnd("⏱️ [DB] Ophalen ritten");
 
         const totalDeliveries = allJobsHistory.length;
         const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
@@ -260,6 +264,7 @@ app.get('/api/haulmp', async (req, res) => {
         let socialsList = [];
         let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
+        console.time("⏱️ [DB] Parallel ophalen overige collecties");
         if (isConnected && db) {
             try {
                 const [badges, announcements, applications, info, convoys, signups, socials, eotw] = await Promise.all([
@@ -282,7 +287,9 @@ app.get('/api/haulmp', async (req, res) => {
                 if (eotw) employeeOfTheWeek = eotw;
             } catch (e) {}
         }
+        console.timeEnd("⏱️ [DB] Parallel ophalen overige collecties");
 
+        console.time("⏱️ [CPU] Data formatteren & berekeningen");
         let formattedDrivers = cachedAccounts.map(m => {
             const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
             return {
@@ -306,6 +313,7 @@ app.get('/api/haulmp', async (req, res) => {
             const dc = j.driver.toLowerCase().replace(/[^a-z0-9]/g, '');
             weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
         });
+        console.timeEnd("⏱️ [CPU] Data formatteren & berekeningen");
 
         const responsePayload = {
             deliveries: totalDeliveries.toString(),
@@ -323,8 +331,10 @@ app.get('/api/haulmp', async (req, res) => {
         cachedHaulmpResponse = responsePayload;
         cacheTimestamp = Date.now();
 
+        console.timeEnd("⏱️ [SERVER] /api/haulmp totale verwerkingstijd");
         res.json(responsePayload);
     } catch(e) {
+        console.timeEnd("⏱️ [SERVER] /api/haulmp totale verwerkingstijd");
         res.status(500).json({ error: e.message });
     }
 });
