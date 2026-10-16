@@ -31,10 +31,9 @@ const MONGO_URI = process.env.MONGO_URI;
 let db, accountsColl, galleryColl, announcementsColl, applicationsColl, infoColl, convoysColl, convoySignupsColl, badgesColl, eotwColl, socialsColl, jobsColl;
 let isConnected = false;
 
-// Geheugen-cache om zware berekeningen direct op te lossen
 let cachedHaulmpResponse = null;
 let cacheTimestamp = 0;
-const CACHE_TTL = 30000; // 30 seconden cache
+const CACHE_TTL = 30000; // 30 seconden server-cache
 
 let cachedAccounts = [
     { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
@@ -66,7 +65,15 @@ async function connectDB() {
         socialsColl = db.collection('socials');
         jobsColl = db.collection('jobs');
 
-        await jobsColl.createIndex({ timestamp: -1 }).catch(() => {});
+        // ULTRA-SNELLE MONGODB INDEXES TOEGEVOEGD
+        await Promise.all([
+            jobsColl.createIndex({ timestamp: -1 }).catch(() => {}),
+            jobsColl.createIndex({ driver: 1 }).catch(() => {}),
+            accountsColl.createIndex({ username: 1 }).catch(() => {}),
+            badgesColl.createIndex({ targetUser: 1 }).catch(() => {}),
+            convoySignupsColl.createIndex({ convoyId: 1, username: 1 }).catch(() => {})
+        ]);
+
         isConnected = true;
 
         const count = await accountsColl.countDocuments();
@@ -75,7 +82,7 @@ async function connectDB() {
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-        console.log("✅ Verbonden met MongoDB Atlas & accounts gecached!");
+        console.log("✅ Verbonden met MongoDB Atlas & Indexen geoptimaliseerd!");
     } catch (err) {
         console.error("❌ MongoDB verbinding mislukt:", err.message);
     }
@@ -149,7 +156,6 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    // Geen trage fetch-loops meer bij opstarten!
 });
 
 clientBot.on('messageCreate', (message) => {
