@@ -222,3 +222,4 @@ if (DISCORD_BOT_TOKEN) {
 }
 
 app.listen(PORT, () => console.log(`🚀 Server actief op poort ${PORT} met SQLite`));
+
