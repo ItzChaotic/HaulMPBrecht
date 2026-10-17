@@ -374,6 +374,7 @@ app.post('/api/user/profile-update', async (req, res) => {
         success: true, 
         username: updatedAcc.username, 
         displayname: updatedAcc.displayname || updatedAcc.username, 
+        role: updatedAcc.role,
         avatarUrl: updatedAcc.avatarUrl || '' 
     });
 });
