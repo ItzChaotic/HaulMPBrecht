@@ -2,173 +2,657 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrechtTransport - Personeelsportaal</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome voor iconen -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Brecht Transport B.V. | ETS2 VTC</title>
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #0a0303;
+            --bg-sidebar: #0d0404;
+            --bg-card: rgba(22, 7, 7, 0.90);
+            --primary: #800000;
+            --primary-light: #cc0000;
+            --accent-red: #ff3333;
+            --border-red: rgba(204, 0, 0, 0.25);
+            --text-main: #ffffff;
+            --text-muted: #caa8a8;
+            --glass-blur: blur(16px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        html, body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; width: 100%; overflow-x: hidden; display: flex; flex-direction: column; }
+
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center fixed;
+            background-size: cover; z-index: -2;
+        }
+        body::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(10, 3, 3, 0.85); backdrop-filter: blur(6px); z-index: -1;
+        }
+
+        nav {
+            position: sticky; top: 10px; z-index: 1000; margin: 0 auto 30px auto; max-width: 1350px; width: 96%;
+            background: rgba(22, 4, 4, 0.94); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-red); border-radius: 16px; padding: 10px 18px;
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
+        }
+
+        .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; cursor: pointer; flex-shrink: 0; }
+        .logo-img { height: 36px; width: auto; object-fit: contain; }
+        .brand-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+        
+        .nav-links { display: flex; gap: 8px; list-style: none; align-items: center; }
+        .nav-links a, .nav-links button { color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 600; background: none; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .nav-links a:hover { color: #fff; }
+
+        .btn-discord { background: #5865F2; color: #fff !important; padding: 6px 12px; border-radius: 8px; font-weight: 700 !important; font-size: 0.78rem !important; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-apply { background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: #fff !important; padding: 6px 12px; border-radius: 8px; font-weight: 700 !important; font-size: 0.78rem !important; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-portal { background: rgba(255, 255, 255, 0.05); color: #fff !important; padding: 6px 10px; border-radius: 8px; font-weight: 700 !important; font-size: 0.78rem !important; border: 1px solid var(--border-red); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+
+        .container { max-width: 1350px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
+        .page-view { display: none; }
+        .page-view.active { display: block; }
+
+        .portal-layout { display: flex; min-height: 100vh; position: relative; width: 100%; }
+        .sidebar { width: 290px; background: var(--bg-sidebar); border-right: 1px solid var(--border-red); padding: 20px 16px; display: flex; flex-direction: column; gap: 15px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; color: #fff; overflow-y: auto; }
+        .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
+        .sidebar-section-title { font-size: 0.7rem; color: #7a5252; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin: 10px 0 4px 8px; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-menu li button { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 8px; color: #caa8a8; text-decoration: none; font-size: 0.9rem; font-weight: 600; background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; }
+        .sidebar-menu li button i { color: var(--accent-red); width: 20px; text-align: center; font-size: 1rem; }
+        .sidebar-menu li:hover button, .sidebar-menu li.active button { background: rgba(204, 0, 0, 0.2); color: #fff; border-left: 3px solid var(--accent-red); }
+
+        .portal-content { margin-left: 290px; flex: 1; padding: 35px; width: calc(100% - 290px); }
+
+        .dashboard-grid-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 25px; }
+        .dash-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: var(--glass-blur); }
+        .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .dash-card-title { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; }
+        .dash-card-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,51,51,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--accent-red); font-size: 1.1rem; }
+        .dash-card-num { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: #fff; }
+
+        .dash-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+        @media (max-width: 1200px) { .dash-main-row { grid-template-columns: 1fr; } }
+
+        .analytics-box, .live-feed-box, .gallery-card, .member-card, .fleet-card, .trips-card { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 24px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
+        .fleet-img { width: 100%; height: 210px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
+
+        .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-red); border-radius: 14px; padding: 16px; }
+        .member-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); overflow: hidden; }
+        .member-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .member-role { display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-top: 4px; }
+
+        .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
+        .role-orange { background: rgba(221, 107, 32, 0.22); color: #ff9d42; border: 1px solid rgba(221, 107, 32, 0.5); }
+        .role-yellow { background: rgba(214, 158, 46, 0.18); color: #f6e05e; border: 1px solid rgba(214, 158, 46, 0.4); }
+        .role-green { background: rgba(56, 161, 105, 0.18); color: #68d391; border: 1px solid rgba(56, 161, 105, 0.4); }
+        .role-blue { background: rgba(49, 130, 206, 0.18); color: #63b3ed; border: 1px solid rgba(49, 130, 206, 0.4); }
+        .role-purple { background: rgba(128, 90, 213, 0.18); color: #b794f4; border: 1px solid rgba(128, 90, 213, 0.4); }
+        .role-cyan { background: rgba(0, 181, 216, 0.18); color: #76e4f7; border: 1px solid rgba(0, 181, 216, 0.4); }
+        .role-gray { background: rgba(160, 174, 192, 0.18); color: #cbd5e0; border: 1px solid rgba(160, 174, 192, 0.4); }
+
+        .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border-red); }
+        .form-input { width: 100%; padding: 12px 16px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 10px; font-size: 0.95rem; }
+        .btn-red { background: var(--primary-light); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
+        .btn-green { background: #2ecc71; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-orange { background: #e67e22; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        .hero-schlüppi { text-align: left; padding: 70px 35px; max-width: 1200px; margin: 0 auto; background: linear-gradient(rgba(10, 3, 3, 0.55), rgba(10, 3, 3, 0.70)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center; background-size: cover; border: 1px solid var(--border-red); border-radius: 20px; }
+        .hero-badge { display: inline-block; background: rgba(204, 0, 0, 0.2); color: #ff6b6b; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; border: 1px solid rgba(204, 0, 0, 0.4); text-transform: uppercase; margin-bottom: 16px; }
+        .hero-title { font-family: 'Space Grotesk', sans-serif; font-size: 4rem; font-weight: 800; line-height: 1.05; margin-bottom: 18px; color: #fff; }
+        .hero-desc-text { font-size: 1.05rem; color: var(--text-muted); max-width: 650px; line-height: 1.6; margin-bottom: 25px; }
+
+        .discord-community-banner { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px; padding: 35px; backdrop-filter: var(--glass-blur); margin: 30px 0; display: grid; grid-template-columns: 1.3fr 1fr; gap: 30px; align-items: center; }
+        @media(max-width: 900px) { .discord-community-banner { grid-template-columns: 1fr; } }
+        .discord-banner-right { background: rgba(15, 3, 3, 0.85); border: 1px solid var(--border-red); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+
+        #login-modal, #password-modal, #discord-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px); }
+        .login-box { background: rgba(18, 4, 4, 0.94); border: 1px solid var(--border-red); border-radius: 20px; max-width: 420px; width: 100%; padding: 30px; text-align: center; color: #fff; }
+
+        .staff-table-wrapper { width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 12px; }
+        .staff-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
+        .staff-table th, .staff-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .staff-table th { color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase; font-weight: 700; background: rgba(0,0,0,0.2); }
+
+        .section-header { text-align: center; margin: 35px 0 20px 0; }
+        .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
+
+        .mobile-header-bar { display: none; background: rgba(18, 3, 3, 0.96); padding: 10px 14px; border-bottom: 1px solid var(--border-red); position: sticky; top: 0; z-index: 1001; justify-content: space-between; align-items: center; width: 100%; }
+        .mobile-drawer { display: none; position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh; background: rgba(16, 3, 3, 0.98); z-index: 3000; padding: 25px 20px; transition: right 0.3s ease; color: #fff; border-left: 1px solid var(--border-red); overflow-y: auto; }
+        .mobile-drawer.open { right: 0; display: block; }
+        .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 2999; }
+        .mobile-drawer-overlay.open { display: block; }
+        .mobile-drawer-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+        .mobile-drawer-menu a, .mobile-drawer-menu button { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 16px; border-radius: 10px; color: #fff; text-decoration: none; font-size: 0.95rem; font-weight: 600; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); text-align: left; cursor: pointer; }
+
+        .mobile-portal-tabs { display: none; background: rgba(20, 4, 4, 0.9); border: 1px solid var(--border-red); border-radius: 12px; padding: 8px; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; gap: 8px; }
+        .mobile-portal-tabs button { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+        .mobile-portal-tabs button.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
+
+        footer { text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); }
+        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-red); padding-bottom: 12px; flex-wrap: wrap; }
+        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 9px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .sub-tab-btn.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
+
+        .sidebar-user-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; width: 100%; }
+        .user-avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; overflow: hidden; }
+        .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+        .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 15px; }
+        .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 14px; padding: 18px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.2s; }
+
+        @media (max-width: 1050px) {
+            nav#main-nav-bar { display: none !important; }
+            .mobile-header-bar { display: flex; }
+            .mobile-drawer { display: block; }
+            .portal-layout { flex-direction: column; }
+            .sidebar { display: none; }
+            .mobile-portal-tabs { display: flex; }
+            .portal-content { margin-left: 0; width: 100%; padding: 15px; }
+        }
+    </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <!-- Sidebar Navigatie -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fa-solid fa-truck-moving"></i> BrechtVTC</h2>
+    <div class="mobile-header-bar">
+        <div class="brand-logo" onclick="goHome()">
+            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:30px;">
+            <span style="font-weight:bold; font-size:0.85rem; color:#fff;">Brecht Transport</span>
+        </div>
+        <div style="display:flex; gap:5px; align-items:center;">
+            <a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord" style="padding:5px 8px; font-size:0.7rem;"><i class="fa-brands fa-discord"></i> Discord</a>
+            <button onclick="handleNavLogin()" class="btn-portal" style="padding:5px 8px; font-size:0.7rem;"><i class="fa-solid fa-lock" style="color:var(--accent-red);"></i> Portaal</button>
+            <button onclick="toggleMobileDrawer()" class="btn-portal" style="padding:5px 8px; border-color:var(--accent-red);"><i class="fa-solid fa-bars" style="color:#fff;"></i></button>
+        </div>
+    </div>
+
+    <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-red); padding-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:26px;">
+                <b style="font-size:1rem; font-family:'Space Grotesk', sans-serif;">Menu</b>
             </div>
-            <ul class="nav-links">
-                <li class="active" onclick="switchTab('dashboard', event)"><i class="fa-solid fa-house"></i> Dashboard</li>
-                <li onclick="switchTab('convoy', event)"><i class="fa-solid fa-route"></i> Konvooien</li>
-                <li onclick="switchTab('werving', event)"><i class="fa-solid fa-user-plus"></i> Werving</li>
-                <li onclick="switchTab('afwezigheid', event)"><i class="fa-solid fa-calendar-days"></i> Afwezigheid</li>
-                <li onclick="switchTab('peilingen', event)"><i class="fa-solid fa-square-poll-vertical"></i> Peilingen</li>
-                <li onclick="switchTab('support', event)"><i class="fa-solid fa-bug"></i> Support & Ideeën</li>
-            </ul>
-        </aside>
+            <button onclick="toggleMobileDrawer()" style="background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
+        </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="top-bar">
-                <h1 id="page-title">Dashboard</h1>
-                <div class="user-profile">
-                    <span id="current-user-display">Driver_Brecht</span>
-                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="mobile-drawer-menu">
+            <a href="javascript:void(0);" onclick="goHome(); toggleMobileDrawer();"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+            <a href="#about-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-circle-info"></i> <span data-i18n="about">Over Ons</span></a>
+            <a href="#rules-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-book"></i> <span data-i18n="rules">Regels</span></a>
+            <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> <span data-i18n="team">Het Team</span></a>
+            <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span data-i18n="fleet">Vloot</span></a>
+            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Afgeronde Ritten</span></a>
+            <a href="https://discord.gg/UCgWxAdXRu" target="_blank" style="background:#5865F2; margin-top:8px;"><i class="fa-brands fa-discord" style="color:#fff;"></i> <span>Join Discord</span></a>
+        </div>
+    </div>
+
+    <nav id="main-nav-bar">
+        <div onclick="goHome()" class="brand-logo">
+            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" class="logo-img">
+            <div><div class="brand-title">BRECHT TRANSPORT</div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="javascript:void(0);" onclick="goHome()" data-i18n="home">Home</a></li>
+            <li><a href="#about-sec" data-i18n="about">Over Ons</a></li>
+            <li><a href="#rules-sec" data-i18n="rules">Regels</a></li>
+            <li><a href="#team" data-i18n="team">Team</a></li>
+            <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
+            <li><a href="#activiteit" data-i18n="trips">Ritten</a></li>
+            <li><a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div id="home-view" class="page-view active">
+            <section class="hero-schlüppi">
+                <div class="hero-badge">ETS2 & ATS VTC</div>
+                <h1 class="hero-title">Brecht<br>Transport</h1>
+                <p class="hero-desc-text">Virtuele Transportonderneming met hart en gezelligheid. Samen onderweg op TruckersMP, bij konvooien en in een actieve community.</p>
+            </section>
+
+            <div class="dashboard-grid-top" style="margin-top:20px;">
+                <div class="dash-card">
+                    <div class="dash-card-header"><span class="dash-card-title">Gereden Afstand</span><div class="dash-card-icon"><i class="fa-solid fa-route"></i></div></div>
+                    <div class="dash-card-num" id="stat-distance">0 km</div>
                 </div>
-            </header>
+                <div class="dash-card">
+                    <div class="dash-card-header"><span class="dash-card-title">Leveringen Volbracht</span><div class="dash-card-icon"><i class="fa-solid fa-truck-ramp-box"></i></div></div>
+                    <div class="dash-card-num" id="stat-deliveries">0</div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-card-header"><span class="dash-card-title">Actieve Chauffeurs</span><div class="dash-card-icon"><i class="fa-solid fa-users"></i></div></div>
+                    <div class="dash-card-num" id="stat-drivers">0</div>
+                </div>
+            </div>
 
-            <div class="content-body">
-                
-                <!-- TAB 1: DASHBOARD -->
-                <section id="tab-dashboard" class="tab-section active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <i class="fa-solid fa-road"></i>
+            <div class="section-header" id="about-sec"><h2>Over Ons</h2></div>
+            <div class="gallery-card" style="line-height:1.7; padding:25px;">
+                <p style="margin-bottom:12px;">Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2.</p>
+            </div>
+
+            <div class="section-header" id="rules-sec"><h2>Bedrijfsregels & Gedragscode</h2></div>
+            <div class="gallery-card" style="line-height:1.7; padding:25px;">
+                <h3 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-shield-halved"></i> Algemene VTC Regels</h3>
+                <ul style="list-style-type: disc; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--text-muted);">
+                    <li><b>Gezelligheid & Respect:</b> Behandel alle collega-chauffeurs met respect.</li>
+                    <li><b>Realistisch Rijgedrag:</b> Houd je aan de verkeersregels en snelheidslimieten.</li>
+                </ul>
+            </div>
+
+            <div class="section-header" id="team"><h2>Ons Team</h2></div>
+            <div class="team-grid" id="team-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;"></div>
+
+            <div class="section-header" id="vloot"><h2>Onze Vloot</h2></div>
+            <div class="fleet-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                <div class="gallery-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg" class="fleet-img"><div style="font-weight:bold;">Scania S 2016</div></div>
+                <div class="gallery-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png" class="fleet-img"><div style="font-weight:bold;">Volvo FH 16</div></div>
+            </div>
+
+            <div class="section-header" id="activiteit"><h2>Afgeronde Ritten</h2></div>
+            <div class="trips-card" id="trips-container" style="margin-bottom:40px;">
+                <p style="text-align:center; color:var(--text-muted);">Laden van recente ritten...</p>
+            </div>
+        </div>
+
+        <!-- PORTAL VIEW -->
+        <div id="portal-view" class="page-view">
+            <div class="portal-layout">
+                <div class="sidebar" id="portal-sidebar">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom: 5px;" class="sidebar-brand" onclick="goHome()">
+                        <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:28px;">
+                        <span style="font-size:0.85rem; line-height:1.2; font-weight:bold;">Brecht Transport Portaal</span>
+                    </div>
+
+                    <div class="sidebar-user-card">
+                        <div class="user-avatar-circle" id="sidebar-avatar-container"><i class="fa-solid fa-user"></i></div>
+                        <div style="overflow:hidden; flex:1;">
+                            <div id="sidebar-username-txt" style="font-weight:bold; font-size:0.85rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Gebruiker</div>
+                            <div id="sidebar-role-txt" style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase;">Chauffeur</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-crop"></i> Profielfoto Croppen</button>
+                        <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
+                    </div>
+
+                    <div class="sidebar-section-title">HOOFDMENU</div>
+                    <ul class="sidebar-menu">
+                        <li class="active"><button onclick="switchPortalTab('p-tab-stats', this, 'Overzicht')"><i class="fa-solid fa-chart-pie"></i> Overzicht</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien')"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-werving', this, 'Werving & Aanmelding')"><i class="fa-solid fa-user-plus"></i> Werving</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid Beheer')"><i class="fa-solid fa-calendar-days"></i> Afwezigheid</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-polls', this, 'Stemmingen & Peilingen')"><i class="fa-solid fa-square-poll-vertical"></i> Peilingen</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-support', this, 'Support & Ideeën')"><i class="fa-solid fa-bug"></i> Support & Ideeën</button></li>
+                    </ul>
+
+                    <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER</div>
+                    <ul class="sidebar-menu">
+                        <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this, 'Badges & EOTW')"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
+                        <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this, 'Personeel Beheren')"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
+                    </ul>
+
+                    <div style="margin-top:auto; padding-top:12px; border-top:1px solid var(--border-red); display:flex; flex-direction:column; gap:6px; width:100%;">
+                        <button onclick="goHome()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-globe"></i> Hoofdsite</button>
+                        <button onclick="logout()" class="btn-red" style="width:100%; background:#330a0a; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-right-from-bracket"></i> Uitloggen</button>
+                    </div>
+                </div>
+
+                <div class="portal-content">
+                    <div class="mobile-portal-tabs">
+                        <button class="active" onclick="switchPortalTab('p-tab-stats', this, 'Overzicht')">Overzicht</button>
+                        <button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien')">Konvooien</button>
+                        <button onclick="switchPortalTab('p-tab-werving', this, 'Werving')">Werving</button>
+                        <button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid')">Afwezigheid</button>
+                        <button onclick="switchPortalTab('p-tab-polls', this, 'Peilingen')">Peilingen</button>
+                        <button onclick="switchPortalTab('p-tab-support', this, 'Support')">Support</button>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid var(--border-red); padding-bottom:16px;">
+                        <div><h1 id="portal-dynamic-title" style="font-size:1.8rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1></div>
+                    </div>
+
+                    <!-- TAB 1: OVERZICHT -->
+                    <div id="p-tab-stats" class="portal-tab-content">
+                        <div class="dashboard-grid-top">
+                            <div class="dash-card">
+                                <div class="dash-card-header"><span class="dash-card-title">AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
+                                <div class="dash-card-num" id="company-stat-distance">0 km</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-header"><span class="dash-card-title">ACTIEVE CHAUFFEURS</span><div class="dash-card-icon"><i class="fa-solid fa-user-group"></i></div></div>
+                                <div class="dash-card-num" id="company-stat-drivers">0</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
+                                <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
+                            </div>
+                        </div>
+
+                        <div class="dash-main-row">
                             <div>
-                                <h3>Totaal KM's</h3>
-                                <p>142.500 km</p>
+                                <div class="analytics-box" style="margin-bottom:24px;">
+                                    <h3 style="font-size: 1.1rem; margin-bottom:15px;"><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Prestatie Analyse</h3>
+                                    <div style="height: 250px; width: 100%;"><canvas id="earningsChart"></canvas></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fa-solid fa-truck"></i>
                             <div>
-                                <h3>Actieve Konvooien</h3>
-                                <p>4</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fa-solid fa-users"></i>
-                            <div>
-                                <h3>Chauffeurs</h3>
-                                <p>28</p>
+                                <div class="live-feed-box">
+                                    <h3 style="margin-bottom:12px; font-size:1.1rem;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
+                                    <div id="live-feed-container"><p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Geen recente activiteit.</p></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </section>
 
-                <!-- TAB 2: KONVOOIEN -->
-                <section id="tab-convoy" class="tab-section">
-                    <h2>Komende Konvooien</h2>
-                    <div class="convoy-card">
-                        <div class="convoy-info">
-                            <h3>🚛 Europort naar Berlin</h3>
-                            <p><i class="fa-regular fa-calendar"></i> 24 Oktober 2026 | <i class="fa-regular fa-clock"></i> 19:30 UTC</p>
-                        </div>
-                        <div class="convoy-actions mt-2">
-                            <button class="btn btn-green" onclick="setAttendance('aanwezig')"><i class="fa-solid fa-check"></i> Aanwezig</button>
-                            <button class="btn btn-orange" onclick="setAttendance('twijfel')"><i class="fa-solid fa-question"></i> Twijfel</button>
-                            <button class="btn btn-red" onclick="setAttendance('afwezig')"><i class="fa-solid fa-xmark"></i> Afwezig</button>
-                        </div>
-                        <div class="attendance-summary mt-2">
-                            <small>Jouw status: <span id="my-status" class="badge-green">Aanwezig</span></small>
+                    <!-- TAB 2: KONVOOIEN -->
+                    <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-truck-front" style="color:var(--accent-red);"></i> Komende Konvooien & Aanwezigheid</h3>
+                            <div id="convoys-list-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
-                </section>
 
-                <!-- TAB 3: WERVING -->
-                <section id="tab-werving" class="tab-section">
-                    <h2>Nieuwe Chauffeur Aanmelding</h2>
-                    <div class="form-card">
-                        <p style="margin-bottom: 15px; color: #a0a0ab;">Vul hieronder je gegevens in om je VTC-account definitief in te stellen met een eigen wachtwoord en displaynaam.</p>
-                        <form id="werving-form" onsubmit="submitWerving(event)">
-                            <div class="form-group">
-                                <label>Gebruikersnaam (Sync ID / Uniek achter de schermen):</label>
-                                <input type="text" id="w-username" required placeholder="bijv. brecht_sync">
-                            </div>
-                            <div class="form-group">
-                                <label>Displaynaam (Zichtbare naam op het portaal):</label>
-                                <input type="text" id="w-displayname" required placeholder="bijv. Brecht">
-                            </div>
-                            <div class="form-group">
-                                <label>Ervaring in ETS2 / VTC's:</label>
-                                <textarea id="w-experience" rows="3" placeholder="Vertel kort over je ervaring..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Kies je eigen wachtwoord:</label>
-                                <input type="password" id="w-password" required placeholder="Minimaal 8 tekens">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Account Activeren</button>
-                        </form>
+                    <!-- TAB 3: WERVING (Nieuw tabje voor instellen gegevens) -->
+                    <div id="p-tab-werving" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="max-width: 600px;">
+                            <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuwe Chauffeur Aanmelding</h3>
+                            <p style="color:var(--text-muted); font-size:0.9rem; margin: 10px 0 20px 0;">Vul je gegevens in om direct je gebruikersnaam, displaynaam, ervaring en eigen wachtwoord vast te leggen.</p>
+                            <form onsubmit="submitWervingForm(event)">
+                                <label style="font-size:0.85rem; color:var(--text-muted);">Gebruikersnaam (Sync ID):</label>
+                                <input type="text" id="w-user" class="form-input" required placeholder="bijv. Driver_Brecht">
+                                
+                                <label style="font-size:0.85rem; color:var(--text-muted);">Displaynaam (Weergavenaam op de site):</label>
+                                <input type="text" id="w-display" class="form-input" required placeholder="bijv. Brecht">
+
+                                <label style="font-size:0.85rem; color:var(--text-muted);">Ervaring / Motivering:</label>
+                                <textarea id="w-exp" class="form-input" rows="3" placeholder="Vertel over je ETS2 ervaring..."></textarea>
+
+                                <label style="font-size:0.85rem; color:var(--text-muted);">Eigen Wachtwoord:</label>
+                                <input type="password" id="w-pass" class="form-input" required placeholder="Kies een sterk wachtwoord">
+
+                                <button type="submit" class="btn-red" style="margin-top:10px;">Account Instellen & Activeren</button>
+                            </form>
+                        </div>
                     </div>
-                </section>
 
-                <!-- TAB 4: AFWEZIGHEID (Management Revamp) -->
-                <section id="tab-afwezigheid" class="tab-section">
-                    <h2>Afwezigheidsbeheer (Management)</h2>
-                    <div class="card-list" id="absence-list">
-                        <div class="absence-item">
-                            <div>
-                                <strong>RoadKing</strong> (1 Nov t/m 5 Nov)<br>
-                                <small style="color: #a0a0ab;">Reden: Vakantie naar het buitenland</small>
+                    <!-- TAB 4: AFWEZIGHEID (Management Revamp) -->
+                    <div id="p-tab-absence" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-calendar-days" style="color:var(--accent-red);"></i> Afwezigheid Aanvragen</h3>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
+                                <div><label style="font-size:0.85rem; color:var(--text-muted);">Van:</label><input type="date" id="abs-from" class="form-input"></div>
+                                <div><label style="font-size:0.85rem; color:var(--text-muted);">Tot:</label><input type="date" id="abs-to" class="form-input"></div>
                             </div>
-                            <div class="absence-actions">
-                                <span class="badge badge-orange">In Afwachting</span>
-                                <button class="btn-sm btn-green" onclick="handleAbsence(this, 'Goedgekeurd')"><i class="fa-solid fa-check"></i></button>
-                                <button class="btn-sm btn-red" onclick="handleAbsence(this, 'Afgewezen')"><i class="fa-solid fa-xmark"></i></button>
+                            <input type="text" id="abs-reason" placeholder="Reden van afwezigheid..." class="form-input">
+                            <button onclick="submitAbsence()" class="btn-red">Verzoek Indienen</button>
+                        </div>
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-clipboard-list" style="color:var(--accent-red);"></i> Ingediende Verzoeken (Management Overzicht)</h3>
+                            <div id="absence-list-container" style="margin-top:15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: STEMMINGEN & PEILINGEN -->
+                    <div id="p-tab-polls" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="max-width: 600px;">
+                            <h3><i class="fa-solid fa-square-poll-vertical" style="color:var(--accent-red);"></i> Actieve Peilingen & Stemmingen</h3>
+                            <div id="polls-container" style="margin-top:15px;">
+                                <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:12px; margin-bottom:12px;">
+                                    <b>Welke DLC-route rijden we tijdens het volgende feestkonvooi?</b>
+                                    <div style="margin:12px 0; display:flex; flex-direction:column; gap:8px;">
+                                        <label><input type="radio" name="poll-1" value="0"> Road to the Black Sea (45%)</label>
+                                        <label><input type="radio" name="poll-1" value="1"> Beyond the Baltic Sea (30%)</label>
+                                        <label><input type="radio" name="poll-1" value="2"> Iberia (25%)</label>
+                                    </div>
+                                    <button onclick="votePoll('poll-1')" class="btn-red" style="padding:6px 14px; font-size:0.85rem;">Stem Uitbrengen</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </section>
 
-                <!-- TAB 5: STEMMINGEN & PEILINGEN -->
-                <section id="tab-peilingen" class="tab-section">
-                    <h2>Actieve Peilingen</h2>
-                    <div class="poll-card">
-                        <h3>Welke DLC-route rijden we tijdens het feestkonvooi?</h3>
-                        <div class="poll-options mt-2">
-                            <label><input type="radio" name="poll"> Road to the Black Sea (45%)</label><br><br>
-                            <label><input type="radio" name="poll"> Beyond the Baltic Sea (30%)</label><br><br>
-                            <label><input type="radio" name="poll"> Iberia (25%)</label>
-                        </div>
-                        <button class="btn btn-primary mt-2" onclick="submitPoll()">Stem Uitbrengen</button>
-                    </div>
-                </section>
-
-                <!-- TAB 6: SUPPORT & IDEEËN -->
-                <section id="tab-support" class="tab-section">
-                    <h2>Support & Ideeënbus (Bugtracker)</h2>
-                    <div class="form-card">
-                        <h3>Meld een Bug of Dien een Idee in</h3>
-                        <form id="support-form" onsubmit="submitSupport(event)" class="mt-2">
-                            <div class="form-group">
-                                <label>Type melding:</label>
-                                <select id="s-type">
+                    <!-- TAB 6: SUPPORT & IDEEËN (Bugtracker) -->
+                    <div id="p-tab-support" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="max-width: 600px; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-bug" style="color:var(--accent-red);"></i> Support & Ideeënbus (Bug Melden of Idee Indienen)</h3>
+                            <form onsubmit="submitSupportForm(event)" style="margin-top:15px;">
+                                <label style="font-size:0.85rem; color:var(--text-muted);">Type melding:</label>
+                                <select id="sup-type" class="form-input" style="background:rgba(0,0,0,0.5); color:#fff;">
                                     <option value="Bug">Bug / Systeemfout</option>
                                     <option value="Idee">Idee / Feature Verzoek</option>
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Omschrijving:</label>
-                                <textarea id="s-desc" rows="3" required placeholder="Omschrijf de bug of je idee zo duidelijk mogelijk..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Versturen naar Devs</button>
-                        </form>
-                    </div>
-                </section>
 
+                                <label style="font-size:0.85rem; color:var(--text-muted);">Omschrijving:</label>
+                                <textarea id="sup-desc" class="form-input" rows="3" required placeholder="Omschrijf het probleem of je idee..."></textarea>
+
+                                <button type="submit" class="btn-red">Versturen naar Devs</button>
+                            </form>
+                        </div>
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-list-check" style="color:var(--accent-red);"></i> Ingezonden Tickets & Ideeën</h3>
+                            <div id="support-list-container" style="margin-top:15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- PERSONEEL BEHEER (Management+) -->
+                    <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
+                        <div class="staff-table-wrapper">
+                            <table class="staff-table">
+                                <thead><tr><th>Gebruiker</th><th>Displaynaam</th><th>Rol</th><th>Acties</th></tr></thead>
+                                <tbody id="staff-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- BADGES & EOTW -->
+                    <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Badges & Chauffeur van de Week</h3>
+                            <div id="badges-tree-container" style="margin-top:15px;"></div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-        </main>
+        </div>
     </div>
 
-    <script src="index.js"></script>
+    <footer><p>&copy; Alle rechten behouden 2026 | Brecht Transport VTC</p></footer>
+
+    <!-- MODALS -->
+    <div id="password-modal">
+        <div class="login-box">
+            <h2 style="font-size:1.3rem; margin-bottom:12px;">Wachtwoord Wijzigen</h2>
+            <input type="password" id="my-new-password" placeholder="Nieuw wachtwoord..." class="form-input">
+            <button onclick="updateMyOwnPassword()" class="btn-red" style="width:100%; margin-top:6px;">Opslaan</button>
+            <button onclick="closePasswordModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:10px; cursor:pointer;">Annuleren</button>
+        </div>
+    </div>
+
+    <div id="login-modal">
+        <div class="login-box">
+            <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;">
+            <h2 style="font-size:1.4rem;">Personeel Inloggen</h2>
+            <input type="text" id="login-user" placeholder="Gebruikersnaam" class="form-input" style="margin-top:12px;">
+            <input type="password" id="login-pass" placeholder="••••••••" class="form-input">
+            <button onclick="handleLogin()" class="btn-red" style="width:100%; margin-top:10px;">Inloggen</button>
+            <button onclick="closeLoginModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:12px; cursor:pointer;">Terug</button>
+            <div id="login-error" style="color:#ff4d4d; font-size:0.82rem; margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let chartInstance = null;
+        const MAIN_DOMAIN = "brechttransport.nl";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchFreshData();
+            const savedUser = sessionStorage.getItem('brecht_user');
+            if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) {} }
+        });
+
+        async function fetchFreshData() {
+            try {
+                const res = await fetch('/api/haulmp');
+                const data = await res.json();
+                processLoadedData(data);
+            } catch(e) {}
+        }
+
+        function processLoadedData(data) {
+            if (data.distance) document.getElementById('stat-distance').innerText = data.distance;
+            if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
+            if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
+
+            if (Array.isArray(data.drivers_list)) {
+                const teamContainer = document.getElementById('team-container');
+                if (teamContainer) {
+                    teamContainer.innerHTML = '';
+                    data.drivers_list.filter(m => !m.isDev).forEach(m => {
+                        teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div><div style="font-weight:bold;">${m.displayname || m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div>`);
+                    });
+                }
+            }
+
+            // Support lijst inladen
+            const supContainer = document.getElementById('support-list-container');
+            if (supContainer && data.supportList) {
+                supContainer.innerHTML = '';
+                data.supportList.forEach(s => {
+                    supContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px;"><b>[${s.type}]</b> ${s.desc} <br><small style="color:#888;">Door ${s.username} - Status: ${s.status}</small></div>`);
+                });
+            }
+
+            // Afwezigheid lijst inladen (Management Revamp)
+            const absContainer = document.getElementById('absence-list-container');
+            if (absContainer && data.absencesList) {
+                absContainer.innerHTML = '';
+                data.absencesList.forEach(a => {
+                    absContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;"><div><b>${a.username}</b> (${a.from} t/m ${a.to})<br><small style="color:#888;">Reden: ${a.reason}</small></div><div><span style="padding:4px 8px; border-radius:4px; background:rgba(230,126,34,0.2); color:#e67e22; font-weight:bold;">${a.status}</span> <button onclick="handleAbsence('${a.id}', 'Goedgekeurd')" class="btn-green" style="font-size:0.75rem; padding:4px 8px;">✓</button> <button onclick="handleAbsence('${a.id}', 'Afgewezen')" class="btn-red" style="font-size:0.75rem; padding:4px 8px;">✕</button></div></div>`);
+                });
+            }
+
+            if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
+            if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance || "0 km";
+            if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers || "0";
+
+            renderChart(data.weeklyChartData || []);
+        }
+
+        async function submitWervingForm(e) {
+            e.preventDefault();
+            const username = document.getElementById('w-user').value;
+            const displayname = document.getElementById('w-display').value;
+            const experience = document.getElementById('w-exp').value;
+            const password = document.getElementById('w-pass').value;
+
+            const res = await fetch('/api/werving/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayname, experience, password }) });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert('Account succesvol aangemaakt! Je kunt nu inloggen.');
+                document.getElementById('werving-form').reset();
+            } else {
+                alert(data.message || 'Fout bij aanmaken account.');
+            }
+        }
+
+        async function submitSupportForm(e) {
+            e.preventDefault();
+            const type = document.getElementById('sup-type').value;
+            const desc = document.getElementById('sup-desc').value;
+            await fetch('/api/support', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, desc, username: currentUser ? currentUser.username : 'Gast' }) });
+            alert('Verzonden naar het dev-team!');
+            document.getElementById('sup-desc').value = '';
+            fetchFreshData();
+        }
+
+        async function submitAbsence() {
+            const from = document.getElementById('abs-from').value;
+            const to = document.getElementById('abs-to').value;
+            const reason = document.getElementById('abs-reason').value;
+            if (!from || !to) return alert('Vul datums in!');
+            await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, reason, username: currentUser.username }) });
+            alert('Afwezigheid aangevraagd.');
+            fetchFreshData();
+        }
+
+        async function handleAbsence(absId, status) {
+            await fetch('/api/absence/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ absId, status }) });
+            fetchFreshData();
+        }
+
+        async function votePoll(pollId) {
+            const selected = document.querySelector(`input[name="${pollId}"]:checked`);
+            if (!selected) return alert('Kies een optie!');
+            await fetch('/api/polls/vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pollId, optionIndex: selected.value, username: currentUser.username }) });
+            alert('Stem succesvol uitgebracht!');
+        }
+
+        function goHome() { switchView('home-view'); }
+        function handleNavLogin() { openLoginModal(); }
+        function switchView(viewId) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+        function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
+        function closeLoginModal() { document.getElementById('login-modal').style.display = 'none'; }
+        function openPasswordModal() { document.getElementById('password-modal').style.display = 'flex'; }
+        function closePasswordModal() { document.getElementById('password-modal').style.display = 'none'; }
+
+        async function handleLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                currentUser = data; sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                closeLoginModal(); openPortalDashboard();
+            } else { document.getElementById('login-error').innerText = data.message; }
+        }
+
+        function logout() { currentUser = null; sessionStorage.removeItem('brecht_user'); goHome(); }
+
+        function openPortalDashboard() {
+            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
+            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
+            if (currentUser.canManageStaff) {
+                document.getElementById('mgt-section-head').style.display = 'block';
+                document.getElementById('staff-tab-btn').style.display = 'block';
+            }
+            switchView('portal-view');
+        }
+
+        function switchPortalTab(tabId, btnElement, titleText) {
+            document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            if (titleText) document.getElementById('portal-dynamic-title').innerHTML = `<i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> ${titleText}`;
+            if (btnElement && btnElement.parentElement) btnElement.parentElement.classList.add('active');
+        }
+
+        function renderChart(weeklyData) {
+            const ctx = document.getElementById('earningsChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: weeklyData.map(w => w.week),
+                    datasets: [{ label: 'Bedrijf (€)', data: weeklyData.map(w => w.company), borderColor: '#ff3333', borderWidth: 3, fill: true, tension: 0.3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8' } } } }
+            });
+        }
+    </script>
 </body>
 </html>
