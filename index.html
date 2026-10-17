@@ -107,7 +107,7 @@
         .hero-title { font-family: 'Space Grotesk', sans-serif; font-size: 4rem; font-weight: 800; line-height: 1.05; margin-bottom: 18px; color: #fff; }
         .hero-desc-text { font-size: 1.05rem; color: var(--text-muted); max-width: 650px; line-height: 1.6; margin-bottom: 25px; }
 
-        #login-modal, #password-modal, #discord-modal, #manage-user-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px); }
+        #login-modal, #password-modal, #manage-user-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px); }
         .login-box { background: rgba(18, 4, 4, 0.96); border: 1px solid var(--border-red); border-radius: 20px; max-width: 440px; width: 100%; padding: 30px; text-align: center; color: #fff; }
 
         .staff-table-wrapper { width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 18px; padding: 12px; }
@@ -130,7 +130,6 @@
         footer { text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); }
         .sidebar-user-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; width: 100%; }
         .user-avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; overflow: hidden; }
-        .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
         @media (max-width: 1050px) {
             .portal-layout { flex-direction: column; }
@@ -149,6 +148,7 @@
         <ul class="nav-links">
             <li><a href="javascript:void(0);" onclick="goHome()">Home</a></li>
             <li><a href="#about-sec">Over Ons</a></li>
+            <li><a href="#rules-sec">Reglement</a></li>
             <li><a href="#team">Team</a></li>
             <li><a href="#vloot">Vloot</a></li>
             <li><a href="#activiteit">Ritten</a></li>
@@ -184,6 +184,18 @@
             <div class="section-header" id="about-sec"><h2>Over Ons</h2></div>
             <div class="gallery-card" style="line-height:1.7; padding:25px;">
                 <p style="margin-bottom:12px;">Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2.</p>
+            </div>
+
+            <div class="section-header" id="rules-sec"><h2>VTC Reglement</h2></div>
+            <div class="gallery-card" style="line-height:1.7; padding:25px;">
+                <h3 style="color:var(--accent-red); margin-bottom:8px;">📌 1. Algemene VTC-regels</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:12px;">Behandel alle leden met respect. Luister naar de leiding en volg instructies van VTC-management en konvooileiders op.</p>
+                
+                <h3 style="color:var(--accent-red); margin-bottom:8px;">🚦 2. Regels tijdens konvooien</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:12px;">Volg altijd de konvooileider. Houd voldoende afstand en haal niet zomaar in. Kom op tijd en zorg dat je trailer klaarstaat.</p>
+
+                <h3 style="color:var(--accent-red); margin-bottom:8px;">🎮 3. Regels in-game (ETS2 / TruckersMP)</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem;">Houd je aan de TruckersMP-regels. Geen cheats of gevaarlijk rijgedrag. Vertegenwoordig Brecht Transport op een positieve manier.</p>
             </div>
 
             <div class="section-header" id="team"><h2>Ons Team</h2></div>
@@ -231,7 +243,7 @@
                         <li><button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien & Evenementen')"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
                         <li><button onclick="switchPortalTab('p-tab-polls', this, 'Stemmingen & Peilingen')"><i class="fa-solid fa-square-poll-vertical"></i> Peilingen</button></li>
                         <li><button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid Melden')"><i class="fa-solid fa-calendar-days"></i> Afwezigheid</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-socials', this, 'Socials Beheren')"><i class="fa-solid fa-share-nodes"></i> Socials</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-socials', this, 'Social Media Links')"><i class="fa-solid fa-share-nodes"></i> Socials</button></li>
                     </ul>
 
                     <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER / MANAGEMENT</div>
@@ -303,37 +315,54 @@
                     <!-- TAB: VTC REGELS -->
                     <div id="p-tab-rules" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="line-height:1.7;">
-                            <h2 style="color:var(--accent-red); margin-bottom:15px;"><i class="fa-solid fa-book-shield"></i> Convoy Regels</h2>
-                            <h3 style="font-size:1.05rem; color:#fff; margin:12px 0 6px 0;">Tijdens Convoys</h3>
-                            <ul style="list-style-type:disc; padding-left:20px; color:var(--text-muted);">
-                                <li>Luister naar Convoy Control.</li>
-                                <li>Niet inhalen tenzij toestemming wordt gegeven.</li>
-                                <li>Houd voldoende afstand.</li>
-                                <li>Geen gevaarlijk remmen of swerven.</li>
-                                <li>Respecteer de snelheid van de convoyleider.</li>
+                            <h2 style="color:var(--accent-red); margin-bottom:15px;"><i class="fa-solid fa-book-shield"></i> VTC-Reglement</h2>
+                            <p style="color:var(--text-muted); margin-bottom:15px;">Welkom bij Brecht Transport! Om ervoor te zorgen dat iedereen met plezier, respect en veilig kan rijden, gelden onderstaande regels.</p>
+                            
+                            <h3 style="font-size:1.05rem; color:#fff; margin:12px 0 6px 0;">📌 1. Algemene VTC-regels</h3>
+                            <ul style="list-style-type:disc; padding-left:20px; color:var(--text-muted); margin-bottom:12px;">
+                                <li>Behandel alle leden met respect. Schelden, pesten en discriminatie worden niet geaccepteerd.</li>
+                                <li>Luister naar de leiding en volg instructies van VTC-management op.</li>
+                                <li>Gedraag je ook buiten onze eigen konvooien als een vertegenwoordiger van Brecht Transport.</li>
                             </ul>
 
-                            <h3 style="font-size:1.05rem; color:#fff; margin:18px 0 6px 0;">CB Radio</h3>
+                            <h3 style="font-size:1.05rem; color:#fff; margin:12px 0 6px 0;">🚦 2. Regels tijdens konvooien</h3>
+                            <ul style="list-style-type:disc; padding-left:20px; color:var(--text-muted); margin-bottom:12px;">
+                                <li>Volg altijd de konvooileider. Route, snelheid en stops worden door de leiding bepaald.</li>
+                                <li>Kom op tijd en zorg dat je vrachtwagen en trailer klaarstaan.</li>
+                                <li>Houd voldoende afstand en haal niet onnodig in.</li>
+                            </ul>
+
+                            <h3 style="font-size:1.05rem; color:#fff; margin:12px 0 6px 0;">🎮 3. Regels in-game (ETS2 / TruckersMP)</h3>
                             <ul style="list-style-type:disc; padding-left:20px; color:var(--text-muted);">
-                                <li>Gebruik alleen de afgesproken CB-kanalen.</li>
-                                <li>Houd communicatie rustig en duidelijk.</li>
-                                <li>Geen geschreeuw of onnodige spam.</li>
+                                <li>Houd je aan de TruckersMP-regels.</li>
+                                <li>Geen cheats, hacks of opzettelijk rammen/blokkeren van andere weggebruikers.</li>
                             </ul>
                         </div>
                     </div>
 
                     <!-- TAB: INFO & MEDEDELINGEN & MODS -->
                     <div id="p-tab-info" class="portal-tab-content" style="display:none;">
-                        <div id="info-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-file-arrow-up" style="color:var(--accent-red);"></i> Mededeling of Info Plaatsen</h3>
-                            <input type="text" id="info-title" placeholder="Titel..." class="form-input">
-                            <textarea id="info-content" placeholder="Inhoud..." class="form-input" style="height:80px;"></textarea>
-                            <button onclick="postInfo()" class="btn-red">Publiceren</button>
+                        <div id="ann-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Mededeling Plaatsen</h3>
+                            <input type="text" id="ann-title" placeholder="Mededeling Titel..." class="form-input">
+                            <textarea id="ann-content" placeholder="Inhoud..." class="form-input" style="height:70px;"></textarea>
+                            <button onclick="postAnnouncement()" class="btn-red">Mededeling Publiceren</button>
                         </div>
+
+                        <div id="info-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-file-arrow-up" style="color:var(--accent-red);"></i> Informatie / Mod Uploaden</h3>
+                            <input type="text" id="info-title" placeholder="Titel van bestand/mod..." class="form-input">
+                            <textarea id="info-content" placeholder="Omschrijving of instructies..." class="form-input" style="height:70px;"></textarea>
+                            <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-top:5px;">Selecteer Bestand (Verkenner):</label>
+                            <input type="file" id="info-file" class="form-input">
+                            <button onclick="postInfoWithFile()" class="btn-red">Bestand / Info Publiceren</button>
+                        </div>
+
                         <div class="gallery-card" style="margin-bottom:20px;">
                             <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Mededelingen</h3>
                             <div id="announcements-display-container" style="margin-top:15px;"></div>
                         </div>
+
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-folder-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
                             <div id="info-list-container" style="margin-top:15px;"></div>
@@ -349,8 +378,10 @@
                                 <input type="text" id="conv-server" placeholder="Server (bijv. Simulation 1)..." class="form-input">
                                 <input type="date" id="conv-date" class="form-input">
                                 <input type="time" id="conv-time" class="form-input">
+                                <input type="text" id="conv-from" placeholder="Vertrekstad (Von)..." class="form-input">
+                                <input type="text" id="conv-to" placeholder="Aankomststad (Nach)..." class="form-input">
                             </div>
-                            <input type="text" id="conv-route" placeholder="Route omschrijving..." class="form-input">
+                            <input type="text" id="conv-route" placeholder="Route info..." class="form-input">
                             <button onclick="postConvoy()" class="btn-red">Konvooi Publiceren</button>
                         </div>
                         <div class="gallery-card">
@@ -359,7 +390,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB: PEILINGEN (Leidinggevende+ kan aanmaken/verwijderen) -->
+                    <!-- TAB: PEILINGEN -->
                     <div id="p-tab-polls" class="portal-tab-content" style="display:none;">
                         <div id="poll-create-box" class="gallery-card" style="display:none; max-width:600px; margin-bottom:20px;">
                             <h3><i class="fa-solid fa-square-poll-vertical" style="color:var(--accent-red);"></i> Nieuwe Peiling Aanmaken</h3>
@@ -449,7 +480,7 @@
                     <!-- TAB: SOLLICITATIES -->
                     <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
-                            <h3><i class="fa-solid fa-file-signature" style="color:var(--accent-red);"></i> Ingekomen Sollicitaties</h3>
+                            <h3><i class="fa-solid fa-file-signature" style="color:var(--accent-red);"></i> Ingekomen Discord Sollicitaties</h3>
                             <div id="applications-open-container" style="margin-top:14px;"></div>
                         </div>
                     </div>
@@ -471,7 +502,6 @@
                                 <select id="badge-user-select" class="form-select" style="flex:1; margin:0;"></select>
                                 <button onclick="awardBadge()" class="btn-red">+ Toevoegen</button>
                             </div>
-                            <div id="badges-tree-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
 
@@ -607,7 +637,7 @@
                 infoContainer.innerHTML = '';
                 data.infoList?.forEach(i => {
                     const deleteBtn = currentUser?.canManageStaff ? `<button onclick="deleteInfo('${i.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem; float:right;">✕</button>` : '';
-                    let fileAction = i.link ? `<br><a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:6px; display:inline-block;"><i class="fa-solid fa-download"></i> Download</a>` : '';
+                    let fileAction = i.link ? `<br><a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:6px; display:inline-block;"><i class="fa-solid fa-download"></i> Download ${i.fileName ? '('+i.fileName+')' : ''}</a>` : '';
                     infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px;">${deleteBtn}<b>${i.title}</b><p style="font-size:0.88rem; color:var(--text-muted);">${i.content}</p>${fileAction}</div>`);
                 });
             }
@@ -628,6 +658,8 @@
                                 <span class="convoy-badge-date">${c.date} - ${c.time || '20:00'}</span>
                                 <div class="convoy-title">${c.title}</div>
                                 <div class="convoy-info-row"><span>Server:</span><b>${c.server || 'TruckersMP'}</b></div>
+                                <div class="convoy-info-row"><span>Von:</span><b>${c.from || 'Onbekend'}</b></div>
+                                <div class="convoy-info-row"><span>Nach:</span><b>${c.to || 'Onbekend'}</b></div>
                                 <div class="convoy-info-row"><span>Route:</span><b>${c.route || 'Algemeen konvooi'}</b></div>
                             </div>
                             <div class="convoy-card-footer">
@@ -662,6 +694,19 @@
                     });
                 } else {
                     pollsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve peilingen.</p>';
+                }
+            }
+
+            // Sollicitaties
+            const appsContainer = document.getElementById('applications-open-container');
+            if (appsContainer) {
+                appsContainer.innerHTML = '';
+                if (data.applications && data.applications.length > 0) {
+                    data.applications.forEach(app => {
+                        appsContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:10px;"><b>${app.applicant}</b> (${app.date})<br><p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">${app.content}</p></div>`);
+                    });
+                } else {
+                    appsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen ingekomen sollicitaties.</p>';
                 }
             }
 
@@ -713,7 +758,7 @@
                 document.getElementById('eotw-reason').innerText = `"${data.employeeOfTheWeek.reason}"`;
             }
 
-            // Live Activiteit & 10 dagen stats
+            // Live Activiteit & 10D Stats
             const liveFeedContainer = document.getElementById('live-feed-container');
             if (liveFeedContainer && Array.isArray(data.recent_jobs)) {
                 liveFeedContainer.innerHTML = '';
@@ -725,7 +770,7 @@
             if (currentUser && Array.isArray(data.dailyChartData)) {
                 let myTotalEarnings = 0;
                 data.dailyChartData.forEach(day => {
-                    const uKey = currentUser.username.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const uKey = currentUser.username.toLowerCase().trim();
                     if (day.drivers && day.drivers[uKey]) myTotalEarnings += day.drivers[uKey];
                 });
                 const myTotalKm = Math.round(myTotalEarnings / 35);
@@ -758,7 +803,7 @@
             const datasets = [{ label: 'Bedrijfssaldo (€)', data: companyValues, borderColor: '#ff3333', borderWidth: 3, fill: true, tension: 0.3 }];
 
             if (username) {
-                const uKey = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const uKey = username.toLowerCase().trim();
                 const userValues = dailyData.map(d => (d.drivers && d.drivers[uKey]) ? d.drivers[uKey] : 0);
                 datasets.push({ label: `Mijn Saldo (€)`, data: userValues, borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.3 });
             }
@@ -775,6 +820,59 @@
                     plugins: { legend: { labels: { color: '#caa8a8' } } } 
                 }
             });
+        }
+
+        async function postAnnouncement() {
+            const title = document.getElementById('ann-title').value;
+            const content = document.getElementById('ann-content').value;
+            await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
+            alert('Mededeling gepubliceerd!');
+            document.getElementById('ann-title').value = ''; document.getElementById('ann-content').value = '';
+            fetchFreshData();
+        }
+
+        async function postInfoWithFile() {
+            const title = document.getElementById('info-title').value;
+            const content = document.getElementById('info-content').value;
+            const fileInput = document.getElementById('info-file');
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('content', content);
+            formData.append('username', currentUser.username);
+            if (fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            await fetch('/api/info', { method: 'POST', body: formData });
+            alert('Informatie / Mod gepubliceerd!');
+            document.getElementById('info-title').value = ''; document.getElementById('info-content').value = ''; fileInput.value = '';
+            fetchFreshData();
+        }
+
+        async function postConvoy() {
+            const title = document.getElementById('conv-title').value;
+            const date = document.getElementById('conv-date').value;
+            const time = document.getElementById('conv-time').value;
+            const server = document.getElementById('conv-server').value;
+            const from = document.getElementById('conv-from').value;
+            const to = document.getElementById('conv-to').value;
+            const route = document.getElementById('conv-route').value;
+            
+            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, from, to, route }) });
+            alert('Konvooi instant gepubliceerd!');
+            fetchFreshData();
+        }
+
+        async function createPoll() {
+            const question = document.getElementById('poll-question').value;
+            const opt1 = document.getElementById('poll-opt1').value;
+            const opt2 = document.getElementById('poll-opt2').value;
+            const opt3 = document.getElementById('poll-opt3').value;
+            const options = [opt1, opt2, opt3].filter(o => o && o.trim() !== "");
+            await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) });
+            alert('Peiling gepubliceerd!');
+            fetchFreshData();
         }
 
         async function submitWervingAccount() {
@@ -809,42 +907,11 @@
 
         async function fireStaffMemberModal() {
             const username = document.getElementById('mgt-old-username').value;
-            if (confirm(`Weet je zeker dat je ${username} wilt ontslaan?`)) {
+            if (confirm(`Weet je zeker dat je ${username} direct wilt ontslaan?`)) {
                 await fetch(`/api/staff/${username}`, { method: 'DELETE' });
                 closeManageModal();
                 fetchFreshData();
             }
-        }
-
-        async function postInfo() {
-            const title = document.getElementById('info-title').value;
-            const content = document.getElementById('info-content').value;
-            await fetch('/api/info', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
-            alert('Geplaatst!');
-            document.getElementById('info-title').value = ''; document.getElementById('info-content').value = '';
-            fetchFreshData();
-        }
-
-        async function postConvoy() {
-            const title = document.getElementById('conv-title').value;
-            const date = document.getElementById('conv-date').value;
-            const time = document.getElementById('conv-time').value;
-            const server = document.getElementById('conv-server').value;
-            const route = document.getElementById('conv-route').value;
-            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route }) });
-            alert('Konvooi aangemaakt!');
-            fetchFreshData();
-        }
-
-        async function createPoll() {
-            const question = document.getElementById('poll-question').value;
-            const opt1 = document.getElementById('poll-opt1').value;
-            const opt2 = document.getElementById('poll-opt2').value;
-            const opt3 = document.getElementById('poll-opt3').value;
-            const options = [opt1, opt2, opt3].filter(o => o && o.trim() !== "");
-            await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) });
-            alert('Peiling aangemaakt!');
-            fetchFreshData();
         }
 
         async function votePoll(pollId, optionIndex) {
@@ -928,6 +995,7 @@
                 document.getElementById('apps-tab-btn').style.display = 'block';
                 document.getElementById('mgt-tab-btn').style.display = 'block';
                 document.getElementById('convoy-create-box').style.display = 'block';
+                document.getElementById('ann-create-box').style.display = 'block';
                 document.getElementById('info-create-box').style.display = 'block';
                 document.getElementById('social-create-box').style.display = 'block';
             }
