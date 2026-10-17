@@ -220,7 +220,6 @@
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-crop"></i> Profielfoto Croppen</button>
                         <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
                     </div>
 
@@ -232,6 +231,7 @@
                         <li><button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien & Evenementen')"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
                         <li><button onclick="switchPortalTab('p-tab-polls', this, 'Stemmingen & Peilingen')"><i class="fa-solid fa-square-poll-vertical"></i> Peilingen</button></li>
                         <li><button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid Melden')"><i class="fa-solid fa-calendar-days"></i> Afwezigheid</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-socials', this, 'Socials Beheren')"><i class="fa-solid fa-share-nodes"></i> Socials</button></li>
                     </ul>
 
                     <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER / MANAGEMENT</div>
@@ -292,6 +292,10 @@
                                     <h3 style="margin-bottom:12px; font-size:1.1rem;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
                                     <div id="live-feed-container"><p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Geen recente activiteit.</p></div>
                                 </div>
+                                <div class="gallery-card" style="margin-top:24px;">
+                                    <h3 style="font-size: 1.1rem;"><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Mijn Badges</h3>
+                                    <div id="my-badges-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -320,6 +324,12 @@
 
                     <!-- TAB: INFO & MEDEDELINGEN & MODS -->
                     <div id="p-tab-info" class="portal-tab-content" style="display:none;">
+                        <div id="info-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-file-arrow-up" style="color:var(--accent-red);"></i> Mededeling of Info Plaatsen</h3>
+                            <input type="text" id="info-title" placeholder="Titel..." class="form-input">
+                            <textarea id="info-content" placeholder="Inhoud..." class="form-input" style="height:80px;"></textarea>
+                            <button onclick="postInfo()" class="btn-red">Publiceren</button>
+                        </div>
                         <div class="gallery-card" style="margin-bottom:20px;">
                             <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Mededelingen</h3>
                             <div id="announcements-display-container" style="margin-top:15px;"></div>
@@ -335,14 +345,12 @@
                         <div id="convoy-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
                             <h3><i class="fa-solid fa-calendar-plus" style="color:var(--accent-red);"></i> Nieuw Konvooi Aanmaken</h3>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                                <input type="text" id="conv-title" placeholder="Titel..." class="form-input">
-                                <input type="text" id="conv-server" placeholder="Server (bijv. Sim 1)..." class="form-input">
+                                <input type="text" id="conv-title" placeholder="Konvooi Naam..." class="form-input">
+                                <input type="text" id="conv-server" placeholder="Server (bijv. Simulation 1)..." class="form-input">
                                 <input type="date" id="conv-date" class="form-input">
                                 <input type="time" id="conv-time" class="form-input">
-                                <input type="text" id="conv-from" placeholder="Vertrekstad..." class="form-input">
-                                <input type="text" id="conv-to" placeholder="Aankomststad..." class="form-input">
                             </div>
-                            <input type="text" id="conv-route" placeholder="Route info..." class="form-input">
+                            <input type="text" id="conv-route" placeholder="Route omschrijving..." class="form-input">
                             <button onclick="postConvoy()" class="btn-red">Konvooi Publiceren</button>
                         </div>
                         <div class="gallery-card">
@@ -351,8 +359,16 @@
                         </div>
                     </div>
 
-                    <!-- TAB: PEILINGEN & STEMMINGEN -->
+                    <!-- TAB: PEILINGEN (Leidinggevende+ kan aanmaken/verwijderen) -->
                     <div id="p-tab-polls" class="portal-tab-content" style="display:none;">
+                        <div id="poll-create-box" class="gallery-card" style="display:none; max-width:600px; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-square-poll-vertical" style="color:var(--accent-red);"></i> Nieuwe Peiling Aanmaken</h3>
+                            <input type="text" id="poll-question" placeholder="Peiling Vraag..." class="form-input">
+                            <input type="text" id="poll-opt1" placeholder="Optie 1..." class="form-input">
+                            <input type="text" id="poll-opt2" placeholder="Optie 2..." class="form-input">
+                            <input type="text" id="poll-opt3" placeholder="Optie 3 (Optioneel)..." class="form-input">
+                            <button onclick="createPoll()" class="btn-red">Peiling Publiceren</button>
+                        </div>
                         <div class="gallery-card" style="max-width:600px;">
                             <h3><i class="fa-solid fa-square-poll-vertical" style="color:var(--accent-red);"></i> Actieve Peilingen</h3>
                             <div id="polls-container" style="margin-top:15px;"><p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve peilingen.</p></div>
@@ -373,6 +389,25 @@
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-list-check" style="color:var(--accent-red);"></i> Ingediende Verzoeken</h3>
                             <div id="absence-list-container" style="margin-top:15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: SOCIALS -->
+                    <div id="p-tab-socials" class="portal-tab-content" style="display:none;">
+                        <div id="social-create-box" class="gallery-card" style="display:none; max-width:600px; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-share-nodes" style="color:var(--accent-red);"></i> Social Media Link Toevoegen</h3>
+                            <select id="social-platform" class="form-select">
+                                <option value="TikTok">TikTok</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="Twitch">Twitch</option>
+                                <option value="YouTube">YouTube</option>
+                            </select>
+                            <input type="url" id="social-url" placeholder="https://..." class="form-input">
+                            <button onclick="addSocialLink()" class="btn-red">Toevoegen</button>
+                        </div>
+                        <div class="gallery-card" style="max-width:600px;">
+                            <h3><i class="fa-solid fa-list" style="color:var(--accent-red);"></i> Onze Socials</h3>
+                            <div id="portal-socials-list" style="margin-top:14px;"></div>
                         </div>
                     </div>
 
@@ -556,6 +591,7 @@
         function refreshPortalData(data) {
             if (!data) return;
 
+            // Mededelingen
             const annContainer = document.getElementById('announcements-display-container');
             if (annContainer) {
                 annContainer.innerHTML = '';
@@ -565,15 +601,18 @@
                 });
             }
 
+            // Info & Mods
             const infoContainer = document.getElementById('info-list-container');
             if (infoContainer) {
                 infoContainer.innerHTML = '';
                 data.infoList?.forEach(i => {
                     const deleteBtn = currentUser?.canManageStaff ? `<button onclick="deleteInfo('${i.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem; float:right;">✕</button>` : '';
-                    infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px;">${deleteBtn}<b>${i.title}</b><p style="font-size:0.88rem; color:var(--text-muted);">${i.content}</p></div>`);
+                    let fileAction = i.link ? `<br><a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:4px 10px; font-size:0.75rem; margin-top:6px; display:inline-block;"><i class="fa-solid fa-download"></i> Download</a>` : '';
+                    infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px;">${deleteBtn}<b>${i.title}</b><p style="font-size:0.88rem; color:var(--text-muted);">${i.content}</p>${fileAction}</div>`);
                 });
             }
 
+            // Konvooien Grid
             const convGrid = document.getElementById('convoys-grid-container');
             if (convGrid) {
                 convGrid.innerHTML = '';
@@ -584,12 +623,12 @@
 
                     convGrid.insertAdjacentHTML('beforeend', `
                         <div class="convoy-card">
-                            <img src="${c.img || 'https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png'}" class="convoy-card-img">
+                            <img src="${c.img}" class="convoy-card-img">
                             <div class="convoy-card-body">
                                 <span class="convoy-badge-date">${c.date} - ${c.time || '20:00'}</span>
                                 <div class="convoy-title">${c.title}</div>
                                 <div class="convoy-info-row"><span>Server:</span><b>${c.server || 'TruckersMP'}</b></div>
-                                <div class="convoy-info-row"><span>Route:</span><b>${c.from || 'Start'} → ${c.to || 'Bestemming'}</b></div>
+                                <div class="convoy-info-row"><span>Route:</span><b>${c.route || 'Algemeen konvooi'}</b></div>
                             </div>
                             <div class="convoy-card-footer">
                                 <span style="font-size:0.8rem; color:var(--text-muted);"><b style="color:#fff;">${signups.length}</b> Deelnemers</span>
@@ -605,6 +644,48 @@
                 });
             }
 
+            // Peilingen
+            const pollsContainer = document.getElementById('polls-container');
+            if (pollsContainer) {
+                pollsContainer.innerHTML = '';
+                if (data.pollsList && data.pollsList.length > 0) {
+                    data.pollsList.forEach(p => {
+                        let optsHtml = '';
+                        p.options.forEach((opt, idx) => {
+                            const hasVoted = opt.votes?.includes(currentUser?.username);
+                            optsHtml += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:8px; margin-bottom:6px;">
+                                <button onclick="votePoll('${p.id}', ${idx})" class="${hasVoted ? 'btn-green' : 'btn-portal'}" style="flex:1; text-align:left; border:none; padding:6px 10px; font-size:0.85rem;">${opt.text} (${opt.votes?.length || 0} stemmen)</button>
+                            </div>`;
+                        });
+                        const delPollBtn = (currentUser?.canManageBadges) ? `<button onclick="deletePoll('${p.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem; float:right;">✕ Verwijderen</button>` : '';
+                        pollsContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px;">${delPollBtn}<b>${p.question}</b><div style="margin-top:10px;">${optsHtml}</div></div>`);
+                    });
+                } else {
+                    pollsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve peilingen.</p>';
+                }
+            }
+
+            // Afwezigheid
+            const absContainer = document.getElementById('absence-list-container');
+            if (absContainer) {
+                absContainer.innerHTML = '';
+                data.absencesList?.forEach(a => {
+                    const statusAction = (currentUser?.canManageStaff) ? `<button onclick="handleAbsence('${a.id}', 'Goedgekeurd')" class="btn-green" style="font-size:0.7rem; padding:4px 8px;">✓</button> <button onclick="handleAbsence('${a.id}', 'Afgewezen')" class="btn-red" style="font-size:0.7rem; padding:4px 8px;">✕</button>` : '';
+                    absContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;"><div><b>${a.username}</b> (${a.from} t/m ${a.to})<br><small style="color:#888;">Reden: ${a.reason}</small></div><div><span style="color:#e67e22; font-weight:bold; margin-right:6px;">${a.status}</span> ${statusAction}</div></div>`);
+                });
+            }
+
+            // Socials
+            const portalSocials = document.getElementById('portal-socials-list');
+            if (portalSocials) {
+                portalSocials.innerHTML = '';
+                data.socialsList?.forEach(s => {
+                    const delSocBtn = currentUser?.canManageStaff ? `<button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;">Verwijderen</button>` : '';
+                    portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:8px; margin-bottom:8px;"><span><b>${s.platform}</b>: <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></span>${delSocBtn}</div>`);
+                });
+            }
+
+            // Personeelslijst
             const staffTable = document.getElementById('staff-table-body');
             if (staffTable && data.drivers_list) {
                 staffTable.innerHTML = '';
@@ -613,6 +694,7 @@
                 });
             }
 
+            // Dropdowns voor Badges & EOTW
             const badgeUserSelect = document.getElementById('badge-user-select');
             const eotwUserSelect = document.getElementById('eotw-select-user');
             if (badgeUserSelect && eotwUserSelect && data.drivers_list) {
@@ -624,44 +706,75 @@
                 });
             }
 
+            // EOTW Banner
+            if (data.employeeOfTheWeek?.username) {
+                document.getElementById('eotw-display-card').style.display = 'block';
+                document.getElementById('eotw-username').innerText = data.employeeOfTheWeek.username;
+                document.getElementById('eotw-reason').innerText = `"${data.employeeOfTheWeek.reason}"`;
+            }
+
+            // Live Activiteit & 10 dagen stats
+            const liveFeedContainer = document.getElementById('live-feed-container');
+            if (liveFeedContainer && Array.isArray(data.recent_jobs)) {
+                liveFeedContainer.innerHTML = '';
+                data.recent_jobs.slice(0, 5).forEach(j => {
+                    liveFeedContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><b>${j.driver}</b><div style="font-size:0.75rem; color:var(--text-muted);">${j.from} → ${j.to}</div></div><div style="color:#68d391; font-weight:bold;">+${j.distance}</div></div>`);
+                });
+            }
+
+            if (currentUser && Array.isArray(data.dailyChartData)) {
+                let myTotalEarnings = 0;
+                data.dailyChartData.forEach(day => {
+                    const uKey = currentUser.username.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (day.drivers && day.drivers[uKey]) myTotalEarnings += day.drivers[uKey];
+                });
+                const myTotalKm = Math.round(myTotalEarnings / 35);
+                document.getElementById('my-10d-distance').innerText = `${myTotalKm.toLocaleString('nl-NL')} km`;
+                document.getElementById('my-10d-earnings').innerText = `Saldo: € ${myTotalEarnings.toLocaleString('nl-NL')}`;
+
+                const myBadgesContainer = document.getElementById('my-badges-container');
+                if (myBadgesContainer) {
+                    myBadgesContainer.innerHTML = '';
+                    const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
+                    myStats?.badges?.forEach(b => {
+                        myBadgesContainer.insertAdjacentHTML('beforeend', `<span style="background:rgba(255,51,51,0.2); border:1px solid var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold;">🛡️ ${b.title}</span>`);
+                    });
+                }
+            }
+
             if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
             if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance || "0 km";
             if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers || "0";
+
+            renderChart(data.dailyChartData || [], currentUser ? currentUser.username : '');
         }
 
-        async function handleLogin() {
-            const username = document.getElementById('login-user').value;
-            const password = document.getElementById('login-pass').value;
-            try {
-                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
-                const data = await res.json();
-                if (res.ok && data.success) {
-                    currentUser = data; 
-                    sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
-                    closeLoginModal(); 
-                    openPortalDashboard();
-                } else { 
-                    document.getElementById('login-error').innerText = data.message || 'Onjuiste gegevens.'; 
+        function renderChart(dailyData, username) {
+            const ctx = document.getElementById('earningsChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            
+            const labels = dailyData.map(d => d.date);
+            const companyValues = dailyData.map(d => d.company);
+            const datasets = [{ label: 'Bedrijfssaldo (€)', data: companyValues, borderColor: '#ff3333', borderWidth: 3, fill: true, tension: 0.3 }];
+
+            if (username) {
+                const uKey = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const userValues = dailyData.map(d => (d.drivers && d.drivers[uKey]) ? d.drivers[uKey] : 0);
+                datasets.push({ label: `Mijn Saldo (€)`, data: userValues, borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.3 });
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: datasets },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#caa8a8', callback: value => '€ ' + value.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { ticks: { color: '#caa8a8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    },
+                    plugins: { legend: { labels: { color: '#caa8a8' } } } 
                 }
-            } catch (e) {
-                document.getElementById('login-error').innerText = 'Server niet bereikbaar.';
-            }
-        }
-
-        function openPortalDashboard() {
-            if (!currentUser) return openLoginModal();
-            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
-            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
-
-            if (currentUser.canManageStaff) {
-                document.getElementById('mgt-section-head').style.display = 'block';
-                document.getElementById('werving-tab-btn').style.display = 'block';
-                document.getElementById('staff-tab-btn').style.display = 'block';
-                document.getElementById('apps-tab-btn').style.display = 'block';
-                document.getElementById('mgt-tab-btn').style.display = 'block';
-                document.getElementById('convoy-create-box').style.display = 'block';
-            }
-            switchView('portal-view');
+            });
         }
 
         async function submitWervingAccount() {
@@ -669,9 +782,8 @@
             const displayname = document.getElementById('werv-display').value;
             const role = document.getElementById('werv-role').value;
             const password = document.getElementById('werv-pass').value;
-
             await fetch('/api/werving/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayname, role, password }) });
-            alert('Aangenomen! Personeelslid is toegevoegd aan de lijst.');
+            alert('Personeelslid succesvol toegevoegd!');
             fetchFreshData();
         }
 
@@ -690,7 +802,6 @@
             const displayname = document.getElementById('mgt-display').value;
             const role = document.getElementById('mgt-role').value;
             const password = document.getElementById('mgt-pass').value;
-
             await fetch('/api/staff/update-full', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ oldUsername, username, displayname, role, password }) });
             closeManageModal();
             fetchFreshData();
@@ -705,6 +816,43 @@
             }
         }
 
+        async function postInfo() {
+            const title = document.getElementById('info-title').value;
+            const content = document.getElementById('info-content').value;
+            await fetch('/api/info', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
+            alert('Geplaatst!');
+            document.getElementById('info-title').value = ''; document.getElementById('info-content').value = '';
+            fetchFreshData();
+        }
+
+        async function postConvoy() {
+            const title = document.getElementById('conv-title').value;
+            const date = document.getElementById('conv-date').value;
+            const time = document.getElementById('conv-time').value;
+            const server = document.getElementById('conv-server').value;
+            const route = document.getElementById('conv-route').value;
+            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route }) });
+            alert('Konvooi aangemaakt!');
+            fetchFreshData();
+        }
+
+        async function createPoll() {
+            const question = document.getElementById('poll-question').value;
+            const opt1 = document.getElementById('poll-opt1').value;
+            const opt2 = document.getElementById('poll-opt2').value;
+            const opt3 = document.getElementById('poll-opt3').value;
+            const options = [opt1, opt2, opt3].filter(o => o && o.trim() !== "");
+            await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) });
+            alert('Peiling aangemaakt!');
+            fetchFreshData();
+        }
+
+        async function votePoll(pollId, optionIndex) {
+            await fetch('/api/polls/vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pollId, optionIndex, username: currentUser.username }) });
+            fetchFreshData();
+        }
+
+        async function deletePoll(id) { await fetch(`/api/polls/${id}`, { method: 'DELETE' }); fetchFreshData(); }
         async function deleteAnnouncement(id) { await fetch(`/api/announcements/${id}`, { method: 'DELETE' }); fetchFreshData(); }
         async function deleteInfo(id) { await fetch(`/api/info/${id}`, { method: 'DELETE' }); fetchFreshData(); }
         async function deleteConvoy(id) { await fetch(`/api/convoys/${id}`, { method: 'DELETE' }); fetchFreshData(); }
@@ -713,6 +861,80 @@
             const endpoint = isSignedUp ? '/api/convoys/cancel' : '/api/convoys/signup';
             await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ convoyId, username: currentUser.username }) });
             fetchFreshData();
+        }
+
+        async function submitAbsence() {
+            const from = document.getElementById('abs-from').value;
+            const to = document.getElementById('abs-to').value;
+            const reason = document.getElementById('abs-reason').value;
+            await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, reason, username: currentUser.username }) });
+            alert('Verzoek ingediend!');
+            fetchFreshData();
+        }
+
+        async function handleAbsence(absId, status) {
+            await fetch('/api/absence/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ absId, status }) });
+            fetchFreshData();
+        }
+
+        async function addSocialLink() {
+            const platform = document.getElementById('social-platform').value;
+            const url = document.getElementById('social-url').value;
+            await fetch('/api/socials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url, username: currentUser.username }) });
+            fetchFreshData();
+        }
+        async function deleteSocial(id) { await fetch(`/api/socials/${id}`, { method: 'DELETE' }); fetchFreshData(); }
+
+        async function setEmployeeOfWeek() {
+            const targetUser = document.getElementById('eotw-select-user').value;
+            const reason = document.getElementById('eotw-input-reason').value;
+            await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
+            alert('Chauffeur van de week ingesteld!');
+            fetchFreshData();
+        }
+
+        async function awardBadge() {
+            const title = document.getElementById('badge-title').value;
+            const targetUser = document.getElementById('badge-user-select').value;
+            await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
+            alert('Badge toegekend!');
+            fetchFreshData();
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            try {
+                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    currentUser = data; 
+                    sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                    closeLoginModal(); 
+                    openPortalDashboard();
+                } else { document.getElementById('login-error').innerText = data.message || 'Onjuiste gegevens.'; }
+            } catch (e) { document.getElementById('login-error').innerText = 'Server niet bereikbaar.'; }
+        }
+
+        function openPortalDashboard() {
+            if (!currentUser) return openLoginModal();
+            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
+            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
+
+            if (currentUser.canManageStaff) {
+                document.getElementById('mgt-section-head').style.display = 'block';
+                document.getElementById('werving-tab-btn').style.display = 'block';
+                document.getElementById('staff-tab-btn').style.display = 'block';
+                document.getElementById('apps-tab-btn').style.display = 'block';
+                document.getElementById('mgt-tab-btn').style.display = 'block';
+                document.getElementById('convoy-create-box').style.display = 'block';
+                document.getElementById('info-create-box').style.display = 'block';
+                document.getElementById('social-create-box').style.display = 'block';
+            }
+            if (currentUser.canManageBadges) {
+                document.getElementById('poll-create-box').style.display = 'block';
+            }
+            switchView('portal-view');
         }
 
         function switchPortalTab(tabId, btnElement, titleText) {
@@ -729,7 +951,6 @@
         function closeLoginModal() { document.getElementById('login-modal').style.display = 'none'; }
         function openPasswordModal() { document.getElementById('password-modal').style.display = 'flex'; }
         function closePasswordModal() { document.getElementById('password-modal').style.display = 'none'; }
-
         function logout() { currentUser = null; sessionStorage.removeItem('brecht_user'); goHome(); }
         function switchView(viewId) {
             document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
