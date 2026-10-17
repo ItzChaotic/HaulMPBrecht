@@ -15,10 +15,11 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }
 });
 
+// Volledige CORS ondersteuning voor subdomeinen
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
 });
@@ -72,9 +73,9 @@ async function connectDB() {
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-        console.log("✅ MongoDB verbinding geslaagd");
+        console.log("✅ MongoDB verbinding succesvol tot stand gebracht.");
     } catch (err) {
-        console.error("❌ MongoDB fout:", err.message);
+        console.error("❌ MongoDB verbinding mislukt:", err.message);
     }
 }
 connectDB();
@@ -132,6 +133,7 @@ function isDriverMatch(jobDriver, accountUsername, accountDisplayname) {
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 clientBot.on('clientReady', () => {
+    console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
     setTimeout(() => {
         fetch7DaysDiscordJobs();
         fetchDiscordApplications();
