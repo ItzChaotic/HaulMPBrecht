@@ -127,6 +127,11 @@
         .convoy-info-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
         .convoy-card-footer { padding: 14px 18px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border-red); display: flex; justify-content: space-between; align-items: center; }
 
+        .rule-section { margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .rule-section h3 { color: var(--accent-red); font-size: 1.05rem; margin-bottom: 10px; font-family: 'Space Grotesk', sans-serif; }
+        .rule-section ol, .rule-section ul { padding-left: 20px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+        .rule-section li { margin-bottom: 6px; }
+
         footer { text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); }
         .sidebar-user-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; width: 100%; }
         .user-avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; overflow: hidden; }
@@ -148,7 +153,6 @@
         <ul class="nav-links">
             <li><a href="javascript:void(0);" onclick="goHome()">Home</a></li>
             <li><a href="#about-sec">Over Ons</a></li>
-            <li><a href="#rules-sec">Reglement</a></li>
             <li><a href="#team">Team</a></li>
             <li><a href="#vloot">Vloot</a></li>
             <li><a href="#activiteit">Ritten</a></li>
@@ -184,18 +188,6 @@
             <div class="section-header" id="about-sec"><h2>Over Ons</h2></div>
             <div class="gallery-card" style="line-height:1.7; padding:25px;">
                 <p style="margin-bottom:12px;">Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2.</p>
-            </div>
-
-            <div class="section-header" id="rules-sec"><h2>VTC Reglement</h2></div>
-            <div class="gallery-card" style="line-height:1.7; padding:25px;">
-                <h3 style="color:var(--accent-red); margin-bottom:8px;">📌 1. Algemene VTC-regels</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:12px;">Behandel alle leden met respect. Luister naar de leiding en volg instructies van VTC-management en konvooileiders op.</p>
-                
-                <h3 style="color:var(--accent-red); margin-bottom:8px;">🚦 2. Regels tijdens konvooien</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:12px;">Volg altijd de konvooileider. Houd voldoende afstand en haal niet zomaar in. Kom op tijd en zorg dat je trailer klaarstaat.</p>
-
-                <h3 style="color:var(--accent-red); margin-bottom:8px;">🎮 3. Regels in-game (ETS2 / TruckersMP)</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem;">Houd je aan de TruckersMP-regels. Geen cheats of gevaarlijk rijgedrag. Vertegenwoordig Brecht Transport op een positieve manier.</p>
             </div>
 
             <div class="section-header" id="team"><h2>Ons Team</h2></div>
@@ -312,31 +304,94 @@
                         </div>
                     </div>
 
-                    <!-- TAB: VTC REGELS -->
+                    <!-- TAB: VTC REGELS (Volledig reglement) -->
                     <div id="p-tab-rules" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="line-height:1.7;">
-                            <h2 style="color:var(--accent-red); margin-bottom:15px;"><i class="fa-solid fa-book-shield"></i> VTC-Reglement</h2>
-                            <p style="color:var(--text-muted); margin-bottom:15px;">Welkom bij Brecht Transport! Om ervoor te zorgen dat iedereen met plezier, respect en veilig kan rijden, gelden onderstaande regels.</p>
-                            
-                            <h3 style="font-size:1.05rem; color:#fff; margin:12px 0 6px 0;">📌 1. Algemene VTC-regels</h3>
-                            <ul style="list-style-type:disc; padding-left:20px; color:var(--text-muted); margin-bottom:12px;">
-                                <li>Behandel alle leden met respect. Schelden, pesten en discriminatie worden niet geaccepteerd.</li>
-                                <li>Luister naar de leiding en volg instructies van VTC-management op.</li>
-                                <li>Gedraag je ook buiten onze eigen konvooien als een vertegenwoordiger van Brecht Transport.</li>
-                            </ul>
+                            <h2 style="color:#fff; font-family:'Space Grotesk', sans-serif; font-size:1.5rem; margin-bottom:10px;"><i class="fa-solid fa-book-shield" style="color:var(--accent-red);"></i> BRECHT TRANSPORT VTC-REGLEMENT</h2>
+                            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Welkom bij Brecht Transport! Om ervoor te zorgen dat iedereen met plezier, respect en veilig kan rijden, gelden de onderstaande regels voor alle chauffeurs en leden van onze VTC.</p>
 
-                            <h3 style="font-size:1.05rem; color:#fff; margin:12px 0 6px 0;">🚦 2. Regels tijdens konvooien</h3>
-                            <ul style="list-style-type:disc; padding-left:20px; color:var(--text-muted); margin-bottom:12px;">
-                                <li>Volg altijd de konvooileider. Route, snelheid en stops worden door de leiding bepaald.</li>
-                                <li>Kom op tijd en zorg dat je vrachtwagen en trailer klaarstaan.</li>
-                                <li>Houd voldoende afstand en haal niet onnodig in.</li>
-                            </ul>
+                            <div class="rule-section">
+                                <h3>📌 1. Algemene VTC-regels</h3>
+                                <ol>
+                                    <li>Behandel alle leden met respect. Schelden, pesten, discriminatie en provoceren worden niet geaccepteerd.</li>
+                                    <li>Luister naar de leiding en volg instructies van VTC-management en konvooileiders op.</li>
+                                    <li>Houd je aan de afspraken die binnen de VTC worden gemaakt.</li>
+                                    <li>Gebruik Discord op een normale en respectvolle manier.</li>
+                                    <li>Maak geen ruzie in openbare kanalen. Probeer problemen rustig op te lossen of meld ze bij de leiding.</li>
+                                    <li>Misbruik de naam, logo's of andere materialen van Brecht Transport niet.</li>
+                                    <li>Wees actief binnen de VTC en meld het bij de leiding als je langere tijd afwezig bent.</li>
+                                    <li>Gedraag je ook buiten onze eigen konvooien als een vertegenwoordiger van Brecht Transport.</li>
+                                </ol>
+                            </div>
 
-                            <h3 style="font-size:1.05rem; color:#fff; margin:12px 0 6px 0;">🎮 3. Regels in-game (ETS2 / TruckersMP)</h3>
-                            <ul style="list-style-type:disc; padding-left:20px; color:var(--text-muted);">
-                                <li>Houd je aan de TruckersMP-regels.</li>
-                                <li>Geen cheats, hacks of opzettelijk rammen/blokkeren van andere weggebruikers.</li>
-                            </ul>
+                            <div class="rule-section">
+                                <h3>🚦 2. Regels tijdens konvooien</h3>
+                                <ol>
+                                    <li><b>Volg altijd de konvooileider.</b> De route, snelheid en eventuele stops worden door de leiding bepaald.</li>
+                                    <li>Kom op tijd en zorg dat je vrachtwagen en trailer klaarstaan voordat het konvooi begint.</li>
+                                    <li>Houd voldoende afstand tot je voorganger. Rijd niet bumper aan bumper.</li>
+                                    <li>Haal andere chauffeurs niet in, tenzij de konvooileider hiervoor toestemming geeft of het veilig en toegestaan is.</li>
+                                    <li>Blijf zoveel mogelijk in je toegewezen positie binnen het konvooi.</li>
+                                    <li>Gebruik je richtingaanwijzers en houd rekening met andere weggebruikers.</li>
+                                    <li>Voorkom botsingen, onnodig remmen, slingeren en gevaarlijk rijgedrag.</li>
+                                    <li>Gebruik je claxon alleen wanneer dat gepast is. Maak geen onnodig lawaai tijdens het rijden.</li>
+                                    <li>Luister naar de instructies via Discord en houd de communicatie vrij voor belangrijke meldingen.</li>
+                                    <li>Verlaat het konvooi niet zonder dit vooraf te melden, behalve wanneer dit door een noodsituatie noodzakelijk is.</li>
+                                    <li>Rijd niet expres tegen andere vrachtwagens aan en veroorzaak geen chaos.</li>
+                                    <li>Raak je achterop of krijg je technische problemen? Meld dit aan de konvooileider en volg de instructies op.</li>
+                                </ol>
+                            </div>
+
+                            <div class="rule-section">
+                                <h3>🎮 3. Regels in-game (ETS2 / TruckersMP)</h3>
+                                <ol>
+                                    <li>Houd je altijd aan de geldende TruckersMP-regels en de verkeersregels die binnen de VTC zijn afgesproken.</li>
+                                    <li>Rijd verantwoord en pas je snelheid aan de omstandigheden aan.</li>
+                                    <li>Gebruik geen cheats, hacks of andere verboden hulpmiddelen.</li>
+                                    <li>Ram, blokkeer of hinder andere spelers niet opzettelijk.</li>
+                                    <li>Misbruik geen bugs of glitches om voordeel te behalen.</li>
+                                    <li>Ga respectvol om met andere spelers, ook wanneer zij fouten maken.</li>
+                                    <li>Parkeer op aangewezen plaatsen en blokkeer geen wegen, garages of tankstations.</li>
+                                    <li>Gebruik passende vrachtwagens, trailers en eventuele afgesproken VTC-skins tijdens officiële ritten.</li>
+                                    <li>Bij een ongeval: blijf rustig, voorkom verdere hinder en volg de afspraken van de konvooileider.</li>
+                                    <li>Houd er rekening mee dat jouw gedrag invloed heeft op de reputatie van Brecht Transport.</li>
+                                </ol>
+                            </div>
+
+                            <div class="rule-section">
+                                <h3>🎙️ 4. Discord en communicatie</h3>
+                                <ol>
+                                    <li>Gebruik de juiste spraakkanalen voor konvooien en VTC-activiteiten.</li>
+                                    <li>Praat niet door belangrijke instructies heen.</li>
+                                    <li>Gebruik een werkende microfoon wanneer dit voor een konvooi vereist is.</li>
+                                    <li>Houd gesprekken netjes en vermijd onnodige discussies tijdens ritten.</li>
+                                    <li>Luister naar meldingen over vertrek, stops, routewijzigingen en aankomst.</li>
+                                    <li>Gebruik push-to-talk wanneer achtergrondgeluiden de communicatie verstoren.</li>
+                                </ol>
+                            </div>
+
+                            <div class="rule-section">
+                                <h3>👔 5. Houding en inzet binnen de VTC</h3>
+                                <ol>
+                                    <li>Wees vriendelijk, behulpzaam en collegiaal tegenover andere chauffeurs.</li>
+                                    <li>Kom afspraken na en geef op tijd aan wanneer je niet kunt deelnemen.</li>
+                                    <li>Respecteer de privacy van andere leden en deel geen persoonlijke gegevens zonder toestemming.</li>
+                                    <li>Gebruik de VTC-naam niet om ruzies met andere VTC's of spelers uit te lokken.</li>
+                                    <li>Problemen met een ander lid bespreek je met de leiding, niet via openbare drama of ruzies.</li>
+                                    <li>Geef nieuwe leden de ruimte om te leren en help elkaar waar nodig.</li>
+                                </ol>
+                            </div>
+
+                            <div class="rule-section">
+                                <h3>⚠️ 6. Overtredingen en maatregelen</h3>
+                                <p style="margin-bottom:8px; color:var(--text-muted);">Wanneer iemand zich niet aan het reglement houdt, kan de VTC passende maatregelen nemen:</p>
+                                <ul style="list-style-type:square;">
+                                    <li><b>Eerste overtreding:</b> mondelinge waarschuwing.</li>
+                                    <li><b>Herhaling:</b> officiële waarschuwing.</li>
+                                    <li><b>Ernstige overtreding:</b> tijdelijke schorsing of uitsluiting van een konvooi.</li>
+                                    <li><b>Herhaaldelijk of opzettelijk wangedrag:</b> mogelijke verwijdering uit de VTC.</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -378,10 +433,8 @@
                                 <input type="text" id="conv-server" placeholder="Server (bijv. Simulation 1)..." class="form-input">
                                 <input type="date" id="conv-date" class="form-input">
                                 <input type="time" id="conv-time" class="form-input">
-                                <input type="text" id="conv-from" placeholder="Vertrekstad (Von)..." class="form-input">
-                                <input type="text" id="conv-to" placeholder="Aankomststad (Nach)..." class="form-input">
                             </div>
-                            <input type="text" id="conv-route" placeholder="Route info..." class="form-input">
+                            <input type="text" id="conv-route" placeholder="Route omschrijving..." class="form-input">
                             <button onclick="postConvoy()" class="btn-red">Konvooi Publiceren</button>
                         </div>
                         <div class="gallery-card">
@@ -658,8 +711,6 @@
                                 <span class="convoy-badge-date">${c.date} - ${c.time || '20:00'}</span>
                                 <div class="convoy-title">${c.title}</div>
                                 <div class="convoy-info-row"><span>Server:</span><b>${c.server || 'TruckersMP'}</b></div>
-                                <div class="convoy-info-row"><span>Von:</span><b>${c.from || 'Onbekend'}</b></div>
-                                <div class="convoy-info-row"><span>Nach:</span><b>${c.to || 'Onbekend'}</b></div>
                                 <div class="convoy-info-row"><span>Route:</span><b>${c.route || 'Algemeen konvooi'}</b></div>
                             </div>
                             <div class="convoy-card-footer">
@@ -855,11 +906,9 @@
             const date = document.getElementById('conv-date').value;
             const time = document.getElementById('conv-time').value;
             const server = document.getElementById('conv-server').value;
-            const from = document.getElementById('conv-from').value;
-            const to = document.getElementById('conv-to').value;
             const route = document.getElementById('conv-route').value;
             
-            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, from, to, route }) });
+            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route }) });
             alert('Konvooi instant gepubliceerd!');
             fetchFreshData();
         }
