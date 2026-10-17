@@ -290,7 +290,9 @@ app.get('/api/haulmp', async (req, res) => {
         let allJobsHistory = [];
         
         if (isConnected && jobsColl) {
+            const stepT = Date.now();
             allJobsHistory = await jobsColl.find({ timestamp: { $gte: sevenDaysAgo } }).sort({ timestamp: -1 }).toArray();
+            console.log(`⏱️ [PERF] /api/haulmp - Jobs ophalen uit DB duurde: ${Date.now() - stepT}ms`);
         }
 
         const totalDeliveries = allJobsHistory.length;
@@ -301,6 +303,7 @@ app.get('/api/haulmp', async (req, res) => {
         let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
         if (isConnected && db) {
+            const stepT2 = Date.now();
             const fetchWithTimeout = (promise, ms = 1500) => Promise.race([promise, new Promise(resolve => resolve([]))]);
 
             try {
@@ -322,6 +325,7 @@ app.get('/api/haulmp', async (req, res) => {
                 infoList = info || []; convoysList = convoys || []; convoySignupsList = signups || []; socialsList = socials || [];
                 supportList = support || []; pollsList = polls || []; absencesList = absences || [];
                 if (eotw && !Array.isArray(eotw)) employeeOfTheWeek = eotw;
+                console.log(`⏱️ [PERF] /api/haulmp - Overige collecties opgehaald in: ${Date.now() - stepT2}ms`);
             } catch (e) {}
         }
 
@@ -348,6 +352,8 @@ app.get('/api/haulmp', async (req, res) => {
             weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
         });
 
+        console.log(`⚡ [PERF] /api/haulmp AFGEROND IN: ${Date.now() - requestStart}ms`);
+
         res.json({
             deliveries: totalDeliveries.toString(),
             distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
@@ -364,7 +370,6 @@ app.get('/api/haulmp', async (req, res) => {
     }
 });
 
-// Support & Bugtracker API
 app.post('/api/support', async (req, res) => {
     const { type, desc, username } = req.body;
     if (!desc) return res.status(400).json({ success: false });
@@ -373,17 +378,14 @@ app.post('/api/support', async (req, res) => {
     res.json({ success: true });
 });
 
-// Peilingen API
 app.post('/api/polls/vote', async (req, res) => {
     const { pollId, optionIndex, username } = req.body;
     if (isConnected && pollsColl) {
-        // Simuleer stemverwerking
         await pollsColl.updateOne({ id: pollId }, { $push: { votes: { username, optionIndex } } }, { upsert: true });
     }
     res.json({ success: true });
 });
 
-// Afwezigheid API
 app.post('/api/absence', async (req, res) => {
     const { from, to, reason, username } = req.body;
     const item = { id: "abs-" + Date.now(), username, from, to, reason, status: 'In Afwachting', date: new Date().toLocaleDateString('nl-NL') };
@@ -397,7 +399,6 @@ app.post('/api/absence/status', async (req, res) => {
     res.json({ success: true });
 });
 
-// Standaard beheer routes
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
     if (isConnected && accountsColl) {
