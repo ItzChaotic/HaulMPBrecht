@@ -73,12 +73,12 @@
                             <h3>🚛 Europort naar Berlin</h3>
                             <p><i class="fa-regular fa-calendar"></i> 24 Oktober 2026 | <i class="fa-regular fa-clock"></i> 19:30 UTC</p>
                         </div>
-                        <div class="convoy-actions">
+                        <div class="convoy-actions mt-2">
                             <button class="btn btn-green" onclick="setAttendance('aanwezig')"><i class="fa-solid fa-check"></i> Aanwezig</button>
                             <button class="btn btn-orange" onclick="setAttendance('twijfel')"><i class="fa-solid fa-question"></i> Twijfel</button>
                             <button class="btn btn-red" onclick="setAttendance('afwezig')"><i class="fa-solid fa-xmark"></i> Afwezig</button>
                         </div>
-                        <div class="attendance-summary">
+                        <div class="attendance-summary mt-2">
                             <small>Jouw status: <span id="my-status" class="badge-green">Aanwezig</span></small>
                         </div>
                     </div>
@@ -88,7 +88,7 @@
                 <section id="tab-werving" class="tab-section">
                     <h2>Nieuwe Chauffeur Aanmelding</h2>
                     <div class="form-card">
-                        <p>Vul hieronder je gegevens in om je VTC-account definitief in te stellen met een eigen wachtwoord en weergavenaam.</p>
+                        <p style="margin-bottom: 15px; color: #a0a0ab;">Vul hieronder je gegevens in om je VTC-account definitief in te stellen met een eigen wachtwoord en displaynaam.</p>
                         <form id="werving-form" onsubmit="submitWerving(event)">
                             <div class="form-group">
                                 <label>Gebruikersnaam (Sync ID / Uniek achter de schermen):</label>
@@ -118,7 +118,7 @@
                         <div class="absence-item">
                             <div>
                                 <strong>RoadKing</strong> (1 Nov t/m 5 Nov)<br>
-                                <small>Reden: Vakantie naar het buitenland</small>
+                                <small style="color: #a0a0ab;">Reden: Vakantie naar het buitenland</small>
                             </div>
                             <div class="absence-actions">
                                 <span class="badge badge-orange">In Afwachting</span>
@@ -134,9 +134,9 @@
                     <h2>Actieve Peilingen</h2>
                     <div class="poll-card">
                         <h3>Welke DLC-route rijden we tijdens het feestkonvooi?</h3>
-                        <div class="poll-options">
-                            <label><input type="radio" name="poll"> Road to the Black Sea (45%)</label><br>
-                            <label><input type="radio" name="poll"> Beyond the Baltic Sea (30%)</label><br>
+                        <div class="poll-options mt-2">
+                            <label><input type="radio" name="poll"> Road to the Black Sea (45%)</label><br><br>
+                            <label><input type="radio" name="poll"> Beyond the Baltic Sea (30%)</label><br><br>
                             <label><input type="radio" name="poll"> Iberia (25%)</label>
                         </div>
                         <button class="btn btn-primary mt-2" onclick="submitPoll()">Stem Uitbrengen</button>
@@ -148,7 +148,7 @@
                     <h2>Support & Ideeënbus (Bugtracker)</h2>
                     <div class="form-card">
                         <h3>Meld een Bug of Dien een Idee in</h3>
-                        <form id="support-form" onsubmit="submitSupport(event)">
+                        <form id="support-form" onsubmit="submitSupport(event)" class="mt-2">
                             <div class="form-group">
                                 <label>Type melding:</label>
                                 <select id="s-type">
