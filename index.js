@@ -15,7 +15,6 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// Cross-Origin headers voor het subdomein personeelsportaal.brechttransport.nl
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
@@ -34,14 +33,14 @@ let db, accountsColl, announcementsColl, applicationsColl, infoColl, convoysColl
 let isConnected = false;
 
 let cachedAccounts = [
-    { username: "DEV ACCOUNT", displayname: "Developer", password: "DEVACC123", role: "Directeur", isDev: true },
-    { username: "MJGamerNL", displayname: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", displayname: "ItzChaotic", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
-    { username: "Ramona", displayname: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
-    { username: "JoeyKj", displayname: "JoeyKj", password: "JoeyPassword", role: "Management" },
-    { username: "Jellybear", displayname: "Jellybear", password: "JellyBearPass", role: "Management" },
-    { username: "Dansco54", displayname: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", displayname: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "DEV ACCOUNT", displayname: "Developer", password: "DEVACC123", role: "Directeur", avatarUrl: "", isDev: true },
+    { username: "MJGamerNL", displayname: "MJGamerNL", password: "Wachtwoord123", role: "Directeur", avatarUrl: "" },
+    { username: "ItzChaotic_", displayname: "ItzChaotic", password: "ChaoticPassword!", role: "Onder Directeur", avatarUrl: "" },
+    { username: "Ramona", displayname: "Ramona", password: "RamonaPass2026", role: "Onder Directeur", avatarUrl: "" },
+    { username: "JoeyKj", displayname: "JoeyKj", password: "JoeyPassword", role: "Management", avatarUrl: "" },
+    { username: "Jellybear", displayname: "Jellybear", password: "JellyBearPass", role: "Management", avatarUrl: "" },
+    { username: "Dansco54", displayname: "Dansco54", password: "DanscoPass", role: "Leidinggevende", avatarUrl: "" },
+    { username: "Zinnorax", displayname: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende", avatarUrl: "" }
 ];
 
 async function connectDB() {
@@ -92,9 +91,9 @@ function getRoleWeight(role) {
     if (r.includes('onder directeur')) return 7;
     if (r.includes('management')) return 6;
     if (r.includes('leidinggevende')) return 5;
-    if (r.includes('senior medewerker')) return 4;
-    if (r.includes('medewerker') && !r.includes('senior') && !r.includes('junior')) return 3;
-    if (r.includes('junior medewerker')) return 2;
+    if (r.includes('senior werknemer')) return 4;
+    if (r.includes('werknemer') && !r.includes('senior') && !r.includes('junior')) return 3;
+    if (r.includes('junior werknemer')) return 2;
     if (r.includes('chauffeur in opleiding')) return 1;
     return 0;
 }
@@ -105,9 +104,9 @@ function getRoleColor(role) {
     if (r.includes('directeur')) return 'red';
     if (r.includes('management')) return 'yellow';
     if (r.includes('leidinggevende')) return 'green';
-    if (r.includes('senior medewerker')) return 'blue';
-    if (r.includes('medewerker')) return 'purple';
-    if (r.includes('junior medewerker')) return 'cyan';
+    if (r.includes('senior werknemer')) return 'blue';
+    if (r.includes('werknemer')) return 'purple';
+    if (r.includes('junior werknemer')) return 'cyan';
     if (r.includes('chauffeur in opleiding')) return 'gray';
     return 'gray';
 }
@@ -243,6 +242,7 @@ app.post('/api/login', (req, res) => {
             displayname: account.displayname || account.username, 
             role: account.role, 
             color: getRoleColor(account.role), 
+            avatarUrl: account.avatarUrl || '',
             canManageBadges: (account.role.toLowerCase().includes('directeur') || account.role.toLowerCase().includes('management') || account.role.toLowerCase().includes('leidinggevende')),
             canManageStaff: (account.role.toLowerCase().includes('directeur') || account.role.toLowerCase().includes('onder directeur') || account.role.toLowerCase().includes('management'))
         });
@@ -305,6 +305,7 @@ app.get('/api/haulmp', async (req, res) => {
                 role: m.role, 
                 weight: getRoleWeight(m.role), 
                 color: getRoleColor(m.role), 
+                avatarUrl: m.avatarUrl || '',
                 isDev: !!m.isDev,
                 deliveries: userJobs.length,
                 distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
@@ -347,10 +348,41 @@ app.get('/api/haulmp', async (req, res) => {
     }
 });
 
+// Zelf Profiel / Persoons Informatie Bijwerken
+app.post('/api/user/profile-update', async (req, res) => {
+    const { username, displayname, password, avatarUrl } = req.body;
+    if (!username) return res.status(400).json({ success: false });
+
+    const updateDoc = {};
+    if (displayname) updateDoc.displayname = displayname.trim();
+    if (password && password.trim() !== '') updateDoc.password = password.trim();
+    if (avatarUrl !== undefined) updateDoc.avatarUrl = avatarUrl;
+
+    if (isConnected && accountsColl) {
+        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } }, { $set: updateDoc });
+        cachedAccounts = await accountsColl.find({}).toArray();
+    } else {
+        const idx = cachedAccounts.findIndex(a => a.username.toLowerCase() === username.toLowerCase());
+        if (idx !== -1) {
+            if (displayname) cachedAccounts[idx].displayname = displayname.trim();
+            if (password) cachedAccounts[idx].password = password.trim();
+            if (avatarUrl !== undefined) cachedAccounts[idx].avatarUrl = avatarUrl;
+        }
+    }
+
+    const updatedAcc = cachedAccounts.find(a => a.username.toLowerCase() === username.toLowerCase());
+    res.json({ 
+        success: true, 
+        username: updatedAcc.username, 
+        displayname: updatedAcc.displayname || updatedAcc.username, 
+        avatarUrl: updatedAcc.avatarUrl || '' 
+    });
+});
+
 app.post('/api/werving/add', async (req, res) => {
     const { username, displayname, password, role } = req.body;
     if (!username || !password) return res.status(400).json({ success: false });
-    const newAcc = { username: username.trim(), displayname: (displayname || username).trim(), password: password.trim(), role: role || 'Chauffeur in opleiding' };
+    const newAcc = { username: username.trim(), displayname: (displayname || username).trim(), password: password.trim(), role: role || 'Chauffeur in opleiding', avatarUrl: "" };
     if (isConnected && accountsColl) {
         await accountsColl.insertOne(newAcc);
         cachedAccounts = await accountsColl.find({}).toArray();
@@ -504,5 +536,9 @@ app.delete('/api/socials/:id', async (req, res) => {
     if (isConnected && socialsColl) await socialsColl.deleteOne({ id: req.params.id });
     res.json({ success: true });
 });
+
+if (DISCORD_BOT_TOKEN) {
+    clientBot.login(DISCORD_BOT_TOKEN).catch(err => {});
+}
 
 app.listen(PORT, () => console.log(`🚀 Server actief op poort ${PORT}`));
