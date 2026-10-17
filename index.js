@@ -348,7 +348,6 @@ app.get('/api/haulmp', async (req, res) => {
     }
 });
 
-// Zelf Profiel / Persoons Informatie Bijwerken
 app.post('/api/user/profile-update', async (req, res) => {
     const { username, displayname, password, avatarUrl } = req.body;
     if (!username) return res.status(400).json({ success: false });
