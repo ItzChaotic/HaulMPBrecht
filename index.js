@@ -319,7 +319,6 @@ app.get('/api/haulmp', async (req, res) => {
     }
 });
 
-// Werving: Gebruiker toevoegen
 app.post('/api/werving/add', async (req, res) => {
     const { username, displayname, password, role } = req.body;
     if (!username || !password) return res.status(400).json({ success: false, message: 'Vul gebruikersnaam en wachtwoord in.' });
@@ -340,7 +339,6 @@ app.post('/api/werving/add', async (req, res) => {
     res.json({ success: true });
 });
 
-// Update Volledig Personeelslid
 app.post('/api/staff/update-full', async (req, res) => {
     const { oldUsername, username, displayname, role, password } = req.body;
     if (isConnected && accountsColl) {
@@ -352,7 +350,6 @@ app.post('/api/staff/update-full', async (req, res) => {
     res.json({ success: true });
 });
 
-// Verwijderen & Aanmaken via API
 app.delete('/api/announcements/:id', async (req, res) => {
     if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
     res.json({ success: true });
