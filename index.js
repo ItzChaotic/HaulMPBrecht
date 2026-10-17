@@ -46,7 +46,7 @@ let cachedAccounts = [
 async function connectDB() {
     if (!MONGO_URI) return;
     try {
-        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 3000 });
         await client.connect();
         db = client.db('brecht_transport');
         
@@ -140,22 +140,12 @@ async function fetch7DaysDiscordJobs() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-        const sevenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
-        let lastId = undefined;
-        let keepFetching = true;
-
-        while (keepFetching) {
-            const options = { limit: 50 };
-            if (lastId) options.before = lastId;
-            const messages = await channel.messages.fetch(options);
-            if (messages.size === 0) break;
-
-            for (const msg of messages.values()) {
-                if (msg.createdTimestamp < sevenDaysAgo) { keepFetching = false; break; }
+        const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
+        const messages = await channel.messages.fetch({ limit: 30 });
+        for (const msg of messages.values()) {
+            if (msg.createdTimestamp >= tenDaysAgo) {
                 await parseAndAddJob(msg);
             }
-            lastId = messages.last()?.id;
-            if (messages.size < 50) break;
         }
     } catch (e) {}
 }
@@ -164,7 +154,7 @@ async function fetchDiscordApplications() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
         if (!channel) return;
-        const messages = await channel.messages.fetch({ limit: 50 });
+        const messages = await channel.messages.fetch({ limit: 20 });
         for (const msg of messages.values()) {
             await parseAndAddApplication(msg);
         }
@@ -257,7 +247,7 @@ app.get('/api/haulmp', async (req, res) => {
         let allJobsHistory = [];
         
         if (isConnected && jobsColl) {
-            allJobsHistory = await jobsColl.find({ timestamp: { $gte: tenDaysAgo } }).sort({ timestamp: -1 }).toArray();
+            allJobsHistory = await jobsColl.find({ timestamp: { $gte: tenDaysAgo } }).sort({ timestamp: -1 }).limit(100).toArray();
         }
 
         allJobsHistory.forEach(j => {
@@ -272,20 +262,18 @@ app.get('/api/haulmp', async (req, res) => {
         let employeeOfTheWeek = { username: "MJGamerNL", displayname: "MJGamerNL", reason: "Uitstekende inzet!" };
 
         if (isConnected && db) {
-            const fetchWithTimeout = (promise) => Promise.race([promise, new Promise(resolve => resolve([]))]);
-
             try {
                 const [badges, announcements, applications, info, convoys, signups, socials, polls, absences, eotw] = await Promise.all([
-                    fetchWithTimeout(badgesColl.find({}).toArray()),
-                    fetchWithTimeout(announcementsColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(applicationsColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(infoColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(convoysColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(convoySignupsColl.find({}).toArray()),
-                    fetchWithTimeout(socialsColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(pollsColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(absencesColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(eotwColl.findOne({}))
+                    badgesColl.find({}).toArray().catch(() => []),
+                    announcementsColl.find({}).sort({ _id: -1 }).toArray().catch(() => []),
+                    applicationsColl.find({}).sort({ _id: -1 }).toArray().catch(() => []),
+                    infoColl.find({}).sort({ _id: -1 }).toArray().catch(() => []),
+                    convoysColl.find({}).sort({ _id: -1 }).toArray().catch(() => []),
+                    convoySignupsColl.find({}).toArray().catch(() => []),
+                    socialsColl.find({}).sort({ _id: -1 }).toArray().catch(() => []),
+                    pollsColl.find({}).sort({ _id: -1 }).toArray().catch(() => []),
+                    absencesColl.find({}).sort({ _id: -1 }).toArray().catch(() => []),
+                    eotwColl.findOne({}).catch(() => null)
                 ]);
 
                 customBadges = badges || []; announcementsList = announcements || []; applicationsList = applications || [];
