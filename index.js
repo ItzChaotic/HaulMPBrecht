@@ -145,7 +145,6 @@ const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntent
 
 clientBot.on('clientReady', () => {
     console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
-    // PRIORITEIT 1: Inladen van de afgelopen 7 dagen aan ritten
     setTimeout(() => fetch7DaysDiscordJobs(), 500);
 });
 
@@ -160,7 +159,7 @@ async function fetch7DaysDiscordJobs() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // Beperkt tot 7 dagen
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         let lastId = undefined;
         let keepFetching = true;
 
@@ -255,7 +254,6 @@ app.get('/api/haulmp', async (req, res) => {
         const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         let allJobsHistory = [];
         
-        // PRIORITEIT 1: Haal direct de eerste 10 ritten op voor de hoofdpagina (snelle respons)
         if (isConnected && jobsColl) {
             const stepT = Date.now();
             allJobsHistory = await jobsColl.find({ timestamp: { $gte: sevenDaysAgo } }).sort({ timestamp: -1 }).toArray();
@@ -276,26 +274,38 @@ app.get('/api/haulmp', async (req, res) => {
         let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
         if (isConnected && db) {
-            try {
-                const stepT2 = Date.now();
-                // PRIORITEIT 2 & 3: Socials en overige portaaldata ophalen
-                const socials = await socialsColl.find({}).sort({ _id: -1 }).toArray();
-                socialsList = socials;
-
-                const [badges, announcements, applications, info, convoys, signups, eotw] = await Promise.all([
-                    badgesColl.find({}).toArray(),
-                    announcementsColl.find({}).sort({ _id: -1 }).toArray(),
-                    applicationsColl.find({}).toArray(),
-                    infoColl.find({}).sort({ _id: -1 }).toArray(),
-                    convoysColl.find({}).sort({ _id: -1 }).toArray(),
-                    convoySignupsColl.find({}).toArray(),
-                    eotwColl.findOne({})
+            const stepT2 = Date.now();
+            const fetchWithTimeout = (promise, ms = 1500) => {
+                return Promise.race([
+                    promise,
+                    new Promise((resolve) => setTimeout(() => resolve([]), ms))
                 ]);
-                customBadges = badges; announcementsList = announcements; applicationsList = applications;
-                infoList = info; convoysList = convoys; convoySignupsList = signups;
-                if (eotw) employeeOfTheWeek = eotw;
-                console.log(`⏱️ [PERF] /api/haulmp - Overige collecties ophalen duurde: ${Date.now() - stepT2}ms`);
-            } catch (e) {}
+            };
+
+            try {
+                const [badges, announcements, applications, info, convoys, signups, socials, eotw] = await Promise.all([
+                    fetchWithTimeout(badgesColl.find({}).toArray()),
+                    fetchWithTimeout(announcementsColl.find({}).sort({ _id: -1 }).toArray()),
+                    fetchWithTimeout(applicationsColl.find({}).toArray()),
+                    fetchWithTimeout(infoColl.find({}).sort({ _id: -1 }).toArray()),
+                    fetchWithTimeout(convoysColl.find({}).sort({ _id: -1 }).toArray()),
+                    fetchWithTimeout(convoySignupsColl.find({}).toArray()),
+                    fetchWithTimeout(socialsColl.find({}).sort({ _id: -1 }).toArray()),
+                    fetchWithTimeout(eotwColl.findOne({}), 1000)
+                ]);
+
+                customBadges = Array.isArray(badges) ? badges : [];
+                announcementsList = Array.isArray(announcements) ? announcements : [];
+                applicationsList = Array.isArray(applications) ? applications : [];
+                infoList = Array.isArray(info) ? info : [];
+                convoysList = Array.isArray(convoys) ? convoys : [];
+                convoySignupsList = Array.isArray(signups) ? signups : [];
+                socialsList = Array.isArray(socials) ? socials : [];
+                if (eotw && !Array.isArray(eotw)) employeeOfTheWeek = eotw;
+                console.log(`⏱️ [PERF] /api/haulmp - Overige collecties opgehaald in: ${Date.now() - stepT2}ms`);
+            } catch (e) {
+                console.error("⚠️ Foutje bij ophalen extra collecties:", e.message);
+            }
         }
 
         let formattedDrivers = cachedAccounts.map(m => {
@@ -321,7 +331,7 @@ app.get('/api/haulmp', async (req, res) => {
             weeklyChartData[w].drivers[dc] = (weeklyChartData[w].drivers[dc] || 0) + j.paidAmount;
         });
 
-        console.log(`⏱️ [PERF] Totale /api/haulmp request verwerkt in: ${Date.now() - requestStart}ms`);
+        console.log(`⚡ [PERF] /api/haulmp AFGEROND IN: ${Date.now() - requestStart}ms`);
 
         res.json({
             deliveries: totalDeliveries.toString(),
@@ -329,7 +339,7 @@ app.get('/api/haulmp', async (req, res) => {
             companyEarnings: `€ ${totalCompanyEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
             drivers: formattedDrivers.filter(d => !d.isDev).length.toString(),
             drivers_list: formattedDrivers,
-            recent_jobs: allJobsHistory.slice(0, 10), // Eerste 10 ritten voor de mainwebsite
+            recent_jobs: allJobsHistory.slice(0, 10),
             badges: customBadges, announcements: announcementsList, applications: applicationsList,
             infoList, convoysList, convoySignupsList, socialsList, employeeOfTheWeek,
             weeklyChartData: Object.values(weeklyChartData).reverse()
@@ -340,7 +350,6 @@ app.get('/api/haulmp', async (req, res) => {
     }
 });
 
-// Overige beheer- en api routes blijven onaangeroerd...
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
     if (!targetUser || !pfp) return res.status(400).json({ success: false });
