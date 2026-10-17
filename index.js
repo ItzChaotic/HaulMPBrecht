@@ -72,9 +72,9 @@ async function connectDB() {
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-        console.log("✅ MongoDB succesvol verbonden.");
+        console.log("✅ MongoDB verbinding geslaagd");
     } catch (err) {
-        console.error("❌ MongoDB verbinding mislukt:", err.message);
+        console.error("❌ MongoDB fout:", err.message);
     }
 }
 connectDB();
@@ -132,7 +132,6 @@ function isDriverMatch(jobDriver, accountUsername, accountDisplayname) {
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 clientBot.on('clientReady', () => {
-    console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
     setTimeout(() => {
         fetch7DaysDiscordJobs();
         fetchDiscordApplications();
@@ -443,20 +442,10 @@ app.post('/api/polls/vote', async (req, res) => {
     res.json({ success: true });
 });
 
-app.post('/api/applications/complete', async (req, res) => {
-    if (isConnected && applicationsColl) await applicationsColl.updateOne({ id: req.body.appId }, { $set: { status: "completed" } });
-    res.json({ success: true });
-});
-
 app.post('/api/badges', async (req, res) => {
     const { title, targetUser } = req.body;
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
-    res.json({ success: true });
-});
-
-app.post('/api/badges/delete', async (req, res) => {
-    if (isConnected && badgesColl) await badgesColl.deleteOne({ id: req.body.badgeId });
     res.json({ success: true });
 });
 
