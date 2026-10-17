@@ -606,7 +606,7 @@
             ENG: { home: "Home", about: "About Us", rules: "Rules", team: "Team", fleet: "Fleet", trips: "Trips", login: "Login", apply: "Apply", hero_desc: "Virtual transport company with heart and soul." }
         };
 
-        // --- CLIENT-SIDE CACHING (Ouwe info direct tonen tot nieuwe binnen is) ---
+        // --- CLIENT-SIDE CACHING (Instant weergave voor álle blokken) ---
         function loadDataInstantWithCache() {
             const cached = localStorage.getItem('brecht_cached_data');
             if (cached) {
@@ -805,14 +805,12 @@
             }
 
             const pubSocials = document.getElementById('public-socials-container');
-            const portalSocials = document.getElementById('portal-socials-list');
-            if (pubSocials) pubSocials.innerHTML = '';
-            if (portalSocials) portalSocials.innerHTML = '';
-
-            data.socialsList?.forEach(s => {
-                if (pubSocials) pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="fa-brands fa-${s.platform.toLowerCase()}"></i><span style="font-weight:bold;">${s.platform}</span><span style="font-size:0.8rem; color:var(--text-muted);">Door ${s.addedBy}</span></a>`);
-                if (portalSocials) portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b>: <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button></div>`);
-            });
+            if (pubSocials) {
+                pubSocials.innerHTML = '';
+                data.socialsList?.forEach(s => {
+                    pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="fa-brands fa-${s.platform.toLowerCase()}"></i><span style="font-weight:bold;">${s.platform}</span><span style="font-size:0.8rem; color:var(--text-muted);">Door ${s.addedBy}</span></a>`);
+                });
+            }
 
             if (Array.isArray(data.drivers_list)) {
                 const teamContainer = document.getElementById('team-container');
@@ -834,24 +832,106 @@
                     });
                 }
             }
-            if (currentUser) refreshPortalData(data);
+            refreshPortalData(data);
         }
 
         async function refreshPortalData(dataOverride) {
             const data = dataOverride || JSON.parse(localStorage.getItem('brecht_cached_data') || '{}');
 
+            // 1. Chauffeur van de week
             if (data.employeeOfTheWeek?.username) {
                 document.getElementById('eotw-display-card').style.display = 'block';
                 document.getElementById('eotw-username').innerText = data.employeeOfTheWeek.username;
                 document.getElementById('eotw-reason').innerText = `"${data.employeeOfTheWeek.reason}"`;
             }
 
+            // 2. Mededelingen
             const annContainer = document.getElementById('announcements-display-container');
-            annContainer.innerHTML = '';
-            data.announcements?.forEach(a => {
-                annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><h4>${a.title}</h4><p style="font-size:0.92rem; margin-top:6px;">${a.content}</p><small style="color:#888;">Door ${a.username || 'Admin'}</small></div>`);
-            });
+            if (annContainer) {
+                annContainer.innerHTML = '';
+                if (data.announcements && data.announcements.length > 0) {
+                    data.announcements.forEach(a => {
+                        annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><h4>${a.title}</h4><p style="font-size:0.92rem; margin-top:6px;">${a.content}</p><small style="color:#888;">Door ${a.username || 'Admin'}</small></div>`);
+                    });
+                } else {
+                    annContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve mededelingen.</p>';
+                }
+            }
 
+            // 3. Informatie & Mods
+            const infoContainer = document.getElementById('info-list-container');
+            if (infoContainer) {
+                infoContainer.innerHTML = '';
+                if (data.infoList && data.infoList.length > 0) {
+                    data.infoList.forEach(i => {
+                        let fileAction = i.link ? `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:6px 14px; font-size:0.8rem; margin-top:8px; display:inline-block;"><i class="fa-solid fa-download"></i> Download</a>` : '';
+                        infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><b>${i.title}</b><p style="font-size:0.92rem; margin:6px 0; color:var(--text-muted);">${i.content}</p>${fileAction}</div>`);
+                    });
+                } else {
+                    infoContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen informatie of mods beschikbaar.</p>';
+                }
+            }
+
+            // 4. Konvooien
+            const convContainer = document.getElementById('convoys-list-container');
+            if (convContainer) {
+                convContainer.innerHTML = '';
+                if (data.convoysList && data.convoysList.length > 0) {
+                    data.convoysList.forEach(c => {
+                        convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:14px;"><b style="color:var(--accent-red);">${c.title}</b><p style="font-size:0.9rem; margin-top:6px;"><b>Datum:</b> ${formatDateToNL(c.date)} ${c.time || ''} | <b>Server:</b> ${c.server}</p><p style="font-size:0.85rem; color:var(--text-muted);"><b>Route:</b> ${c.route}</p></div>`);
+                    });
+                } else {
+                    convContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen geplande konvooien.</p>';
+                }
+            }
+
+            // 5. Socials Beheren
+            const portalSocials = document.getElementById('portal-socials-list');
+            if (portalSocials) {
+                portalSocials.innerHTML = '';
+                if (data.socialsList && data.socialsList.length > 0) {
+                    data.socialsList.forEach(s => {
+                        portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b>: <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button></div>`);
+                    });
+                } else {
+                    portalSocials.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen beheerde socials.</p>';
+                }
+            }
+
+            // 6. Sollicitaties
+            const appsOpen = document.getElementById('applications-open-container');
+            if (appsOpen) {
+                appsOpen.innerHTML = '';
+                if (data.applications && data.applications.filter(a => a.status !== 'completed').length > 0) {
+                    data.applications.forEach(app => {
+                        if (app.status !== 'completed') {
+                            appsOpen.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="padding:16px; margin-bottom:12px;"><b>${app.applicant}</b><div style="font-size:0.92rem; color:var(--text-muted); margin:10px 0;">"${app.content}"</div><button onclick="completeApp('${app.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;">Afronden</button></div>`);
+                        }
+                    });
+                } else {
+                    appsOpen.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve sollicitaties.</p>';
+                }
+            }
+
+            // 7. Personeelslijst
+            const staffTable = document.getElementById('staff-table-body');
+            if (staffTable && data.drivers_list) {
+                staffTable.innerHTML = '';
+                data.drivers_list.filter(d => !d.isDev).forEach(m => {
+                    staffTable.insertAdjacentHTML('beforeend', `<tr><td><b>${m.username}</b></td><td><span class="member-role role-${m.color}">${m.role}</span></td><td><button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="padding:4px 8px; font-size:0.75rem;">Rol Aanpassen</button></td><td><button onclick="updateStaffPassword('${m.username}')" class="btn-portal" style="padding:4px 8px; font-size:0.75rem;">Wachtwoord Herstellen</button></td><td><button onclick="fireStaffMember('${m.username}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button></td></tr>`);
+                });
+            }
+
+            // 8. Badges Tree
+            const badgesTree = document.getElementById('badges-tree-container');
+            if (badgesTree && data.badges) {
+                badgesTree.innerHTML = '';
+                data.badges.forEach(b => {
+                    badgesTree.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;"><span><b>${b.title}</b> - ${b.targetUser}</span><button onclick="deleteBadge('${b.id}')" class="btn-red" style="padding:3px 8px; font-size:0.75rem;">Verwijderen</button></div>`);
+                });
+            }
+
+            // Live Feed & Badges in overzicht
             const liveFeedContainer = document.getElementById('live-feed-container');
             if (liveFeedContainer && Array.isArray(data.recent_jobs)) {
                 liveFeedContainer.innerHTML = '';
@@ -860,42 +940,26 @@
                 });
             }
 
-            const infoContainer = document.getElementById('info-list-container');
-            infoContainer.innerHTML = '';
-            data.infoList?.forEach(i => {
-                let fileAction = i.link ? `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:6px 14px; font-size:0.8rem; margin-top:8px; display:inline-block;"><i class="fa-solid fa-download"></i> Download</a>` : '';
-                infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><b>${i.title}</b><p style="font-size:0.92rem; margin:6px 0; color:var(--text-muted);">${i.content}</p>${fileAction}</div>`);
-            });
-
-            const convContainer = document.getElementById('convoys-list-container');
-            convContainer.innerHTML = '';
-            data.convoysList?.forEach(c => {
-                convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:14px;"><b style="color:var(--accent-red);">${c.title}</b><p style="font-size:0.9rem; margin-top:6px;"><b>Datum:</b> ${formatDateToNL(c.date)} ${c.time || ''} | <b>Server:</b> ${c.server}</p><p style="font-size:0.85rem; color:var(--text-muted);"><b>Route:</b> ${c.route}</p></div>`);
-            });
-
-            const appsOpen = document.getElementById('applications-open-container');
-            appsOpen.innerHTML = '';
-            data.applications?.forEach(app => {
-                if (app.status !== 'completed') {
-                    appsOpen.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="padding:16px; margin-bottom:12px;"><b>${app.applicant}</b><div style="font-size:0.92rem; color:var(--text-muted); margin:10px 0;">"${app.content}"</div><button onclick="completeApp('${app.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;">Afronden</button></div>`);
+            if (currentUser) {
+                const myBadgesContainer = document.getElementById('my-badges-container');
+                if (myBadgesContainer) {
+                    myBadgesContainer.innerHTML = '';
+                    const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
+                    if (myStats) {
+                        document.getElementById('user-stat-distance').innerText = myStats.distance || "0 km";
+                        document.getElementById('user-stat-deliveries-label').innerText = `${myStats.deliveries || 0} Leveringen`;
+                        myStats.badges?.forEach(b => {
+                            myBadgesContainer.insertAdjacentHTML('beforeend', `<span style="background:rgba(255,51,51,0.2); border:1px solid var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold;">🛡️ ${b.title}</span>`);
+                        });
+                    }
                 }
-            });
-
-            const myBadgesContainer = document.getElementById('my-badges-container');
-            myBadgesContainer.innerHTML = '';
-            const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
-            if (myStats) {
-                document.getElementById('user-stat-distance').innerText = myStats.distance || "0 km";
-                document.getElementById('user-stat-deliveries-label').innerText = `${myStats.deliveries || 0} Leveringen`;
-                myStats.badges?.forEach(b => {
-                    myBadgesContainer.insertAdjacentHTML('beforeend', `<span style="background:rgba(255,51,51,0.2); border:1px solid var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold;">🛡️ ${b.title}</span>`);
-                });
             }
+
             if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
             if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance || "0 km";
             if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers || "0";
 
-            renderChart(data.weeklyChartData || [], currentUser.username);
+            renderChart(data.weeklyChartData || [], currentUser ? currentUser.username : '');
         }
 
         function renderChart(weeklyData, username) {
