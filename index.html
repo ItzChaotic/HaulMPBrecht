@@ -110,10 +110,6 @@
         .hero-title { font-family: 'Space Grotesk', sans-serif; font-size: 4rem; font-weight: 800; line-height: 1.05; margin-bottom: 18px; color: #fff; }
         .hero-desc-text { font-size: 1.05rem; color: var(--text-muted); max-width: 650px; line-height: 1.6; margin-bottom: 25px; }
 
-        .discord-community-banner { background: var(--bg-card); border: 1px solid var(--border-red); border-radius: 20px; padding: 35px; backdrop-filter: var(--glass-blur); margin: 30px 0; display: grid; grid-template-columns: 1.3fr 1fr; gap: 30px; align-items: center; }
-        @media(max-width: 900px) { .discord-community-banner { grid-template-columns: 1fr; } }
-        .discord-banner-right { background: rgba(15, 3, 3, 0.85); border: 1px solid var(--border-red); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
-
         #login-modal, #password-modal, #discord-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px); }
         .login-box { background: rgba(18, 4, 4, 0.94); border: 1px solid var(--border-red); border-radius: 20px; max-width: 420px; width: 100%; padding: 30px; text-align: center; color: #fff; }
 
@@ -138,16 +134,9 @@
         .mobile-portal-tabs button.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
 
         footer { text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); }
-        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-red); padding-bottom: 12px; flex-wrap: wrap; }
-        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 9px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
-        .sub-tab-btn.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
-
         .sidebar-user-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; width: 100%; }
         .user-avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; overflow: hidden; }
         .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-
-        .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 15px; }
-        .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 14px; padding: 18px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.2s; }
 
         @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
@@ -186,11 +175,11 @@
 
         <div class="mobile-drawer-menu">
             <a href="javascript:void(0);" onclick="goHome(); toggleMobileDrawer();"><i class="fa-solid fa-house"></i> <span>Home</span></a>
-            <a href="#about-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-circle-info"></i> <span data-i18n="about">Over Ons</span></a>
-            <a href="#rules-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-book"></i> <span data-i18n="rules">Regels</span></a>
-            <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> <span data-i18n="team">Het Team</span></a>
-            <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span data-i18n="fleet">Vloot</span></a>
-            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span data-i18n="trips">Afgeronde Ritten</span></a>
+            <a href="#about-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-circle-info"></i> <span>Over Ons</span></a>
+            <a href="#rules-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-book"></i> <span>Regels</span></a>
+            <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> <span>Het Team</span></a>
+            <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span>Vloot</span></a>
+            <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span>Afgeronde Ritten</span></a>
             <a href="https://discord.gg/UCgWxAdXRu" target="_blank" style="background:#5865F2; margin-top:8px;"><i class="fa-brands fa-discord" style="color:#fff;"></i> <span>Join Discord</span></a>
         </div>
     </div>
@@ -201,18 +190,19 @@
             <div><div class="brand-title">BRECHT TRANSPORT</div></div>
         </div>
         <ul class="nav-links">
-            <li><a href="javascript:void(0);" onclick="goHome()" data-i18n="home">Home</a></li>
-            <li><a href="#about-sec" data-i18n="about">Over Ons</a></li>
-            <li><a href="#rules-sec" data-i18n="rules">Regels</a></li>
-            <li><a href="#team" data-i18n="team">Team</a></li>
-            <li><a href="#vloot" data-i18n="fleet">Vloot</a></li>
-            <li><a href="#activiteit" data-i18n="trips">Ritten</a></li>
+            <li><a href="javascript:void(0);" onclick="goHome()">Home</a></li>
+            <li><a href="#about-sec">Over Ons</a></li>
+            <li><a href="#rules-sec">Regels</a></li>
+            <li><a href="#team">Team</a></li>
+            <li><a href="#vloot">Vloot</a></li>
+            <li><a href="#activiteit">Ritten</a></li>
             <li><a href="https://discord.gg/UCgWxAdXRu" target="_blank" class="btn-discord"><i class="fa-brands fa-discord"></i> Discord</a></li>
-            <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> <span data-i18n="login">Inloggen</span></button></li>
+            <li><button onclick="handleNavLogin()" class="btn-portal"><i class="fa-solid fa-lock"></i> Inloggen</button></li>
         </ul>
     </nav>
 
     <div class="container">
+        <!-- HOME VIEW -->
         <div id="home-view" class="page-view active">
             <section class="hero-schlüppi">
                 <div class="hero-badge">ETS2 & ATS VTC</div>
@@ -252,10 +242,12 @@
             <div class="section-header" id="team"><h2>Ons Team</h2></div>
             <div class="team-grid" id="team-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;"></div>
 
+            <!-- VLOOT (Inclusief DAF!) -->
             <div class="section-header" id="vloot"><h2>Onze Vloot</h2></div>
             <div class="fleet-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
                 <div class="gallery-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg" class="fleet-img"><div style="font-weight:bold;">Scania S 2016</div></div>
                 <div class="gallery-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/Schermafbeelding%202026-10-08%20203105.png" class="fleet-img"><div style="font-weight:bold;">Volvo FH 16</div></div>
+                <div class="gallery-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/RealDaf.png" class="fleet-img"><div style="font-weight:bold;">DAF XF Euro 6</div></div>
             </div>
 
             <div class="section-header" id="activiteit"><h2>Afgeronde Ritten</h2></div>
@@ -282,7 +274,6 @@
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-crop"></i> Profielfoto Croppen</button>
                         <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
                     </div>
 
@@ -298,7 +289,6 @@
 
                     <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER</div>
                     <ul class="sidebar-menu">
-                        <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this, 'Badges & EOTW')"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
                         <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this, 'Personeel Beheren')"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
                     </ul>
 
@@ -363,7 +353,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 3: WERVING (Nieuw tabje voor instellen gegevens) -->
+                    <!-- TAB 3: WERVING -->
                     <div id="p-tab-werving" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="max-width: 600px;">
                             <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuwe Chauffeur Aanmelding</h3>
@@ -421,7 +411,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 6: SUPPORT & IDEEËN (Bugtracker) -->
+                    <!-- TAB 6: SUPPORT & IDEEËN -->
                     <div id="p-tab-support" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="max-width: 600px; margin-bottom:20px;">
                             <h3><i class="fa-solid fa-bug" style="color:var(--accent-red);"></i> Support & Ideeënbus (Bug Melden of Idee Indienen)</h3>
@@ -444,21 +434,13 @@
                         </div>
                     </div>
 
-                    <!-- PERSONEEL BEHEER (Management+) -->
+                    <!-- PERSONEEL BEHEER -->
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
                         <div class="staff-table-wrapper">
                             <table class="staff-table">
                                 <thead><tr><th>Gebruiker</th><th>Displaynaam</th><th>Rol</th><th>Acties</th></tr></thead>
                                 <tbody id="staff-table-body"></tbody>
                             </table>
-                        </div>
-                    </div>
-
-                    <!-- BADGES & EOTW -->
-                    <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card">
-                            <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Badges & Chauffeur van de Week</h3>
-                            <div id="badges-tree-container" style="margin-top:15px;"></div>
                         </div>
                     </div>
 
@@ -494,21 +476,33 @@
     <script>
         let currentUser = null;
         let chartInstance = null;
-        const MAIN_DOMAIN = "brechttransport.nl";
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- CLIENT-SIDE CACHING (Directe weergave zonder wachten) ---
+        function loadDataInstantWithCache() {
+            const cached = localStorage.getItem('brecht_cached_data');
+            if (cached) {
+                try {
+                    const data = JSON.parse(cached);
+                    processLoadedData(data);
+                } catch(e) {}
+            }
             fetchFreshData();
-            const savedUser = sessionStorage.getItem('brecht_user');
-            if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) {} }
-        });
+        }
 
         async function fetchFreshData() {
             try {
                 const res = await fetch('/api/haulmp');
                 const data = await res.json();
+                localStorage.setItem('brecht_cached_data', JSON.stringify(data));
                 processLoadedData(data);
             } catch(e) {}
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataInstantWithCache();
+            const savedUser = sessionStorage.getItem('brecht_user');
+            if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) {} }
+        });
 
         function processLoadedData(data) {
             if (data.distance) document.getElementById('stat-distance').innerText = data.distance;
@@ -525,7 +519,16 @@
                 }
             }
 
-            // Support lijst inladen
+            if (Array.isArray(data.recent_jobs)) {
+                const container = document.getElementById('trips-container');
+                if (container) {
+                    container.innerHTML = '';
+                    data.recent_jobs.forEach(job => {
+                        container.insertAdjacentHTML('beforeend', `<div class="trip-item"><div><div style="font-weight:bold; font-size:0.95rem;">${job.from} → ${job.to}</div><div style="font-size:0.8rem; color:var(--text-muted);">Chauffeur: <b>${job.driver}</b></div></div><div style="color:var(--accent-red); font-weight:bold; font-size:0.9rem;">${job.distance}</div></div>`);
+                    });
+                }
+            }
+
             const supContainer = document.getElementById('support-list-container');
             if (supContainer && data.supportList) {
                 supContainer.innerHTML = '';
@@ -534,7 +537,6 @@
                 });
             }
 
-            // Afwezigheid lijst inladen (Management Revamp)
             const absContainer = document.getElementById('absence-list-container');
             if (absContainer && data.absencesList) {
                 absContainer.innerHTML = '';
@@ -561,7 +563,6 @@
             const data = await res.json();
             if (res.ok && data.success) {
                 alert('Account succesvol aangemaakt! Je kunt nu inloggen.');
-                document.getElementById('werving-form').reset();
             } else {
                 alert(data.message || 'Fout bij aanmaken account.');
             }
