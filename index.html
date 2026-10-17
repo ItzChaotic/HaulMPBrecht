@@ -551,16 +551,16 @@
                             <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Displaynaam (Zichtbaar op de website):</label>
                             <input type="text" id="werv-display" class="form-input" placeholder="bijv. Truus">
 
-                            <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Start Rol:</label>
+                            <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Start Rol (Hoog naar Laag):</label>
                             <select id="werv-role" class="form-select">
-                                <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
-                                <option value="Junior Werknemer">Junior Werknemer</option>
-                                <option value="Werknemer">Werknemer</option>
-                                <option value="Senior Werknemer">Senior Werknemer</option>
-                                <option value="Leidinggevende">Leidinggevende</option>
-                                <option value="Management">Management</option>
-                                <option value="Onder Directeur">Onder Directeur</option>
                                 <option value="Directeur">Directeur</option>
+                                <option value="Onder Directeur">Onder Directeur</option>
+                                <option value="Management">Management</option>
+                                <option value="Leidinggevende">Leidinggevende</option>
+                                <option value="Senior Werknemer">Senior Werknemer</option>
+                                <option value="Werknemer">Werknemer</option>
+                                <option value="Junior Werknemer">Junior Werknemer</option>
+                                <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
                             </select>
 
                             <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Wachtwoord:</label>
@@ -613,7 +613,7 @@
         </div>
     </div>
 
-    <!-- MODAL: PERSOON MANAGEN BY MANAGEMENT -->
+    <!-- MODAL: PERSOON MANAGEN -->
     <div id="manage-user-modal">
         <div class="login-box">
             <h2 style="font-size:1.3rem; margin-bottom:12px;"><i class="fa-solid fa-user-gear" style="color:var(--accent-red);"></i> Persoon Beheren</h2>
@@ -624,14 +624,14 @@
             <input type="text" id="mgt-display" class="form-input" style="margin-top:2px;">
             <label style="font-size:0.75rem; color:var(--text-muted); text-align:left; display:block;">Rang / Rol:</label>
             <select id="mgt-role" class="form-select" style="margin-top:2px;">
-                <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
-                <option value="Junior Werknemer">Junior Werknemer</option>
-                <option value="Werknemer">Werknemer</option>
-                <option value="Senior Werknemer">Senior Werknemer</option>
-                <option value="Leidinggevende">Leidinggevende</option>
-                <option value="Management">Management</option>
-                <option value="Onder Directeur">Onder Directeur</option>
                 <option value="Directeur">Directeur</option>
+                <option value="Onder Directeur">Onder Directeur</option>
+                <option value="Management">Management</option>
+                <option value="Leidinggevende">Leidinggevende</option>
+                <option value="Senior Werknemer">Senior Werknemer</option>
+                <option value="Werknemer">Werknemer</option>
+                <option value="Junior Werknemer">Junior Werknemer</option>
+                <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
             </select>
             <label style="font-size:0.75rem; color:var(--text-muted); text-align:left; display:block;">Nieuw Wachtwoord (Optioneel):</label>
             <input type="password" id="mgt-pass" placeholder="Leeg laten voor ongewijzigd" class="form-input" style="margin-top:2px;">
@@ -776,7 +776,7 @@
                 });
             }
 
-            // Geplande Konvooien Grid (Gesteund op Bijlage 2)
+            // Geplande Konvooien Grid (Bijlage 2 Stijl)
             const convGrid = document.getElementById('convoys-grid-container');
             if (convGrid) {
                 convGrid.innerHTML = '';
@@ -872,6 +872,19 @@
                     badgeUserSelect.insertAdjacentHTML('beforeend', `<option value="${m.username}">${m.displayname || m.username}</option>`);
                     eotwUserSelect.insertAdjacentHTML('beforeend', `<option value="${m.username}">${m.displayname || m.username}</option>`);
                 });
+            }
+
+            // Sollicitaties
+            const appsContainer = document.getElementById('applications-open-container');
+            if (appsContainer && data.applications) {
+                appsContainer.innerHTML = '';
+                if (data.applications.length > 0) {
+                    data.applications.forEach(app => {
+                        appsContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:8px;"><b>${app.applicant}</b> (${app.date})<p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">${app.content}</p></div>`);
+                    });
+                } else {
+                    appsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen openstaande sollicitaties.</p>';
+                }
             }
 
             // EOTW Banner
@@ -1033,6 +1046,11 @@
             
             await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route }) });
             alert('Konvooi gepubliceerd!');
+            document.getElementById('conv-title').value = '';
+            document.getElementById('conv-server').value = '';
+            document.getElementById('conv-date').value = '';
+            document.getElementById('conv-time').value = '';
+            document.getElementById('conv-route').value = '';
             fetchFreshData();
         }
 
@@ -1044,6 +1062,10 @@
             const options = [opt1, opt2, opt3].filter(o => o && o.trim() !== "");
             await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) });
             alert('Peiling gepubliceerd!');
+            document.getElementById('poll-question').value = '';
+            document.getElementById('poll-opt1').value = '';
+            document.getElementById('poll-opt2').value = '';
+            document.getElementById('poll-opt3').value = '';
             fetchFreshData();
         }
 
@@ -1054,6 +1076,9 @@
             const password = document.getElementById('werv-pass').value;
             await fetch('/api/werving/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayname, role, password }) });
             alert('Personeelslid succesvol toegevoegd!');
+            document.getElementById('werv-user').value = '';
+            document.getElementById('werv-display').value = '';
+            document.getElementById('werv-pass').value = '';
             fetchFreshData();
         }
 
@@ -1108,6 +1133,9 @@
             const reason = document.getElementById('abs-reason').value;
             await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, reason, username: currentUser.username }) });
             alert('Verzoek ingediend!');
+            document.getElementById('abs-from').value = '';
+            document.getElementById('abs-to').value = '';
+            document.getElementById('abs-reason').value = '';
             fetchFreshData();
         }
 
@@ -1120,6 +1148,8 @@
             const platform = document.getElementById('social-platform').value;
             const url = document.getElementById('social-url').value;
             await fetch('/api/socials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url, username: currentUser.username }) });
+            alert('Social toegevoegd!');
+            document.getElementById('social-url').value = '';
             fetchFreshData();
         }
         async function deleteSocial(id) { await fetch(`/api/socials/${id}`, { method: 'DELETE' }); fetchFreshData(); }
@@ -1137,6 +1167,7 @@
             const targetUser = document.getElementById('badge-user-select').value;
             await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
             alert('Badge toegekend!');
+            document.getElementById('badge-title').value = '';
             fetchFreshData();
         }
 
