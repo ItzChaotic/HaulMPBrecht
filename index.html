@@ -661,6 +661,8 @@
         let currentUser = null;
         let chartInstance = null;
 
+        // Hardcoded backend URL zodat frontend op brechttransport.nl en personeelsportaal.brechttransport.nl direct communiceert met Render
+        const API_BASE = "https://haulmpbrecht.onrender.com";
         const PORTAL_SUBDOMAIN_URL = "https://personeelsportaal.brechttransport.nl";
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -684,14 +686,17 @@
 
         async function fetchFreshData() {
             try {
-                const res = await fetch('/api/haulmp');
+                const res = await fetch(API_BASE + '/api/haulmp');
                 const data = await res.json();
                 localStorage.setItem('brecht_cached_data', JSON.stringify(data));
                 processLoadedData(data);
-            } catch(e) {}
+            } catch(e) {
+                console.error("Fout bij ophalen data:", e);
+            }
         }
 
         function processLoadedData(data) {
+            if (!data) return;
             if (data.distance) document.getElementById('stat-distance').innerText = data.distance;
             if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
             if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
@@ -949,7 +954,7 @@
                 avatarUrl = await compressImageFile(fileInput.files[0]);
             }
 
-            const res = await fetch('/api/user/profile-update', {
+            const res = await fetch(API_BASE + '/api/user/profile-update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: currentUser.username, displayname, password, avatarUrl })
@@ -1001,7 +1006,7 @@
         async function postAnnouncement() {
             const title = document.getElementById('ann-title').value;
             const content = document.getElementById('ann-content').value;
-            await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
+            await fetch(API_BASE + '/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
             alert('Mededeling gepubliceerd!');
             document.getElementById('ann-title').value = ''; document.getElementById('ann-content').value = '';
             fetchFreshData();
@@ -1020,7 +1025,7 @@
                 formData.append('file', fileInput.files[0]);
             }
 
-            await fetch('/api/info', { method: 'POST', body: formData });
+            await fetch(API_BASE + '/api/info', { method: 'POST', body: formData });
             alert('Mod / Bestand gepubliceerd!');
             document.getElementById('info-title').value = ''; document.getElementById('info-content').value = ''; fileInput.value = '';
             fetchFreshData();
@@ -1033,7 +1038,7 @@
             const server = document.getElementById('conv-server').value;
             const route = document.getElementById('conv-route').value;
             
-            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route }) });
+            await fetch(API_BASE + '/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route }) });
             alert('Konvooi gepubliceerd!');
             document.getElementById('conv-title').value = '';
             document.getElementById('conv-server').value = '';
@@ -1049,7 +1054,7 @@
             const opt2 = document.getElementById('poll-opt2').value;
             const opt3 = document.getElementById('poll-opt3').value;
             const options = [opt1, opt2, opt3].filter(o => o && o.trim() !== "");
-            await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) });
+            await fetch(API_BASE + '/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) });
             alert('Peiling gepubliceerd!');
             document.getElementById('poll-question').value = '';
             document.getElementById('poll-opt1').value = '';
@@ -1063,7 +1068,7 @@
             const displayname = document.getElementById('werv-display').value;
             const role = document.getElementById('werv-role').value;
             const password = document.getElementById('werv-pass').value;
-            await fetch('/api/werving/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayname, role, password }) });
+            await fetch(API_BASE + '/api/werving/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayname, role, password }) });
             alert('Personeelslid succesvol toegevoegd!');
             document.getElementById('werv-user').value = '';
             document.getElementById('werv-display').value = '';
@@ -1086,7 +1091,7 @@
             const displayname = document.getElementById('mgt-display').value;
             const role = document.getElementById('mgt-role').value;
             const password = document.getElementById('mgt-pass').value;
-            await fetch('/api/staff/update-full', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ oldUsername, username, displayname, role, password }) });
+            await fetch(API_BASE + '/api/staff/update-full', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ oldUsername, username, displayname, role, password }) });
             closeManageModal();
             fetchFreshData();
         }
@@ -1094,25 +1099,25 @@
         async function fireStaffMemberModal() {
             const username = document.getElementById('mgt-old-username').value;
             if (confirm(`Weet je zeker dat je ${username} wilt ontslaan?`)) {
-                await fetch(`/api/staff/${username}`, { method: 'DELETE' });
+                await fetch(API_BASE + `/api/staff/${username}`, { method: 'DELETE' });
                 closeManageModal();
                 fetchFreshData();
             }
         }
 
         async function votePoll(pollId, optionIndex) {
-            await fetch('/api/polls/vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pollId, optionIndex, username: currentUser.username }) });
+            await fetch(API_BASE + '/api/polls/vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pollId, optionIndex, username: currentUser.username }) });
             fetchFreshData();
         }
 
-        async function deletePoll(id) { await fetch(`/api/polls/${id}`, { method: 'DELETE' }); fetchFreshData(); }
-        async function deleteAnnouncement(id) { await fetch(`/api/announcements/${id}`, { method: 'DELETE' }); fetchFreshData(); }
-        async function deleteInfo(id) { await fetch(`/api/info/${id}`, { method: 'DELETE' }); fetchFreshData(); }
-        async function deleteConvoy(id) { await fetch(`/api/convoys/${id}`, { method: 'DELETE' }); fetchFreshData(); }
+        async function deletePoll(id) { await fetch(API_BASE + `/api/polls/${id}`, { method: 'DELETE' }); fetchFreshData(); }
+        async function deleteAnnouncement(id) { await fetch(API_BASE + `/api/announcements/${id}`, { method: 'DELETE' }); fetchFreshData(); }
+        async function deleteInfo(id) { await fetch(API_BASE + `/api/info/${id}`, { method: 'DELETE' }); fetchFreshData(); }
+        async function deleteConvoy(id) { await fetch(API_BASE + `/api/convoys/${id}`, { method: 'DELETE' }); fetchFreshData(); }
 
         async function toggleConvoySignup(convoyId, isSignedUp) {
             const endpoint = isSignedUp ? '/api/convoys/cancel' : '/api/convoys/signup';
-            await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ convoyId, username: currentUser.username }) });
+            await fetch(API_BASE + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ convoyId, username: currentUser.username }) });
             fetchFreshData();
         }
 
@@ -1120,7 +1125,7 @@
             const from = document.getElementById('abs-from').value;
             const to = document.getElementById('abs-to').value;
             const reason = document.getElementById('abs-reason').value;
-            await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, reason, username: currentUser.username }) });
+            await fetch(API_BASE + '/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, reason, username: currentUser.username }) });
             alert('Verzoek ingediend!');
             document.getElementById('abs-from').value = '';
             document.getElementById('abs-to').value = '';
@@ -1129,24 +1134,24 @@
         }
 
         async function handleAbsence(absId, status) {
-            await fetch('/api/absence/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ absId, status }) });
+            await fetch(API_BASE + '/api/absence/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ absId, status }) });
             fetchFreshData();
         }
 
         async function addSocialLink() {
             const platform = document.getElementById('social-platform').value;
             const url = document.getElementById('social-url').value;
-            await fetch('/api/socials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url, username: currentUser.username }) });
+            await fetch(API_BASE + '/api/socials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url, username: currentUser.username }) });
             alert('Social toegevoegd!');
             document.getElementById('social-url').value = '';
             fetchFreshData();
         }
-        async function deleteSocial(id) { await fetch(`/api/socials/${id}`, { method: 'DELETE' }); fetchFreshData(); }
+        async function deleteSocial(id) { await fetch(API_BASE + `/api/socials/${id}`, { method: 'DELETE' }); fetchFreshData(); }
 
         async function setEmployeeOfWeek() {
             const targetUser = document.getElementById('eotw-select-user').value;
             const reason = document.getElementById('eotw-input-reason').value;
-            await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
+            await fetch(API_BASE + '/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
             alert('Chauffeur van de week ingesteld!');
             fetchFreshData();
         }
@@ -1154,7 +1159,7 @@
         async function awardBadge() {
             const title = document.getElementById('badge-title').value;
             const targetUser = document.getElementById('badge-user-select').value;
-            await fetch('/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
+            await fetch(API_BASE + '/api/badges', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, targetUser }) });
             alert('Badge toegekend!');
             document.getElementById('badge-title').value = '';
             fetchFreshData();
@@ -1164,7 +1169,7 @@
             const username = document.getElementById('login-user').value;
             const password = document.getElementById('login-pass').value;
             try {
-                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const res = await fetch(API_BASE + '/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
                 const data = await res.json();
                 if (res.ok && data.success) {
                     currentUser = data; 
