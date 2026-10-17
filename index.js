@@ -15,7 +15,7 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// Toestaan van CORS voor al je domeinen
+// CORS-headers instellen voor je hoofdsite en subdomein
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     const allowedOrigins = [
