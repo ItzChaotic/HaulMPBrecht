@@ -118,6 +118,7 @@
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
 
+        /* Konvooikaarten Stijl als Bijlage 2 */
         .convoy-events-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; margin-top: 15px; }
         .convoy-card { background: rgba(18, 5, 5, 0.95); border: 1px solid var(--border-red); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
         .convoy-card-img { width: 100%; height: 150px; object-fit: cover; }
@@ -135,6 +136,7 @@
         footer { text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); }
         .sidebar-user-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; width: 100%; }
         .user-avatar-circle { width: 38px; height: 38px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow: hidden; }
+        .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
 
         @media (max-width: 1050px) {
             .portal-layout { flex-direction: column; }
@@ -206,7 +208,7 @@
             </div>
         </div>
 
-        <!-- PORTAL VIEW (DRIVERS HUB INDELING) -->
+        <!-- PORTAL VIEW -->
         <div id="portal-view" class="page-view">
             <div class="portal-layout">
                 <div class="sidebar" id="portal-sidebar">
@@ -236,6 +238,11 @@
                         <li><button onclick="switchPortalTab('p-tab-socials', this, 'Socials')"><i class="fa-solid fa-share-nodes"></i> Socials</button></li>
                     </ul>
 
+                    <div class="sidebar-section-title">CHAUFFEUR</div>
+                    <ul class="sidebar-menu">
+                        <li><button onclick="switchPortalTab('p-tab-profile', this, 'Persoons Informatie')"><i class="fa-solid fa-user-gear"></i> Persoons Informatie</button></li>
+                    </ul>
+
                     <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER / MANAGEMENT</div>
                     <ul class="sidebar-menu">
                         <li id="werving-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-werving', this, 'Werving')"><i class="fa-solid fa-user-plus"></i> Werving</button></li>
@@ -258,7 +265,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB: DASHBOARD (CONCEPT ART INDELING) -->
+                    <!-- TAB: DASHBOARD -->
                     <div id="p-tab-stats" class="portal-tab-content">
                         <div class="gallery-card" style="background: linear-gradient(135deg, rgba(80,0,0,0.6), rgba(20,4,4,0.8)); border:1px solid var(--accent-red); padding:20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
                             <div>
@@ -318,6 +325,25 @@
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-users" style="color:var(--accent-red);"></i> Onze Chauffeurs & Leden</h3>
                             <div id="portal-drivers-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top:15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: PERSOONS INFORMATIE -->
+                    <div id="p-tab-profile" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="max-width:550px;">
+                            <h3><i class="fa-solid fa-id-card" style="color:var(--accent-red);"></i> Persoons Informatie Bijwerken</h3>
+                            <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:15px;">Pas hier je eigen weergavenaam, profielfoto en wachtwoord aan.</p>
+
+                            <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Displaynaam (Zichtbaar op de website):</label>
+                            <input type="text" id="prof-displayname" class="form-input">
+
+                            <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Nieuw Wachtwoord (Optioneel):</label>
+                            <input type="password" id="prof-password" placeholder="Leeg laten om niet te wijzigen..." class="form-input">
+
+                            <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Profielfoto Uploaden (vanuit verkenner):</label>
+                            <input type="file" id="prof-avatar-file" accept="image/*" class="form-input">
+
+                            <button onclick="saveMyProfileInfo()" class="btn-red" style="margin-top:10px;"><i class="fa-solid fa-floppy-disk"></i> Gegevens Opslaan</button>
                         </div>
                     </div>
 
@@ -528,9 +554,13 @@
                             <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Start Rol:</label>
                             <select id="werv-role" class="form-select">
                                 <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
-                                <option value="Medewerker">Medewerker</option>
+                                <option value="Junior Werknemer">Junior Werknemer</option>
+                                <option value="Werknemer">Werknemer</option>
+                                <option value="Senior Werknemer">Senior Werknemer</option>
                                 <option value="Leidinggevende">Leidinggevende</option>
                                 <option value="Management">Management</option>
+                                <option value="Onder Directeur">Onder Directeur</option>
+                                <option value="Directeur">Directeur</option>
                             </select>
 
                             <label style="font-size:0.78rem; color:var(--text-muted); display:block;">Wachtwoord:</label>
@@ -583,7 +613,7 @@
         </div>
     </div>
 
-    <!-- MODAL: PERSOON MANAGEN -->
+    <!-- MODAL: PERSOON MANAGEN BY MANAGEMENT -->
     <div id="manage-user-modal">
         <div class="login-box">
             <h2 style="font-size:1.3rem; margin-bottom:12px;"><i class="fa-solid fa-user-gear" style="color:var(--accent-red);"></i> Persoon Beheren</h2>
@@ -594,12 +624,14 @@
             <input type="text" id="mgt-display" class="form-input" style="margin-top:2px;">
             <label style="font-size:0.75rem; color:var(--text-muted); text-align:left; display:block;">Rang / Rol:</label>
             <select id="mgt-role" class="form-select" style="margin-top:2px;">
-                <option value="Directeur">Directeur</option>
-                <option value="Onder Directeur">Onder Directeur</option>
-                <option value="Management">Management</option>
-                <option value="Leidinggevende">Leidinggevende</option>
-                <option value="Medewerker">Medewerker</option>
                 <option value="Chauffeur in opleiding">Chauffeur in opleiding</option>
+                <option value="Junior Werknemer">Junior Werknemer</option>
+                <option value="Werknemer">Werknemer</option>
+                <option value="Senior Werknemer">Senior Werknemer</option>
+                <option value="Leidinggevende">Leidinggevende</option>
+                <option value="Management">Management</option>
+                <option value="Onder Directeur">Onder Directeur</option>
+                <option value="Directeur">Directeur</option>
             </select>
             <label style="font-size:0.75rem; color:var(--text-muted); text-align:left; display:block;">Nieuw Wachtwoord (Optioneel):</label>
             <input type="password" id="mgt-pass" placeholder="Leeg laten voor ongewijzigd" class="form-input" style="margin-top:2px;">
@@ -637,7 +669,6 @@
             if (cached) { try { processLoadedData(JSON.parse(cached)); } catch(e) {} }
             fetchFreshData();
 
-            // Als we op het subdomein zitten, openen we direct het portaal
             if (window.location.hostname.includes("personeelsportaal")) {
                 document.getElementById('main-nav-bar').style.display = 'none';
                 const savedUser = sessionStorage.getItem('brecht_user');
@@ -666,7 +697,6 @@
             if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
             if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
 
-            // Live Ritten Feed op hoofdsite & dashboard (Met Displaynaam!)
             if (Array.isArray(data.recent_jobs)) {
                 const container = document.getElementById('trips-container');
                 const liveFeedContainer = document.getElementById('live-feed-container');
@@ -686,7 +716,6 @@
                 }
             }
 
-            // Chauffeurslijst op hoofdsite en in tab
             if (Array.isArray(data.drivers_list)) {
                 const teamContainer = document.getElementById('team-container');
                 const portalDriversGrid = document.getElementById('portal-drivers-grid');
@@ -701,7 +730,17 @@
                 if (portalDriversGrid) {
                     portalDriversGrid.innerHTML = '';
                     data.drivers_list.filter(m => !m.isDev).forEach(m => {
-                        portalDriversGrid.insertAdjacentHTML('beforeend', `<div class="member-card"><div><div style="font-weight:bold; font-size:0.95rem;">${m.displayname || m.username}</div><span class="member-role role-${m.color}">${m.role}</span><div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Gereden: ${m.distance}</div></div></div>`);
+                        const avatarSrc = m.avatarUrl || 'https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png';
+                        portalDriversGrid.insertAdjacentHTML('beforeend', `
+                            <div class="member-card">
+                                <img src="${avatarSrc}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:1px solid var(--accent-red);">
+                                <div style="flex:1;">
+                                    <div style="font-weight:bold; font-size:0.95rem;">${m.displayname || m.username}</div>
+                                    <span class="member-role role-${m.color}">${m.role}</span>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Gereden: ${m.distance}</div>
+                                </div>
+                            </div>
+                        `);
                     });
                 }
             }
@@ -737,36 +776,40 @@
                 });
             }
 
-            // Konvooien Grid
+            // Geplande Konvooien Grid (Gesteund op Bijlage 2)
             const convGrid = document.getElementById('convoys-grid-container');
             if (convGrid) {
                 convGrid.innerHTML = '';
-                data.convoysList?.forEach(c => {
-                    const signups = data.convoySignupsList?.filter(s => s.convoyId === c.id) || [];
-                    const isSignedUp = signups.some(s => s.username === currentUser?.username);
-                    const deleteBtn = currentUser?.canManageStaff ? `<button onclick="deleteConvoy('${c.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : '';
+                if (data.convoysList && data.convoysList.length > 0) {
+                    data.convoysList.forEach(c => {
+                        const signups = data.convoySignupsList?.filter(s => s.convoyId === c.id) || [];
+                        const isSignedUp = signups.some(s => s.username === currentUser?.username);
+                        const deleteBtn = currentUser?.canManageStaff ? `<button onclick="deleteConvoy('${c.id}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button>` : '';
 
-                    convGrid.insertAdjacentHTML('beforeend', `
-                        <div class="convoy-card">
-                            <img src="${c.img}" class="convoy-card-img">
-                            <div class="convoy-card-body">
-                                <span class="convoy-badge-date">${c.date} - ${c.time || '20:00'}</span>
-                                <div class="convoy-title">${c.title}</div>
-                                <div class="convoy-info-row"><span>Server:</span><b>${c.server || 'TruckersMP'}</b></div>
-                                <div class="convoy-info-row"><span>Route:</span><b>${c.route || 'Algemeen konvooi'}</b></div>
-                            </div>
-                            <div class="convoy-card-footer">
-                                <span style="font-size:0.8rem; color:var(--text-muted);"><b style="color:#fff;">${signups.length}</b> Deelnemers</span>
-                                <div style="display:flex; gap:6px;">
-                                    ${deleteBtn}
-                                    <button onclick="toggleConvoySignup('${c.id}', ${isSignedUp})" class="${isSignedUp ? 'btn-red' : 'btn-green'}" style="padding:6px 12px; font-size:0.8rem;">
-                                        ${isSignedUp ? 'Afmelden' : 'Aanmelden'}
-                                    </button>
+                        convGrid.insertAdjacentHTML('beforeend', `
+                            <div class="convoy-card">
+                                <img src="${c.img}" class="convoy-card-img">
+                                <div class="convoy-card-body">
+                                    <span class="convoy-badge-date">ETS2 - ${c.date || 'Datum TBD'}, ${c.time || '20:00'} Uhr</span>
+                                    <div class="convoy-title">${c.title}</div>
+                                    <div class="convoy-info-row"><span>Server:</span><b>${c.server || 'TruckersMP'}</b></div>
+                                    <div class="convoy-info-row"><span>Route:</span><b>${c.route || 'Brecht Transport Konvooi'}</b></div>
+                                </div>
+                                <div class="convoy-card-footer">
+                                    <span style="font-size:0.8rem; color:var(--text-muted);"><b style="color:#fff;">${signups.length}</b> Deelnemers</span>
+                                    <div style="display:flex; gap:6px;">
+                                        ${deleteBtn}
+                                        <button onclick="toggleConvoySignup('${c.id}', ${isSignedUp})" class="${isSignedUp ? 'btn-red' : 'btn-green'}" style="padding:6px 12px; font-size:0.8rem;">
+                                            ${isSignedUp ? 'Afmelden' : 'Aanmelden'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `);
-                });
+                        `);
+                    });
+                } else {
+                    convGrid.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen geplande konvooien.</p>';
+                }
             }
 
             // Peilingen
@@ -790,7 +833,7 @@
                 }
             }
 
-            // Afwezigheid (met Displaynaam)
+            // Afwezigheid
             const absContainer = document.getElementById('absence-list-container');
             if (absContainer) {
                 absContainer.innerHTML = '';
@@ -831,7 +874,7 @@
                 });
             }
 
-            // EOTW Banner (Met Displaynaam)
+            // EOTW Banner
             if (data.employeeOfTheWeek?.username) {
                 document.getElementById('eotw-display-card').style.display = 'block';
                 document.getElementById('eotw-username').innerText = data.employeeOfTheWeek.displayname || data.employeeOfTheWeek.username;
@@ -891,6 +934,66 @@
                     plugins: { legend: { labels: { color: '#caa8a8' } } } 
                 }
             });
+        }
+
+        async function saveMyProfileInfo() {
+            const displayname = document.getElementById('prof-displayname').value;
+            const password = document.getElementById('prof-password').value;
+            const fileInput = document.getElementById('prof-avatar-file');
+
+            let avatarUrl = currentUser.avatarUrl;
+
+            if (fileInput.files && fileInput.files[0]) {
+                avatarUrl = await compressImageFile(fileInput.files[0]);
+            }
+
+            const res = await fetch('/api/user/profile-update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser.username, displayname, password, avatarUrl })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                currentUser.displayname = data.displayname;
+                currentUser.avatarUrl = data.avatarUrl;
+                sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                updateSidebarUserCard();
+                alert('Persoons informatie succesvol bijgewerkt!');
+                fetchFreshData();
+            }
+        }
+
+        function compressImageFile(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = 200;
+                        canvas.height = 200;
+                        ctx.drawImage(img, 0, 0, 200, 200);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                };
+            });
+        }
+
+        function updateSidebarUserCard() {
+            if (!currentUser) return;
+            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
+            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
+
+            const avatarContainer = document.getElementById('sidebar-avatar-container');
+            if (currentUser.avatarUrl && currentUser.avatarUrl.trim() !== "") {
+                avatarContainer.innerHTML = `<img src="${currentUser.avatarUrl}">`;
+            } else {
+                avatarContainer.innerHTML = `<i class="fa-solid fa-user"></i>`;
+            }
         }
 
         async function postAnnouncement() {
@@ -1048,7 +1151,6 @@
                     sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
                     closeLoginModal(); 
 
-                    // Als we op de hoofdsite zitten, openen we het subdomein in een tweede venster/tabblad!
                     if (!window.location.hostname.includes("personeelsportaal")) {
                         window.open(PORTAL_SUBDOMAIN_URL, '_blank');
                     } else {
@@ -1060,8 +1162,9 @@
 
         function openPortalDashboard() {
             if (!currentUser) return openLoginModal();
-            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
-            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
+            updateSidebarUserCard();
+
+            document.getElementById('prof-displayname').value = currentUser.displayname || currentUser.username;
 
             if (currentUser.canManageStaff) {
                 document.getElementById('mgt-section-head').style.display = 'block';
