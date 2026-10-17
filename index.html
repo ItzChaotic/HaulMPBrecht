@@ -17,12 +17,12 @@
                 <h2><i class="fa-solid fa-truck-moving"></i> BrechtVTC</h2>
             </div>
             <ul class="nav-links">
-                <li class="active" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i> Dashboard</li>
-                <li onclick="switchTab('convoy')"><i class="fa-solid fa-route"></i> Konvooien</li>
-                <li onclick="switchTab('werving')"><i class="fa-solid fa-user-plus"></i> Werving</li>
-                <li onclick="switchTab('afwezigheid')"><i class="fa-solid fa-calendar-days"></i> Afwezigheid</li>
-                <li onclick="switchTab('peilingen')"><i class="fa-solid fa-square-poll-vertical"></i> Peilingen</li>
-                <li onclick="switchTab('support')"><i class="fa-solid fa-bug"></i> Support & Ideeën</li>
+                <li class="active" onclick="switchTab('dashboard', event)"><i class="fa-solid fa-house"></i> Dashboard</li>
+                <li onclick="switchTab('convoy', event)"><i class="fa-solid fa-route"></i> Konvooien</li>
+                <li onclick="switchTab('werving', event)"><i class="fa-solid fa-user-plus"></i> Werving</li>
+                <li onclick="switchTab('afwezigheid', event)"><i class="fa-solid fa-calendar-days"></i> Afwezigheid</li>
+                <li onclick="switchTab('peilingen', event)"><i class="fa-solid fa-square-poll-vertical"></i> Peilingen</li>
+                <li onclick="switchTab('support', event)"><i class="fa-solid fa-bug"></i> Support & Ideeën</li>
             </ul>
         </aside>
 
@@ -88,14 +88,14 @@
                 <section id="tab-werving" class="tab-section">
                     <h2>Nieuwe Chauffeur Aanmelding</h2>
                     <div class="form-card">
-                        <p>Vul hieronder je gegevens in om je VTC-account definitief in te stellen.</p>
+                        <p>Vul hieronder je gegevens in om je VTC-account definitief in te stellen met een eigen wachtwoord en weergavenaam.</p>
                         <form id="werving-form" onsubmit="submitWerving(event)">
                             <div class="form-group">
-                                <label>Gebruikersnaam (Sync ID / Uniek):</label>
-                                <input type="text" id="w-username" required placeholder="bijv. brecht_99">
+                                <label>Gebruikersnaam (Sync ID / Uniek achter de schermen):</label>
+                                <input type="text" id="w-username" required placeholder="bijv. brecht_sync">
                             </div>
                             <div class="form-group">
-                                <label>Displaynaam (Zichtbare naam):</label>
+                                <label>Displaynaam (Zichtbare naam op het portaal):</label>
                                 <input type="text" id="w-displayname" required placeholder="bijv. Brecht">
                             </div>
                             <div class="form-group">
@@ -113,9 +113,8 @@
 
                 <!-- TAB 4: AFWEZIGHEID (Management Revamp) -->
                 <section id="tab-afwezigheid" class="tab-section">
-                    <h2>Afwezigheidsbeheer</h2>
+                    <h2>Afwezigheidsbeheer (Management)</h2>
                     <div class="card-list" id="absence-list">
-                        <!-- Voorbeelditem voor Management -->
                         <div class="absence-item">
                             <div>
                                 <strong>RoadKing</strong> (1 Nov t/m 5 Nov)<br>
@@ -136,30 +135,30 @@
                     <div class="poll-card">
                         <h3>Welke DLC-route rijden we tijdens het feestkonvooi?</h3>
                         <div class="poll-options">
-                            <label><input type="radio" name="poll"> Road to the Black Sea (45%)</label>
-                            <label><input type="radio" name="poll"> Beyond the Baltic Sea (30%)</label>
+                            <label><input type="radio" name="poll"> Road to the Black Sea (45%)</label><br>
+                            <label><input type="radio" name="poll"> Beyond the Baltic Sea (30%)</label><br>
                             <label><input type="radio" name="poll"> Iberia (25%)</label>
                         </div>
-                        <button class="btn btn-primary mt-2">Stem Uitbrengen</button>
+                        <button class="btn btn-primary mt-2" onclick="submitPoll()">Stem Uitbrengen</button>
                     </div>
                 </section>
 
                 <!-- TAB 6: SUPPORT & IDEEËN -->
                 <section id="tab-support" class="tab-section">
-                    <h2>Support & Ideeënbus</h2>
+                    <h2>Support & Ideeënbus (Bugtracker)</h2>
                     <div class="form-card">
                         <h3>Meld een Bug of Dien een Idee in</h3>
                         <form id="support-form" onsubmit="submitSupport(event)">
                             <div class="form-group">
-                                <label>Type:</label>
+                                <label>Type melding:</label>
                                 <select id="s-type">
-                                    <option value="Bug">Bug / Probleem</option>
+                                    <option value="Bug">Bug / Systeemfout</option>
                                     <option value="Idee">Idee / Feature Verzoek</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Omschrijving:</label>
-                                <textarea id="s-desc" rows="3" required placeholder="Omschrijf de bug of je idee..."></textarea>
+                                <textarea id="s-desc" rows="3" required placeholder="Omschrijf de bug of je idee zo duidelijk mogelijk..."></textarea>
                             </div>
                             <button type="submit" class="btn btn-primary">Versturen naar Devs</button>
                         </form>
