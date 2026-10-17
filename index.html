@@ -85,8 +85,6 @@
         .fleet-img { width: 100%; height: 210px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
 
         .member-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-red); border-radius: 14px; padding: 16px; }
-        .member-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(30, 6, 6, 0.8); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); overflow: hidden; }
-        .member-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         .member-role { display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-top: 4px; }
 
         .role-red { background: rgba(229, 62, 62, 0.18); color: #fc8181; border: 1px solid rgba(229, 62, 62, 0.4); }
@@ -120,7 +118,6 @@
         .section-header { text-align: center; margin: 35px 0 20px 0; }
         .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
 
-        /* KONVOOI EVENT CARD STYLE (BIJLAGE 2 INSPIRATIE) */
         .convoy-events-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 20px; margin-top: 15px; }
         .convoy-card { background: rgba(18, 5, 5, 0.95); border: 1px solid var(--border-red); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
         .convoy-card-img { width: 100%; height: 160px; object-fit: cover; }
@@ -136,7 +133,6 @@
         .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
         @media (max-width: 1050px) {
-            nav#main-nav-bar { display: none !important; }
             .portal-layout { flex-direction: column; }
             .sidebar { display: none; }
             .portal-content { margin-left: 0; width: 100%; padding: 15px; }
@@ -334,7 +330,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB: KONVOOIEN (EVENEMENTEN STIJL ZOALS BIJLAGE 2) -->
+                    <!-- TAB: KONVOOIEN -->
                     <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
                         <div id="convoy-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
                             <h3><i class="fa-solid fa-calendar-plus" style="color:var(--accent-red);"></i> Nieuw Konvooi Aanmaken</h3>
@@ -359,7 +355,7 @@
                     <div id="p-tab-polls" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="max-width:600px;">
                             <h3><i class="fa-solid fa-square-poll-vertical" style="color:var(--accent-red);"></i> Actieve Peilingen</h3>
-                            <div id="polls-container" style="margin-top:15px;"></div>
+                            <div id="polls-container" style="margin-top:15px;"><p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve peilingen.</p></div>
                         </div>
                     </div>
 
@@ -380,7 +376,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB: WERVING (NIEUW ACCOUNT AANMAKEN) -->
+                    <!-- TAB: WERVING -->
                     <div id="p-tab-werving" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card" style="max-width:550px;">
                             <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuw Personeelslid Aannemen</h3>
@@ -415,7 +411,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB: SOLLICITATIES (In beheer groep) -->
+                    <!-- TAB: SOLLICITATIES -->
                     <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
                         <div class="gallery-card">
                             <h3><i class="fa-solid fa-file-signature" style="color:var(--accent-red);"></i> Ingekomen Sollicitaties</h3>
@@ -449,7 +445,7 @@
         </div>
     </div>
 
-    <!-- MODAL: PERSOON MANAGEN (Rang, Displaynaam, Wachtwoord, Ontslaan) -->
+    <!-- MODAL: PERSOON MANAGEN -->
     <div id="manage-user-modal">
         <div class="login-box">
             <h2 style="font-size:1.3rem; margin-bottom:12px;"><i class="fa-solid fa-user-gear" style="color:var(--accent-red);"></i> Persoon Beheren</h2>
@@ -477,7 +473,7 @@
         </div>
     </div>
 
-    <!-- MODAL: WACHTWOORD & CROPPER -->
+    <!-- MODAL: WACHTWOORD -->
     <div id="password-modal">
         <div class="login-box">
             <h2 style="font-size:1.3rem; margin-bottom:12px;">Wachtwoord Wijzigen</h2>
@@ -487,6 +483,7 @@
         </div>
     </div>
 
+    <!-- MODAL: INLOGGEN -->
     <div id="login-modal">
         <div class="login-box">
             <img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/LogoBrechtTransport.png" style="height:48px; margin-bottom:12px;">
@@ -511,7 +508,12 @@
             fetchFreshData();
 
             const savedUser = sessionStorage.getItem('brecht_user');
-            if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) {} }
+            if (savedUser) { 
+                try { 
+                    currentUser = JSON.parse(savedUser); 
+                    openPortalDashboard(); 
+                } catch(e) {} 
+            }
         });
 
         async function fetchFreshData() {
@@ -554,7 +556,6 @@
         function refreshPortalData(data) {
             if (!data) return;
 
-            // Mededelingen met verwijderknop
             const annContainer = document.getElementById('announcements-display-container');
             if (annContainer) {
                 annContainer.innerHTML = '';
@@ -564,7 +565,6 @@
                 });
             }
 
-            // Info & Mods met verwijderknop
             const infoContainer = document.getElementById('info-list-container');
             if (infoContainer) {
                 infoContainer.innerHTML = '';
@@ -574,7 +574,6 @@
                 });
             }
 
-            // Konvooien Grid (Bijlage 2 Stijl)
             const convGrid = document.getElementById('convoys-grid-container');
             if (convGrid) {
                 convGrid.innerHTML = '';
@@ -606,7 +605,6 @@
                 });
             }
 
-            // Personeelslijst
             const staffTable = document.getElementById('staff-table-body');
             if (staffTable && data.drivers_list) {
                 staffTable.innerHTML = '';
@@ -615,7 +613,6 @@
                 });
             }
 
-            // Populeer dropdowns voor Badges & EOTW
             const badgeUserSelect = document.getElementById('badge-user-select');
             const eotwUserSelect = document.getElementById('eotw-select-user');
             if (badgeUserSelect && eotwUserSelect && data.drivers_list) {
@@ -626,6 +623,45 @@
                     eotwUserSelect.insertAdjacentHTML('beforeend', `<option value="${m.username}">${m.displayname || m.username}</option>`);
                 });
             }
+
+            if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
+            if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance || "0 km";
+            if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers || "0";
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            try {
+                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    currentUser = data; 
+                    sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                    closeLoginModal(); 
+                    openPortalDashboard();
+                } else { 
+                    document.getElementById('login-error').innerText = data.message || 'Onjuiste gegevens.'; 
+                }
+            } catch (e) {
+                document.getElementById('login-error').innerText = 'Server niet bereikbaar.';
+            }
+        }
+
+        function openPortalDashboard() {
+            if (!currentUser) return openLoginModal();
+            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
+            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
+
+            if (currentUser.canManageStaff) {
+                document.getElementById('mgt-section-head').style.display = 'block';
+                document.getElementById('werving-tab-btn').style.display = 'block';
+                document.getElementById('staff-tab-btn').style.display = 'block';
+                document.getElementById('apps-tab-btn').style.display = 'block';
+                document.getElementById('mgt-tab-btn').style.display = 'block';
+                document.getElementById('convoy-create-box').style.display = 'block';
+            }
+            switchView('portal-view');
         }
 
         async function submitWervingAccount() {
@@ -679,21 +715,6 @@
             fetchFreshData();
         }
 
-        function openPortalDashboard() {
-            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
-            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
-
-            if (currentUser.canManageStaff) {
-                document.getElementById('mgt-section-head').style.display = 'block';
-                document.getElementById('werving-tab-btn').style.display = 'block';
-                document.getElementById('staff-tab-btn').style.display = 'block';
-                document.getElementById('apps-tab-btn').style.display = 'block';
-                document.getElementById('mgt-tab-btn').style.display = 'block';
-                document.getElementById('convoy-create-box').style.display = 'block';
-            }
-            switchView('portal-view');
-        }
-
         function switchPortalTab(tabId, btnElement, titleText) {
             document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
@@ -709,18 +730,11 @@
         function openPasswordModal() { document.getElementById('password-modal').style.display = 'flex'; }
         function closePasswordModal() { document.getElementById('password-modal').style.display = 'none'; }
 
-        async function handleLogin() {
-            const username = document.getElementById('login-user').value;
-            const password = document.getElementById('login-pass').value;
-            const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                currentUser = data; sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
-                closeLoginModal(); openPortalDashboard();
-            } else { document.getElementById('login-error').innerText = data.message; }
-        }
-
         function logout() { currentUser = null; sessionStorage.removeItem('brecht_user'); goHome(); }
+        function switchView(viewId) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
     </script>
 </body>
 </html>
