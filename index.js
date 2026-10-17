@@ -6,13 +6,13 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(express.static(__dirname));
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 app.use((req, res, next) => {
@@ -72,7 +72,10 @@ async function connectDB() {
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-    } catch (err) {}
+        console.log("✅ MongoDB succesvol verbonden.");
+    } catch (err) {
+        console.error("❌ MongoDB verbinding mislukt:", err.message);
+    }
 }
 connectDB();
 
@@ -120,20 +123,24 @@ function canManageStaff(role) {
 
 function isDriverMatch(jobDriver, accountUsername, accountDisplayname) {
     if (!jobDriver) return false;
-    const j = jobDriver.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const u = (accountUsername || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const d = (accountDisplayname || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    return j === u || j === d || j.includes(u) || u.includes(j) || (d && (j.includes(d) || d.includes(j)));
+    const j = jobDriver.toLowerCase().trim();
+    const u = (accountUsername || '').toLowerCase().trim();
+    const d = (accountDisplayname || '').toLowerCase().trim();
+    return j === u || j === d || j.includes(u) || u.includes(j);
 }
 
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 clientBot.on('clientReady', () => {
-    setTimeout(() => fetch7DaysDiscordJobs(), 500);
+    console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
+    setTimeout(() => {
+        fetch7DaysDiscordJobs();
+        fetchDiscordApplications();
+    }, 1000);
 });
 
 clientBot.on('messageCreate', (message) => {
-    if (message.author.id !== TARGET_BOT_ID) return;
+    if (message.author.id !== TARGET_BOT_ID && !message.author.bot) return;
     if (message.channelId === DISCORD_CHANNEL_ID) parseAndAddJob(message);
     else if (message.channelId === DISCORD_APPLICATIONS_CHANNEL_ID) parseAndAddApplication(message);
 });
@@ -142,7 +149,7 @@ async function fetch7DaysDiscordJobs() {
     try {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
-        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        const sevenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
         let lastId = undefined;
         let keepFetching = true;
 
@@ -154,7 +161,7 @@ async function fetch7DaysDiscordJobs() {
 
             for (const msg of messages.values()) {
                 if (msg.createdTimestamp < sevenDaysAgo) { keepFetching = false; break; }
-                if (msg.author.id === TARGET_BOT_ID) await parseAndAddJob(msg);
+                await parseAndAddJob(msg);
             }
             lastId = messages.last()?.id;
             if (messages.size < 50) break;
@@ -162,17 +169,32 @@ async function fetch7DaysDiscordJobs() {
     } catch (e) {}
 }
 
+async function fetchDiscordApplications() {
+    try {
+        const channel = await clientBot.channels.fetch(DISCORD_APPLICATIONS_CHANNEL_ID);
+        if (!channel) return;
+        const messages = await channel.messages.fetch({ limit: 50 });
+        for (const msg of messages.values()) {
+            await parseAndAddApplication(msg);
+        }
+    } catch (e) {}
+}
+
 async function parseAndAddApplication(message) {
     try {
-        if (message.author.id !== TARGET_BOT_ID) return;
-        let contentText = message.content || "Nieuwe sollicitatie.";
-        if (message.embeds?.[0]) contentText = message.embeds[0].description || message.embeds[0].title || contentText;
+        let applicantName = "Sollicitant";
+        let contentText = message.content || "Nieuwe sollicitatie via Discord.";
+        if (message.embeds?.[0]) {
+            const emb = message.embeds[0];
+            contentText = emb.description || emb.title || contentText;
+            if (emb.author?.name) applicantName = emb.author.name;
+        }
         const appId = "app-" + message.id;
         if (isConnected && applicationsColl) {
             const exists = await applicationsColl.findOne({ id: appId });
             if (!exists) {
                 await applicationsColl.insertOne({
-                    id: appId, applicant: "Sollicitant", content: contentText, status: "open",
+                    id: appId, applicant: applicantName, content: contentText, status: "open",
                     date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL')
                 });
             }
@@ -190,9 +212,10 @@ async function parseAndAddJob(message) {
             const title = embed.title || '';
             if (title.includes('→')) { const p = title.split('→'); from = cleanText(p[0]); to = cleanText(p[1]); }
             embed.fields?.forEach(f => {
-                if (f.name.toLowerCase().includes('driver')) driver = cleanText(f.value);
-                if (f.name.toLowerCase().includes('distance')) distanceStr = cleanText(f.value);
-                if (f.name.toLowerCase().includes('paid')) paidAmount = parseCurrency(f.value);
+                const name = f.name.toLowerCase();
+                if (name.includes('driver') || name.includes('chauffeur')) driver = cleanText(f.value);
+                if (name.includes('distance') || name.includes('afstand')) distanceStr = cleanText(f.value);
+                if (name.includes('paid') || name.includes('opbrengst') || name.includes('saldo')) paidAmount = parseCurrency(f.value);
             });
         }
         if (!from || !to) return;
@@ -246,7 +269,7 @@ app.get('/api/haulmp', async (req, res) => {
                 const [badges, announcements, applications, info, convoys, signups, socials, polls, absences, eotw] = await Promise.all([
                     fetchWithTimeout(badgesColl.find({}).toArray()),
                     fetchWithTimeout(announcementsColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(applicationsColl.find({}).toArray()),
+                    fetchWithTimeout(applicationsColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(infoColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(convoysColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(convoySignupsColl.find({}).toArray()),
@@ -288,7 +311,7 @@ app.get('/api/haulmp', async (req, res) => {
             const dStr = new Date(j.timestamp).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit' });
             if (dailyChartData[dStr]) {
                 dailyChartData[dStr].company += j.paidAmount;
-                const dc = j.driver.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const dc = j.driver.toLowerCase().trim();
                 dailyChartData[dStr].drivers[dc] = (dailyChartData[dStr].drivers[dc] || 0) + j.paidAmount;
             }
         });
@@ -327,6 +350,12 @@ app.post('/api/staff/update-full', async (req, res) => {
         if (password && password.trim() !== "") updateDoc.password = password.trim();
         await accountsColl.updateOne({ username: oldUsername }, { $set: updateDoc });
         cachedAccounts = await accountsColl.find({}).toArray();
+    } else {
+        const idx = cachedAccounts.findIndex(a => a.username === oldUsername);
+        if (idx !== -1) {
+            cachedAccounts[idx] = { ...cachedAccounts[idx], username, displayname, role };
+            if (password) cachedAccounts[idx].password = password;
+        }
     }
     res.json({ success: true });
 });
@@ -336,6 +365,8 @@ app.delete('/api/staff/:targetUser', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${target}$`, 'i') } });
         cachedAccounts = await accountsColl.find({}).toArray();
+    } else {
+        cachedAccounts = cachedAccounts.filter(a => a.username.toLowerCase() !== target.toLowerCase());
     }
     res.json({ success: true });
 });
@@ -403,22 +434,13 @@ app.post('/api/polls/vote', async (req, res) => {
         const poll = await pollsColl.findOne({ id: pollId });
         if (poll) {
             poll.options.forEach((opt, idx) => {
-                opt.votes = opt.votes.filter(u => u !== username);
+                opt.votes = opt.votes ? opt.votes.filter(u => u !== username) : [];
                 if (idx === parseInt(optionIndex)) opt.votes.push(username);
             });
             await pollsColl.updateOne({ id: pollId }, { $set: { options: poll.options } });
         }
     }
     res.json({ success: true });
-});
-
-app.post('/api/staff/upload-pfp', async (req, res) => {
-    const { targetUser, pfp } = req.body;
-    if (isConnected && accountsColl) {
-        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: pfp } });
-        cachedAccounts = await accountsColl.find({}).toArray();
-    }
-    res.json({ success: true, avatarUrl: pfp });
 });
 
 app.post('/api/applications/complete', async (req, res) => {
