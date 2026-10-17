@@ -15,8 +15,19 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }
 });
 
+// Toestaan van CORS voor al je domeinen
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+        'https://brechttransport.nl',
+        'https://www.brechttransport.nl',
+        'https://personeelsportaal.brechttransport.nl',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+    ];
+    if (allowedOrigins.includes(origin) || !origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') return res.sendStatus(200);
@@ -46,7 +57,7 @@ let cachedAccounts = [
 async function connectDB() {
     if (!MONGO_URI) return;
     try {
-        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 3000 });
+        const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
         await client.connect();
         db = client.db('brecht_transport');
         
@@ -141,7 +152,7 @@ async function fetch7DaysDiscordJobs() {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
         const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
-        const messages = await channel.messages.fetch({ limit: 30 });
+        const messages = await channel.messages.fetch({ limit: 50 });
         for (const msg of messages.values()) {
             if (msg.createdTimestamp >= tenDaysAgo) {
                 await parseAndAddJob(msg);
