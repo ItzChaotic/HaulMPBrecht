@@ -44,7 +44,6 @@ let cachedAccounts = [
 ];
 
 async function connectDB() {
-    const startT = Date.now();
     if (!MONGO_URI) return;
     try {
         const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
@@ -73,10 +72,7 @@ async function connectDB() {
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-        console.log(`⏱️ MongoDB verbinding & accounts ingeladen in ${Date.now() - startT}ms`);
-    } catch (err) {
-        console.error("❌ MongoDB verbinding mislukt:", err.message);
-    }
+    } catch (err) {}
 }
 connectDB();
 
@@ -133,7 +129,6 @@ function isDriverMatch(jobDriver, accountUsername, accountDisplayname) {
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 clientBot.on('clientReady', () => {
-    console.log(`🤖 Discord Bot ingelogd als ${clientBot.user.tag}`);
     setTimeout(() => fetch7DaysDiscordJobs(), 500);
 });
 
@@ -159,9 +154,7 @@ async function fetch7DaysDiscordJobs() {
 
             for (const msg of messages.values()) {
                 if (msg.createdTimestamp < sevenDaysAgo) { keepFetching = false; break; }
-                if (msg.author.id === TARGET_BOT_ID) {
-                    await parseAndAddJob(msg);
-                }
+                if (msg.author.id === TARGET_BOT_ID) await parseAndAddJob(msg);
             }
             lastId = messages.last()?.id;
             if (messages.size < 50) break;
@@ -172,18 +165,15 @@ async function fetch7DaysDiscordJobs() {
 async function parseAndAddApplication(message) {
     try {
         if (message.author.id !== TARGET_BOT_ID) return;
-        let applicantName = "Sollicitant";
         let contentText = message.content || "Nieuwe sollicitatie.";
         if (message.embeds?.[0]) contentText = message.embeds[0].description || message.embeds[0].title || contentText;
-
         const appId = "app-" + message.id;
         if (isConnected && applicationsColl) {
             const exists = await applicationsColl.findOne({ id: appId });
             if (!exists) {
                 await applicationsColl.insertOne({
-                    id: appId, applicant: applicantName, content: contentText, status: "open",
-                    date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL'),
-                    link: "https://vtc.haulmp.com/Brecht#applications"
+                    id: appId, applicant: "Sollicitant", content: contentText, status: "open",
+                    date: new Date(message.createdTimestamp || Date.now()).toLocaleDateString('nl-NL')
                 });
             }
         }
@@ -192,7 +182,7 @@ async function parseAndAddApplication(message) {
 
 async function parseAndAddJob(message) {
     try {
-        let from = '', to = '', driver = '', cargo = 'Vracht', distanceStr = '0 km', paidAmount = 0;
+        let from = '', to = '', driver = '', distanceStr = '0 km', paidAmount = 0;
         let timestamp = message.createdTimestamp || Date.now();
 
         if (message.embeds?.[0]) {
@@ -210,7 +200,7 @@ async function parseAndAddJob(message) {
         const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
         if (paidAmount === 0 && kmAmount > 0) paidAmount = kmAmount * 35;
 
-        const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
+        const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
         if (isConnected && jobsColl) {
             await jobsColl.updateOne({ id: jobObj.id }, { $set: jobObj }, { upsert: true });
         }
@@ -225,7 +215,7 @@ app.post('/api/login', (req, res) => {
         
         res.json({ 
             success: true, username: account.username, displayname: account.displayname || account.username, role: account.role, color: getRoleColor(account.role), 
-            discordId: account.discordId || '', avatarUrl: account.avatarUrl || '', 
+            avatarUrl: account.avatarUrl || '', 
             canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role)
         });
     } catch(e) {
@@ -250,7 +240,7 @@ app.get('/api/haulmp', async (req, res) => {
         let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
         if (isConnected && db) {
-            const fetchWithTimeout = (promise, ms = 1500) => Promise.race([promise, new Promise(resolve => resolve([]))]);
+            const fetchWithTimeout = (promise) => Promise.race([promise, new Promise(resolve => resolve([]))]);
 
             try {
                 const [badges, announcements, applications, info, convoys, signups, socials, polls, absences, eotw] = await Promise.all([
@@ -263,7 +253,7 @@ app.get('/api/haulmp', async (req, res) => {
                     fetchWithTimeout(socialsColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(pollsColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(absencesColl.find({}).sort({ _id: -1 }).toArray()),
-                    fetchWithTimeout(eotwColl.findOne({}), 1000)
+                    fetchWithTimeout(eotwColl.findOne({}))
                 ]);
 
                 customBadges = badges || []; announcementsList = announcements || []; applicationsList = applications || [];
@@ -277,7 +267,7 @@ app.get('/api/haulmp', async (req, res) => {
             const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username, m.displayname));
             return {
                 username: m.username, displayname: m.displayname || m.username, role: m.role, weight: getRoleWeight(m.role), color: getRoleColor(m.role), isDev: !!m.isDev,
-                avatarUrl: m.avatarUrl || '', discordId: m.discordId || '',
+                avatarUrl: m.avatarUrl || '',
                 deliveries: userJobs.length,
                 distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
                 earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
@@ -321,21 +311,12 @@ app.get('/api/haulmp', async (req, res) => {
 
 app.post('/api/werving/add', async (req, res) => {
     const { username, displayname, password, role } = req.body;
-    if (!username || !password) return res.status(400).json({ success: false, message: 'Vul gebruikersnaam en wachtwoord in.' });
-    
-    const newAcc = { 
-        username: username.trim(), 
-        displayname: (displayname || username).trim(), 
-        password: password.trim(), 
-        role: role || 'Chauffeur in opleiding' 
-    };
-
+    if (!username || !password) return res.status(400).json({ success: false });
+    const newAcc = { username: username.trim(), displayname: (displayname || username).trim(), password: password.trim(), role: role || 'Chauffeur in opleiding' };
     if (isConnected && accountsColl) {
         await accountsColl.insertOne(newAcc);
         cachedAccounts = await accountsColl.find({}).toArray();
-    } else {
-        cachedAccounts.push(newAcc);
-    }
+    } else { cachedAccounts.push(newAcc); }
     res.json({ success: true });
 });
 
@@ -343,8 +324,17 @@ app.post('/api/staff/update-full', async (req, res) => {
     const { oldUsername, username, displayname, role, password } = req.body;
     if (isConnected && accountsColl) {
         const updateDoc = { username, displayname, role };
-        if (password) updateDoc.password = password;
+        if (password && password.trim() !== "") updateDoc.password = password.trim();
         await accountsColl.updateOne({ username: oldUsername }, { $set: updateDoc });
+        cachedAccounts = await accountsColl.find({}).toArray();
+    }
+    res.json({ success: true });
+});
+
+app.delete('/api/staff/:targetUser', async (req, res) => {
+    const target = req.params.targetUser;
+    if (isConnected && accountsColl) {
+        await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${target}$`, 'i') } });
         cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true });
@@ -369,9 +359,9 @@ app.delete('/api/convoys/:id', async (req, res) => {
 });
 
 app.post('/api/convoys/signup', async (req, res) => {
-    const { convoyId, username, status } = req.body;
+    const { convoyId, username } = req.body;
     if (isConnected && convoySignupsColl) {
-        await convoySignupsColl.updateOne({ convoyId, username }, { $set: { convoyId, username, status, date: new Date().toLocaleDateString('nl-NL') } }, { upsert: true });
+        await convoySignupsColl.updateOne({ convoyId, username }, { $set: { convoyId, username, date: new Date().toLocaleDateString('nl-NL') } }, { upsert: true });
     }
     res.json({ success: true });
 });
@@ -392,6 +382,33 @@ app.post('/api/absence', async (req, res) => {
 app.post('/api/absence/status', async (req, res) => {
     const { absId, status } = req.body;
     if (isConnected && absencesColl) await absencesColl.updateOne({ id: absId }, { $set: { status } });
+    res.json({ success: true });
+});
+
+app.post('/api/polls', async (req, res) => {
+    const { question, options } = req.body;
+    const pollObj = { id: "poll-" + Date.now(), question, options: options.map(o => ({ text: o, votes: [] })), date: new Date().toLocaleDateString('nl-NL') };
+    if (isConnected && pollsColl) await pollsColl.insertOne(pollObj);
+    res.json({ success: true });
+});
+
+app.delete('/api/polls/:id', async (req, res) => {
+    if (isConnected && pollsColl) await pollsColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.post('/api/polls/vote', async (req, res) => {
+    const { pollId, optionIndex, username } = req.body;
+    if (isConnected && pollsColl) {
+        const poll = await pollsColl.findOne({ id: pollId });
+        if (poll) {
+            poll.options.forEach((opt, idx) => {
+                opt.votes = opt.votes.filter(u => u !== username);
+                if (idx === parseInt(optionIndex)) opt.votes.push(username);
+            });
+            await pollsColl.updateOne({ id: pollId }, { $set: { options: poll.options } });
+        }
+    }
     res.json({ success: true });
 });
 
@@ -464,14 +481,6 @@ app.delete('/api/socials/:id', async (req, res) => {
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
-        cachedAccounts = await accountsColl.find({}).toArray();
-    }
-    res.json({ success: true });
-});
-
-app.delete('/api/staff/:targetUser', async (req, res) => {
-    if (isConnected && accountsColl) {
-        await accountsColl.deleteOne({ username: { $regex: new RegExp(`^${req.params.targetUser}$`, 'i') } });
         cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true });
