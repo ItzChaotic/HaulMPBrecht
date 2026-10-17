@@ -102,8 +102,6 @@
         .trip-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border-red); }
         .form-input { width: 100%; padding: 12px 16px; margin: 6px 0 14px 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border-red); color: var(--text-main); border-radius: 10px; font-size: 0.95rem; }
         .btn-red { background: var(--primary-light); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
-        .btn-green { background: #2ecc71; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-orange { background: #e67e22; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
         .hero-schlüppi { text-align: left; padding: 70px 35px; max-width: 1200px; margin: 0 auto; background: linear-gradient(rgba(10, 3, 3, 0.55), rgba(10, 3, 3, 0.70)), url('https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png') no-repeat center center; background-size: cover; border: 1px solid var(--border-red); border-radius: 20px; }
         .hero-badge { display: inline-block; background: rgba(204, 0, 0, 0.2); color: #ff6b6b; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; border: 1px solid rgba(204, 0, 0, 0.4); text-transform: uppercase; margin-bottom: 16px; }
@@ -134,9 +132,16 @@
         .mobile-portal-tabs button.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
 
         footer { text-align: center; padding: 25px 0; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border-red); margin-top: 60px; background: rgba(16, 3, 3, 0.5); }
+        .sub-tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-red); padding-bottom: 12px; flex-wrap: wrap; }
+        .sub-tab-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-red); color: var(--text-muted); padding: 9px 18px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .sub-tab-btn.active { background: var(--primary-light); color: #fff; border-color: var(--accent-red); }
+
         .sidebar-user-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-red); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; width: 100%; }
         .user-avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(204,0,0,0.2); border: 1px solid var(--accent-red); color: var(--accent-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; overflow: hidden; }
         .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+        .socials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 15px; }
+        .social-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-red); border-radius: 14px; padding: 18px; text-align: center; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.2s; }
 
         @media (max-width: 1050px) {
             nav#main-nav-bar { display: none !important; }
@@ -177,6 +182,7 @@
             <a href="javascript:void(0);" onclick="goHome(); toggleMobileDrawer();"><i class="fa-solid fa-house"></i> <span>Home</span></a>
             <a href="#about-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-circle-info"></i> <span>Over Ons</span></a>
             <a href="#rules-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-book"></i> <span>Regels</span></a>
+            <a href="#socials-main-sec" onclick="toggleMobileDrawer();"><i class="fa-solid fa-share-nodes"></i> <span>Socials</span></a>
             <a href="#team" onclick="toggleMobileDrawer();"><i class="fa-solid fa-users"></i> <span>Het Team</span></a>
             <a href="#vloot" onclick="toggleMobileDrawer();"><i class="fa-solid fa-truck"></i> <span>Vloot</span></a>
             <a href="#activiteit" onclick="toggleMobileDrawer();"><i class="fa-solid fa-route"></i> <span>Afgeronde Ritten</span></a>
@@ -193,6 +199,7 @@
             <li><a href="javascript:void(0);" onclick="goHome()">Home</a></li>
             <li><a href="#about-sec">Over Ons</a></li>
             <li><a href="#rules-sec">Regels</a></li>
+            <li><a href="#socials-main-sec">Socials</a></li>
             <li><a href="#team">Team</a></li>
             <li><a href="#vloot">Vloot</a></li>
             <li><a href="#activiteit">Ritten</a></li>
@@ -202,7 +209,6 @@
     </nav>
 
     <div class="container">
-        <!-- HOME VIEW -->
         <div id="home-view" class="page-view active">
             <section class="hero-schlüppi">
                 <div class="hero-badge">ETS2 & ATS VTC</div>
@@ -230,19 +236,29 @@
                 <p style="margin-bottom:12px;">Brecht Transport B.V. is een hechte en professionele Virtuele Transport Onderneming (VTC) opgericht op het platform Euro Truck Simulator 2.</p>
             </div>
 
+            <!-- APART REGELS TABJE OP DE MAINSITE -->
             <div class="section-header" id="rules-sec"><h2>Bedrijfsregels & Gedragscode</h2></div>
             <div class="gallery-card" style="line-height:1.7; padding:25px;">
                 <h3 style="color:var(--accent-red); margin-bottom:10px;"><i class="fa-solid fa-shield-halved"></i> Algemene VTC Regels</h3>
                 <ul style="list-style-type: disc; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--text-muted);">
-                    <li><b>Gezelligheid & Respect:</b> Behandel alle collega-chauffeurs met respect.</li>
-                    <li><b>Realistisch Rijgedrag:</b> Houd je aan de verkeersregels en snelheidslimieten.</li>
+                    <li><b>Gezelligheid & Respect:</b> Behandel alle collega-chauffeurs met respect[cite: 8].</li>
+                    <li><b>Realistisch Rijgedrag:</b> Houd je aan de verkeersregels en snelheidslimieten[cite: 8].</li>
+                    <li><b>Communicatie:</b> Kom afspraken na en meld afwezigheid tijdig bij de leiding[cite: 8].</li>
+                    <li><b>Bedrijfsuitstraling:</b> Gebruik de verplichte VTC-tags en skins tijdens officiële konvooien[cite: 8].</li>
                 </ul>
+            </div>
+
+            <!-- SOCIAL MEDIA TABJE OP DE MAINSITE -->
+            <div class="section-header" id="socials-main-sec"><h2>Check Onze Socials</h2></div>
+            <div class="gallery-card" style="padding:25px;">
+                <p style="color:var(--text-muted); text-align:center; margin-bottom:10px;">Volg ons op al onze kanalen!</p>
+                <div id="public-socials-container" class="socials-grid"></div>
             </div>
 
             <div class="section-header" id="team"><h2>Ons Team</h2></div>
             <div class="team-grid" id="team-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;"></div>
 
-            <!-- VLOOT (Inclusief DAF!) -->
+            <!-- VLOOT (INCLUSIEF DAF!) -->
             <div class="section-header" id="vloot"><h2>Onze Vloot</h2></div>
             <div class="fleet-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
                 <div class="gallery-card"><img src="https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/DAF.jpg" class="fleet-img"><div style="font-weight:bold;">Scania S 2016</div></div>
@@ -274,21 +290,22 @@
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                        <button onclick="openDiscordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem; background:rgba(204,0,0,0.15);"><i class="fa-solid fa-crop"></i> Profielfoto Croppen</button>
                         <button onclick="openPasswordModal()" class="btn-portal" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.8rem;"><i class="fa-solid fa-key"></i> Wachtwoord Wijzigen</button>
                     </div>
 
                     <div class="sidebar-section-title">HOOFDMENU</div>
                     <ul class="sidebar-menu">
                         <li class="active"><button onclick="switchPortalTab('p-tab-stats', this, 'Overzicht')"><i class="fa-solid fa-chart-pie"></i> Overzicht</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-info', this, 'Informatie, Mededelingen & Mods')"><i class="fa-solid fa-book-open"></i> Info & Mods</button></li>
                         <li><button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien')"><i class="fa-solid fa-truck-front"></i> Konvooien</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-werving', this, 'Werving & Aanmelding')"><i class="fa-solid fa-user-plus"></i> Werving</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid Beheer')"><i class="fa-solid fa-calendar-days"></i> Afwezigheid</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-polls', this, 'Stemmingen & Peilingen')"><i class="fa-solid fa-square-poll-vertical"></i> Peilingen</button></li>
-                        <li><button onclick="switchPortalTab('p-tab-support', this, 'Support & Ideeën')"><i class="fa-solid fa-bug"></i> Support & Ideeën</button></li>
+                        <li><button onclick="switchPortalTab('p-tab-socials', this, 'Socials Beheren')"><i class="fa-solid fa-share-nodes"></i> Socials Beheren</button></li>
+                        <li id="apps-tab-btn"><button onclick="switchPortalTab('p-tab-apps', this, 'Sollicitaties')"><i class="fa-solid fa-file-signature"></i> Sollicitaties</button></li>
                     </ul>
 
                     <div class="sidebar-section-title" id="mgt-section-head" style="display:none;">BEHEER</div>
                     <ul class="sidebar-menu">
+                        <li id="mgt-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-mgt', this, 'Badges & EOTW')"><i class="fa-solid fa-award"></i> Badges & EOTW</button></li>
                         <li id="staff-tab-btn" style="display:none;"><button onclick="switchPortalTab('p-tab-staff', this, 'Personeel Beheren')"><i class="fa-solid fa-user-gear"></i> Personeel Beheren</button></li>
                     </ul>
 
@@ -299,24 +316,15 @@
                 </div>
 
                 <div class="portal-content">
-                    <div class="mobile-portal-tabs">
-                        <button class="active" onclick="switchPortalTab('p-tab-stats', this, 'Overzicht')">Overzicht</button>
-                        <button onclick="switchPortalTab('p-tab-convoys', this, 'Konvooien')">Konvooien</button>
-                        <button onclick="switchPortalTab('p-tab-werving', this, 'Werving')">Werving</button>
-                        <button onclick="switchPortalTab('p-tab-absence', this, 'Afwezigheid')">Afwezigheid</button>
-                        <button onclick="switchPortalTab('p-tab-polls', this, 'Peilingen')">Peilingen</button>
-                        <button onclick="switchPortalTab('p-tab-support', this, 'Support')">Support</button>
-                    </div>
-
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid var(--border-red); padding-bottom:16px;">
                         <div><h1 id="portal-dynamic-title" style="font-size:1.8rem; font-family:'Space Grotesk', sans-serif;"><i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> Overzicht</h1></div>
                     </div>
 
-                    <!-- TAB 1: OVERZICHT -->
+                    <!-- TAB 1: OVERZICHT (Met eigen afgelopen 10d kilometers & saldo + gecorrigeerde grafiek met Y-as) -->
                     <div id="p-tab-stats" class="portal-tab-content">
                         <div class="dashboard-grid-top">
                             <div class="dash-card">
-                                <div class="dash-card-header"><span class="dash-card-title">AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
+                                <div class="dash-card-header"><span class="dash-card-title">BEDRIJF AFSTAND</span><div class="dash-card-icon"><i class="fa-solid fa-truck-moving"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-distance">0 km</div>
                             </div>
                             <div class="dash-card">
@@ -327,13 +335,23 @@
                                 <div class="dash-card-header"><span class="dash-card-title">BEDRIJFSSALDO</span><div class="dash-card-icon"><i class="fa-solid fa-vault"></i></div></div>
                                 <div class="dash-card-num" id="company-stat-earnings" style="color:#ff9999;">€ 0</div>
                             </div>
+                            <div class="dash-card" style="border: 1px solid var(--accent-red); background: rgba(255,51,51,0.05);">
+                                <div class="dash-card-header"><span class="dash-card-title" style="color:var(--accent-red);">MIJN AFGELOPEN 10D</span><div class="dash-card-icon"><i class="fa-solid fa-user-clock"></i></div></div>
+                                <div class="dash-card-num" id="my-10d-distance" style="font-size:1.5rem;">0 km</div>
+                                <span style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;" id="my-10d-earnings">Saldo: € 0</span>
+                            </div>
                         </div>
 
                         <div class="dash-main-row">
                             <div>
                                 <div class="analytics-box" style="margin-bottom:24px;">
-                                    <h3 style="font-size: 1.1rem; margin-bottom:15px;"><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Prestatie Analyse</h3>
+                                    <h3 style="font-size: 1.1rem; margin-bottom:15px;"><i class="fa-solid fa-chart-line" style="color:var(--accent-red);"></i> Prestatie Analyse (Afgelopen 10 Dagen)</h3>
                                     <div style="height: 250px; width: 100%;"><canvas id="earningsChart"></canvas></div>
+                                </div>
+                                <div id="eotw-display-card" class="gallery-card" style="background: linear-gradient(135deg, rgba(128,0,0,0.35), rgba(204,0,0,0.12)); border: 1px solid var(--accent-red); display:none; text-align:center; padding:24px;">
+                                    <h3 style="color:#f6e05e; font-size:1.2rem; margin-bottom:6px;"><i class="fa-solid fa-crown"></i> Chauffeur van de Week!</h3>
+                                    <h2 id="eotw-username" style="font-size:1.8rem; margin-bottom:4px;">Chauffeur</h2>
+                                    <p id="eotw-reason" style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">"Uitstekende prestaties!"</p>
                                 </div>
                             </div>
                             <div>
@@ -341,117 +359,161 @@
                                     <h3 style="margin-bottom:12px; font-size:1.1rem;"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-red);"></i> Live Activiteit</h3>
                                     <div id="live-feed-container"><p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Geen recente activiteit.</p></div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 2: KONVOOIEN -->
-                    <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card">
-                            <h3><i class="fa-solid fa-truck-front" style="color:var(--accent-red);"></i> Komende Konvooien & Aanwezigheid</h3>
-                            <div id="convoys-list-container" style="margin-top:15px;"></div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 3: WERVING -->
-                    <div id="p-tab-werving" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card" style="max-width: 600px;">
-                            <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuwe Chauffeur Aanmelding</h3>
-                            <p style="color:var(--text-muted); font-size:0.9rem; margin: 10px 0 20px 0;">Vul je gegevens in om direct je gebruikersnaam, displaynaam, ervaring en eigen wachtwoord vast te leggen.</p>
-                            <form onsubmit="submitWervingForm(event)">
-                                <label style="font-size:0.85rem; color:var(--text-muted);">Gebruikersnaam (Sync ID):</label>
-                                <input type="text" id="w-user" class="form-input" required placeholder="bijv. Driver_Brecht">
-                                
-                                <label style="font-size:0.85rem; color:var(--text-muted);">Displaynaam (Weergavenaam op de site):</label>
-                                <input type="text" id="w-display" class="form-input" required placeholder="bijv. Brecht">
-
-                                <label style="font-size:0.85rem; color:var(--text-muted);">Ervaring / Motivering:</label>
-                                <textarea id="w-exp" class="form-input" rows="3" placeholder="Vertel over je ETS2 ervaring..."></textarea>
-
-                                <label style="font-size:0.85rem; color:var(--text-muted);">Eigen Wachtwoord:</label>
-                                <input type="password" id="w-pass" class="form-input" required placeholder="Kies een sterk wachtwoord">
-
-                                <button type="submit" class="btn-red" style="margin-top:10px;">Account Instellen & Activeren</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- TAB 4: AFWEZIGHEID (Management Revamp) -->
-                    <div id="p-tab-absence" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card" style="margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-calendar-days" style="color:var(--accent-red);"></i> Afwezigheid Aanvragen</h3>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
-                                <div><label style="font-size:0.85rem; color:var(--text-muted);">Van:</label><input type="date" id="abs-from" class="form-input"></div>
-                                <div><label style="font-size:0.85rem; color:var(--text-muted);">Tot:</label><input type="date" id="abs-to" class="form-input"></div>
-                            </div>
-                            <input type="text" id="abs-reason" placeholder="Reden van afwezigheid..." class="form-input">
-                            <button onclick="submitAbsence()" class="btn-red">Verzoek Indienen</button>
-                        </div>
-                        <div class="gallery-card">
-                            <h3><i class="fa-solid fa-clipboard-list" style="color:var(--accent-red);"></i> Ingediende Verzoeken (Management Overzicht)</h3>
-                            <div id="absence-list-container" style="margin-top:15px;"></div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 5: STEMMINGEN & PEILINGEN -->
-                    <div id="p-tab-polls" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card" style="max-width: 600px;">
-                            <h3><i class="fa-solid fa-square-poll-vertical" style="color:var(--accent-red);"></i> Actieve Peilingen & Stemmingen</h3>
-                            <div id="polls-container" style="margin-top:15px;">
-                                <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:12px; margin-bottom:12px;">
-                                    <b>Welke DLC-route rijden we tijdens het volgende feestkonvooi?</b>
-                                    <div style="margin:12px 0; display:flex; flex-direction:column; gap:8px;">
-                                        <label><input type="radio" name="poll-1" value="0"> Road to the Black Sea (45%)</label>
-                                        <label><input type="radio" name="poll-1" value="1"> Beyond the Baltic Sea (30%)</label>
-                                        <label><input type="radio" name="poll-1" value="2"> Iberia (25%)</label>
-                                    </div>
-                                    <button onclick="votePoll('poll-1')" class="btn-red" style="padding:6px 14px; font-size:0.85rem;">Stem Uitbrengen</button>
+                                <div class="gallery-card" style="margin-top:24px;">
+                                    <h3 style="font-size: 1.1rem;"><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Mijn Badges</h3>
+                                    <div id="my-badges-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TAB 6: SUPPORT & IDEEËN -->
-                    <div id="p-tab-support" class="portal-tab-content" style="display:none;">
-                        <div class="gallery-card" style="max-width: 600px; margin-bottom:20px;">
-                            <h3><i class="fa-solid fa-bug" style="color:var(--accent-red);"></i> Support & Ideeënbus (Bug Melden of Idee Indienen)</h3>
-                            <form onsubmit="submitSupportForm(event)" style="margin-top:15px;">
-                                <label style="font-size:0.85rem; color:var(--text-muted);">Type melding:</label>
-                                <select id="sup-type" class="form-input" style="background:rgba(0,0,0,0.5); color:#fff;">
-                                    <option value="Bug">Bug / Systeemfout</option>
-                                    <option value="Idee">Idee / Feature Verzoek</option>
-                                </select>
-
-                                <label style="font-size:0.85rem; color:var(--text-muted);">Omschrijving:</label>
-                                <textarea id="sup-desc" class="form-input" rows="3" required placeholder="Omschrijf het probleem of je idee..."></textarea>
-
-                                <button type="submit" class="btn-red">Versturen naar Devs</button>
-                            </form>
+                    <!-- TAB 2: INFORMATIE, MEDEDELINGEN & MODS -->
+                    <div id="p-tab-info" class="portal-tab-content" style="display:none;">
+                        <div class="sub-tab-bar">
+                            <button class="sub-tab-btn active" onclick="switchInfoSubTab('info-sub-view', this)"><i class="fa-solid fa-book-open"></i> Overzicht & Mededelingen</button>
+                            <button id="info-create-subtab-btn" class="sub-tab-btn" style="display:none;" onclick="switchInfoSubTab('info-sub-create', this)"><i class="fa-solid fa-plus"></i> Nieuwe Post Plaatsen</button>
                         </div>
-                        <div class="gallery-card">
-                            <h3><i class="fa-solid fa-list-check" style="color:var(--accent-red);"></i> Ingezonden Tickets & Ideeën</h3>
-                            <div id="support-list-container" style="margin-top:15px;"></div>
+                        <div id="info-sub-view">
+                            <div class="gallery-card" style="margin-bottom:20px;">
+                                <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Belangrijke Mededelingen</h3>
+                                <div id="announcements-display-container" style="margin-top:15px;"></div>
+                            </div>
+                            <div class="gallery-card">
+                                <h3><i class="fa-solid fa-folder-open" style="color:var(--accent-red);"></i> Bedrijfsinformatie & Mods</h3>
+                                <div id="info-list-container" style="margin-top:15px;"></div>
+                            </div>
+                        </div>
+                        <div id="info-sub-create" style="display:none;">
+                            <div class="gallery-card" style="margin-bottom:20px;">
+                                <h3><i class="fa-solid fa-bullhorn" style="color:var(--accent-red);"></i> Nieuwe Mededeling</h3>
+                                <input type="text" id="ann-title" placeholder="Titel..." class="form-input">
+                                <textarea id="ann-content" placeholder="Inhoud..." class="form-input" style="height:90px;"></textarea>
+                                <button onclick="postAnnouncement()" class="btn-red">Publiceren</button>
+                            </div>
+                            <div class="gallery-card">
+                                <h3><i class="fa-solid fa-file-arrow-up" style="color:var(--accent-red);"></i> Informatie / Mod Posten</h3>
+                                <input type="text" id="info-title" placeholder="Titel..." class="form-input">
+                                <textarea id="info-content" placeholder="Omschrijving..." class="form-input" style="height:80px;"></textarea>
+                                <input type="file" id="info-file" class="form-input" accept=".zip,.scs,.rar,.pdf,.png,.jpg">
+                                <button onclick="postInfo()" class="btn-red" style="margin-top:12px;">Opslaan</button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- PERSONEEL BEHEER -->
+                    <!-- TAB 3: KONVOOIEN (Leiding+ kan aanmaken) -->
+                    <div id="p-tab-convoys" class="portal-tab-content" style="display:none;">
+                        <div id="convoy-create-box" class="gallery-card" style="display:none; margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-calendar-plus" style="color:var(--accent-red);"></i> Nieuw Konvooi Inplannen</h3>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                <input type="text" id="conv-title" placeholder="Titel..." class="form-input">
+                                <input type="text" id="conv-server" placeholder="Server..." class="form-input">
+                                <input type="date" id="conv-date" class="form-input">
+                                <input type="time" id="conv-time" class="form-input">
+                            </div>
+                            <input type="text" id="conv-route" placeholder="Route..." class="form-input">
+                            <textarea id="conv-details" placeholder="Details..." class="form-input" style="height:80px;"></textarea>
+                            <button onclick="postConvoy()" class="btn-red">Inplannen</button>
+                        </div>
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-truck-front" style="color:var(--accent-red);"></i> Geplande Konvooien</h3>
+                            <div id="convoys-list-container" style="margin-top:15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: SOCIALS BEHEREN -->
+                    <div id="p-tab-socials" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-share-nodes" style="color:var(--accent-red);"></i> Social Media Link Toevoegen</h3>
+                            <div style="display:grid; grid-template-columns: 1fr 2fr; gap:12px; margin-top:10px;">
+                                <select id="social-platform" class="form-input" style="margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);">
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="Twitch">Twitch</option>
+                                    <option value="YouTube">YouTube</option>
+                                </select>
+                                <input type="url" id="social-url" placeholder="https://..." class="form-input" style="margin:0;">
+                            </div>
+                            <button onclick="addSocialLink()" class="btn-red" style="margin-top:14px;">Toevoegen</button>
+                        </div>
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-list" style="color:var(--accent-red);"></i> Beheerde Socials</h3>
+                            <div id="portal-socials-list" style="margin-top:14px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: SOLLICITATIES -->
+                    <div id="p-tab-apps" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-file-signature" style="color:var(--accent-red);"></i> Actieve Sollicitaties</h3>
+                            <div id="applications-open-container" style="margin-top:14px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: PERSONEEL BEHEER (Hersteld!) -->
                     <div id="p-tab-staff" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-user-plus" style="color:var(--accent-red);"></i> Nieuw Personeelslid</h3>
+                            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+                                <input type="text" id="new-staff-user" placeholder="Gebruikersnaam" class="form-input" style="flex:1; margin:0;">
+                                <select id="new-staff-role" class="form-input" style="flex:1; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);">
+                                    <option value="Directeur">Directeur</option>
+                                    <option value="Management">Management</option>
+                                    <option value="Leidinggevende">Leidinggevende</option>
+                                    <option value="Medewerker">Medewerker</option>
+                                </select>
+                                <button onclick="addNewStaff()" class="btn-red">Toevoegen</button>
+                            </div>
+                        </div>
                         <div class="staff-table-wrapper">
                             <table class="staff-table">
-                                <thead><tr><th>Gebruiker</th><th>Displaynaam</th><th>Rol</th><th>Acties</th></tr></thead>
+                                <thead><tr><th>Gebruiker</th><th>Rol</th><th>Wijzigen</th><th>Wachtwoord</th><th>Acties</th></tr></thead>
                                 <tbody id="staff-table-body"></tbody>
                             </table>
                         </div>
                     </div>
 
+                    <!-- TAB 7: BADGES & EOTW -->
+                    <div id="p-tab-mgt" class="portal-tab-content" style="display:none;">
+                        <div class="gallery-card" style="margin-bottom:20px;">
+                            <h3><i class="fa-solid fa-crown" style="color:var(--accent-red);"></i> Chauffeur van de Week</h3>
+                            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+                                <select id="eotw-select-user" class="form-input" style="flex:1; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
+                                <input type="text" id="eotw-input-reason" placeholder="Reden..." class="form-input" style="flex:2; margin:0;">
+                                <button onclick="setEmployeeOfWeek()" class="btn-red">Instellen</button>
+                            </div>
+                        </div>
+                        <div class="gallery-card">
+                            <h3><i class="fa-solid fa-award" style="color:var(--accent-red);"></i> Badges Beheren</h3>
+                            <div style="display:flex; gap:12px; margin:14px 0; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:14px; border-radius:12px;">
+                                <input type="text" id="badge-title" placeholder="Badge Naam" class="form-input" style="flex:1; margin:0;">
+                                <select id="badge-user-select" class="form-input" style="flex:1; margin:0; background:rgba(0,0,0,0.5); color:var(--text-main);"></select>
+                                <button onclick="awardBadge()" class="btn-red">+ Toevoegen</button>
+                            </div>
+                            <div id="badges-tree-container" style="margin-top:15px;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer><p>&copy; Alle rechten behouden 2026 | Brecht Transport VTC</p></footer>
+    <footer><p>&copy; Alle rechten behouden 2026 | Gemaakt door ItzChaotic_</p></footer>
 
     <!-- MODALS -->
+    <div id="discord-modal">
+        <div class="login-box" style="max-width:440px;">
+            <h2 style="font-size:1.3rem; margin-bottom:10px;"><i class="fa-solid fa-crop" style="color:var(--accent-red);"></i> Profielfoto Croppen</h2>
+            <input type="file" id="pfp-file-input" accept="image/*" class="form-input" onchange="previewCropImage(this)">
+            <div id="crop-preview-area" style="display:none; margin:12px 0; text-align:center;">
+                <div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; margin: 0 auto; border: 2px solid var(--accent-red); background: #000;">
+                    <canvas id="cropCanvas" width="150" height="150" style="cursor: grab;"></canvas>
+                </div>
+            </div>
+            <button onclick="saveCroppedProfilePicture()" class="btn-red" style="width:100%; margin-top:10px;">Opslaan</button>
+            <button onclick="closeDiscordModal()" style="background:transparent; color:#888; border:none; width:100%; margin-top:10px; cursor:pointer;">Annuleren</button>
+        </div>
+    </div>
+
     <div id="password-modal">
         <div class="login-box">
             <h2 style="font-size:1.3rem; margin-bottom:12px;">Wachtwoord Wijzigen</h2>
@@ -476,8 +538,9 @@
     <script>
         let currentUser = null;
         let chartInstance = null;
+        let cropImageObj = new Image();
+        let cropScale = 1, cropOffsetX = 0, cropOffsetY = 0, isDragging = false, startX = 0, startY = 0;
 
-        // --- CLIENT-SIDE CACHING (Directe weergave zonder wachten) ---
         function loadDataInstantWithCache() {
             const cached = localStorage.getItem('brecht_cached_data');
             if (cached) {
@@ -500,21 +563,170 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDataInstantWithCache();
-            const savedUser = sessionStorage.getItem('brecht_user');
-            if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) {} }
+            if (window.location.hostname.includes("personeelsportaal")) {
+                document.getElementById('main-nav-bar').style.display = 'none';
+                const savedUser = sessionStorage.getItem('brecht_user');
+                if (savedUser) { try { currentUser = JSON.parse(savedUser); openPortalDashboard(); } catch(e) { openLoginModal(); } } else openLoginModal();
+            }
+            initCropperEvents();
         });
 
+        function openPasswordModal() { document.getElementById('password-modal').style.display = 'flex'; }
+        function closePasswordModal() { document.getElementById('password-modal').style.display = 'none'; }
+        function openDiscordModal() { document.getElementById('discord-modal').style.display = 'flex'; }
+        function closeDiscordModal() { document.getElementById('discord-modal').style.display = 'none'; }
+
+        function previewCropImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    cropImageObj.onload = function() {
+                        document.getElementById('crop-preview-area').style.display = 'block';
+                        cropScale = 1; cropOffsetX = 0; cropOffsetY = 0;
+                        drawCropCanvas();
+                    };
+                    cropImageObj.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function initCropperEvents() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas) return;
+            canvas.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - cropOffsetX; startY = e.clientY - cropOffsetY; });
+            window.addEventListener('mousemove', (e) => { if (!isDragging) return; cropOffsetX = e.clientX - startX; cropOffsetY = e.clientY - startY; drawCropCanvas(); });
+            window.addEventListener('mouseup', () => { isDragging = false; });
+        }
+
+        function drawCropCanvas() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(canvas.width / 2 + cropOffsetX, canvas.height / 2 + cropOffsetY);
+            ctx.scale(cropScale, cropScale);
+            ctx.drawImage(cropImageObj, -cropImageObj.width / 2, -cropImageObj.height / 2);
+            ctx.restore();
+        }
+
+        async function saveCroppedProfilePicture() {
+            const canvas = document.getElementById('cropCanvas');
+            if (!canvas || !cropImageObj.src) return alert('Selecteer eerst een afbeelding!');
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const res = await fetch('/api/staff/upload-pfp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser: currentUser.username, pfp: dataUrl }) });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                currentUser.avatarUrl = data.avatarUrl;
+                sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                alert('Profielfoto opgeslagen!');
+                closeDiscordModal();
+                updateSidebarAvatar();
+                fetchFreshData();
+            }
+        }
+
+        function updateSidebarAvatar() {
+            const container = document.getElementById('sidebar-avatar-container');
+            if (currentUser && currentUser.avatarUrl) container.innerHTML = `<img src="${currentUser.avatarUrl}">`;
+            else container.innerHTML = `<i class="fa-solid fa-user"></i>`;
+        }
+
+        function switchInfoSubTab(subId, btn) {
+            document.getElementById('info-sub-view').style.display = 'none';
+            document.getElementById('info-sub-create').style.display = 'none';
+            document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(subId).style.display = 'block';
+            btn.classList.add('active');
+        }
+
+        function goHome() {
+            switchView('home-view');
+        }
+
+        function handleNavLogin() {
+            openLoginModal();
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
+        function closeLoginModal() { document.getElementById('login-modal').style.display = 'none'; }
+
+        async function handleLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            try {
+                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    currentUser = data; sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
+                    closeLoginModal(); openPortalDashboard();
+                } else document.getElementById('login-error').innerText = data.message || 'Onjuiste gegevens.';
+            } catch (e) { document.getElementById('login-error').innerText = 'Server niet bereikbaar.'; }
+        }
+
+        function logout() { currentUser = null; sessionStorage.removeItem('brecht_user'); goHome(); }
+
+        function openPortalDashboard() {
+            if (!currentUser) return openLoginModal();
+            document.getElementById('sidebar-username-txt').innerText = currentUser.username;
+            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
+            updateSidebarAvatar();
+
+            if (currentUser.canManageBadges) {
+                document.getElementById('mgt-section-head').style.display = 'block';
+                document.getElementById('mgt-tab-btn').style.display = 'block';
+            }
+            if (currentUser.canManageStaff) {
+                document.getElementById('staff-tab-btn').style.display = 'block';
+                document.getElementById('info-create-subtab-btn').style.display = 'inline-block';
+            }
+            if (['directeur', 'onder directeur', 'management', 'leidinggevende'].some(r => currentUser.role.toLowerCase().includes(r))) {
+                document.getElementById('convoy-create-box').style.display = 'block';
+            }
+            refreshPortalData();
+            switchView('portal-view');
+        }
+
+        function switchPortalTab(tabId, btnElement, titleText) {
+            document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            if (titleText) document.getElementById('portal-dynamic-title').innerHTML = `<i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> ${titleText}`;
+            if (btnElement && btnElement.parentElement) btnElement.parentElement.classList.add('active');
+        }
+
         function processLoadedData(data) {
-            if (data.distance) document.getElementById('stat-distance').innerText = data.distance;
+            if (data.distance) {
+                document.getElementById('stat-distance').innerText = data.distance;
+                if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance;
+            }
             if (data.deliveries) document.getElementById('stat-deliveries').innerText = data.deliveries;
-            if (data.drivers) document.getElementById('stat-drivers').innerText = data.drivers;
+            if (data.drivers) {
+                document.getElementById('stat-drivers').innerText = data.drivers;
+                if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers;
+            }
+
+            const pubSocials = document.getElementById('public-socials-container');
+            if (pubSocials) {
+                pubSocials.innerHTML = '';
+                data.socialsList?.forEach(s => {
+                    pubSocials.insertAdjacentHTML('beforeend', `<a href="${s.url}" target="_blank" class="social-card"><i class="fa-brands fa-${s.platform.toLowerCase()}"></i><span style="font-weight:bold;">${s.platform}</span><span style="font-size:0.8rem; color:var(--text-muted);">Door ${s.addedBy}</span></a>`);
+                });
+            }
 
             if (Array.isArray(data.drivers_list)) {
                 const teamContainer = document.getElementById('team-container');
                 if (teamContainer) {
                     teamContainer.innerHTML = '';
                     data.drivers_list.filter(m => !m.isDev).forEach(m => {
-                        teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div><div style="font-weight:bold;">${m.displayname || m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div>`);
+                        const avatarHtml = m.avatarUrl ? `<img src="${m.avatarUrl}">` : `<i class="fa-solid fa-user"></i>`;
+                        teamContainer.insertAdjacentHTML('beforeend', `<div class="member-card"><div style="display:flex; align-items:center; gap:14px;"><div class="member-avatar">${avatarHtml}</div><div><div style="font-weight:bold; font-size:0.95rem;">${m.username}</div><span class="member-role role-${m.color}">${m.role}</span></div></div></div>`);
                     });
                 }
             }
@@ -528,131 +740,238 @@
                     });
                 }
             }
+            refreshPortalData(data);
+        }
 
-            const supContainer = document.getElementById('support-list-container');
-            if (supContainer && data.supportList) {
-                supContainer.innerHTML = '';
-                data.supportList.forEach(s => {
-                    supContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px;"><b>[${s.type}]</b> ${s.desc} <br><small style="color:#888;">Door ${s.username} - Status: ${s.status}</small></div>`);
+        async function refreshPortalData(dataOverride) {
+            const data = dataOverride || JSON.parse(localStorage.getItem('brecht_cached_data') || '{}');
+
+            if (data.employeeOfTheWeek?.username) {
+                document.getElementById('eotw-display-card').style.display = 'block';
+                document.getElementById('eotw-username').innerText = data.employeeOfTheWeek.username;
+                document.getElementById('eotw-reason').innerText = `"${data.employeeOfTheWeek.reason}"`;
+            }
+
+            const annContainer = document.getElementById('announcements-display-container');
+            if (annContainer) {
+                annContainer.innerHTML = '';
+                if (data.announcements && data.announcements.length > 0) {
+                    data.announcements.forEach(a => {
+                        annContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:14px; border-radius:10px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><h4>${a.title}</h4><p style="font-size:0.92rem; margin-top:6px;">${a.content}</p><small style="color:#888;">Door ${a.username || 'Admin'}</small></div>`);
+                    });
+                } else {
+                    annContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve mededelingen.</p>';
+                }
+            }
+
+            const infoContainer = document.getElementById('info-list-container');
+            if (infoContainer) {
+                infoContainer.innerHTML = '';
+                if (data.infoList && data.infoList.length > 0) {
+                    data.infoList.forEach(i => {
+                        let fileAction = i.link ? `<a href="${i.link}" download="${i.fileName || 'download'}" class="btn-portal" style="padding:6px 14px; font-size:0.8rem; margin-top:8px; display:inline-block;"><i class="fa-solid fa-download"></i> Download</a>` : '';
+                        infoContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:12px; border-left:3px solid var(--accent-red);"><b>${i.title}</b><p style="font-size:0.92rem; margin:6px 0; color:var(--text-muted);">${i.content}</p>${fileAction}</div>`);
+                    });
+                } else {
+                    infoContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen informatie of mods beschikbaar.</p>';
+                }
+            }
+
+            const convContainer = document.getElementById('convoys-list-container');
+            if (convContainer) {
+                convContainer.innerHTML = '';
+                if (data.convoysList && data.convoysList.length > 0) {
+                    data.convoysList.forEach(c => {
+                        convContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:12px; margin-bottom:14px;"><b style="color:var(--accent-red);">${c.title}</b><p style="font-size:0.9rem; margin-top:6px;"><b>Datum:</b> ${c.date} ${c.time || ''} | <b>Server:</b> ${c.server}</p><p style="font-size:0.85rem; color:var(--text-muted);"><b>Route:</b> ${c.route}</p></div>`);
+                    });
+                } else {
+                    convContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen geplande konvooien.</p>';
+                }
+            }
+
+            const portalSocials = document.getElementById('portal-socials-list');
+            if (portalSocials) {
+                portalSocials.innerHTML = '';
+                if (data.socialsList && data.socialsList.length > 0) {
+                    data.socialsList.forEach(s => {
+                        portalSocials.insertAdjacentHTML('beforeend', `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:10px; margin-bottom:10px;"><div><b>${s.platform}</b>: <a href="${s.url}" target="_blank" style="color:var(--accent-red);">${s.url}</a></div><button onclick="deleteSocial('${s.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i></button></div>`);
+                    });
+                } else {
+                    portalSocials.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen beheerde socials.</p>';
+                }
+            }
+
+            const appsOpen = document.getElementById('applications-open-container');
+            if (appsOpen) {
+                appsOpen.innerHTML = '';
+                if (data.applications && data.applications.filter(a => a.status !== 'completed').length > 0) {
+                    data.applications.forEach(app => {
+                        if (app.status !== 'completed') {
+                            appsOpen.insertAdjacentHTML('beforeend', `<div class="gallery-card" style="padding:16px; margin-bottom:12px;"><b>${app.applicant}</b><div style="font-size:0.92rem; color:var(--text-muted); margin:10px 0;">"${app.content}"</div><button onclick="completeApp('${app.id}')" class="btn-red" style="padding:6px 12px; font-size:0.8rem;">Afronden</button></div>`);
+                        }
+                    });
+                } else {
+                    appsOpen.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Geen actieve sollicitaties.</p>';
+                }
+            }
+
+            const staffTable = document.getElementById('staff-table-body');
+            if (staffTable && data.drivers_list) {
+                staffTable.innerHTML = '';
+                data.drivers_list.filter(d => !d.isDev).forEach(m => {
+                    staffTable.insertAdjacentHTML('beforeend', `<tr><td><b>${m.username}</b></td><td><span class="member-role role-${m.color}">${m.role}</span></td><td><button onclick="updateStaffRole('${m.username}')" class="btn-portal" style="padding:4px 8px; font-size:0.75rem;">Rol Aanpassen</button></td><td><button onclick="updateStaffPassword('${m.username}')" class="btn-portal" style="padding:4px 8px; font-size:0.75rem;">Wachtwoord Herstellen</button></td><td><button onclick="fireStaffMember('${m.username}')" class="btn-red" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i></button></td></tr>`);
                 });
             }
 
-            const absContainer = document.getElementById('absence-list-container');
-            if (absContainer && data.absencesList) {
-                absContainer.innerHTML = '';
-                data.absencesList.forEach(a => {
-                    absContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;"><div><b>${a.username}</b> (${a.from} t/m ${a.to})<br><small style="color:#888;">Reden: ${a.reason}</small></div><div><span style="padding:4px 8px; border-radius:4px; background:rgba(230,126,34,0.2); color:#e67e22; font-weight:bold;">${a.status}</span> <button onclick="handleAbsence('${a.id}', 'Goedgekeurd')" class="btn-green" style="font-size:0.75rem; padding:4px 8px;">✓</button> <button onclick="handleAbsence('${a.id}', 'Afgewezen')" class="btn-red" style="font-size:0.75rem; padding:4px 8px;">✕</button></div></div>`);
+            const badgesTree = document.getElementById('badges-tree-container');
+            if (badgesTree && data.badges) {
+                badgesTree.innerHTML = '';
+                data.badges.forEach(b => {
+                    badgesTree.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;"><span><b>${b.title}</b> - ${b.targetUser}</span><button onclick="deleteBadge('${b.id}')" class="btn-red" style="padding:3px 8px; font-size:0.75rem;">Verwijderen</button></div>`);
                 });
+            }
+
+            const liveFeedContainer = document.getElementById('live-feed-container');
+            if (liveFeedContainer && Array.isArray(data.recent_jobs)) {
+                liveFeedContainer.innerHTML = '';
+                data.recent_jobs.slice(0, 5).forEach(j => {
+                    liveFeedContainer.insertAdjacentHTML('beforeend', `<div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between;"><div><b>${j.driver}</b><div style="font-size:0.78rem; color:var(--text-muted);">${j.from} → ${j.to}</div></div><div style="color:#68d391; font-weight:bold;">+${j.distance}</div></div>`);
+                });
+            }
+
+            if (currentUser && Array.isArray(data.dailyChartData)) {
+                let myTotalKm = 0;
+                let myTotalEarnings = 0;
+                data.dailyChartData.forEach(day => {
+                    const uKey = currentUser.username.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    // Als er ritten zijn voor deze chauffeur in deze dag
+                    if (day.drivers && day.drivers[uKey]) {
+                        myTotalEarnings += day.drivers[uKey];
+                    }
+                });
+                // Schatting kilometers op basis van saldo (€35 per km)
+                myTotalKm = Math.round(myTotalEarnings / 35);
+                document.getElementById('my-10d-distance').innerText = `${myTotalKm.toLocaleString('nl-NL')} km`;
+                document.getElementById('my-10d-earnings').innerText = `Saldo: € ${myTotalEarnings.toLocaleString('nl-NL')}`;
+
+                const myBadgesContainer = document.getElementById('my-badges-container');
+                if (myBadgesContainer) {
+                    myBadgesContainer.innerHTML = '';
+                    const myStats = (data.drivers_list || []).find(d => d.username.toLowerCase() === currentUser.username.toLowerCase());
+                    myStats?.badges?.forEach(b => {
+                        myBadgesContainer.insertAdjacentHTML('beforeend', `<span style="background:rgba(255,51,51,0.2); border:1px solid var(--accent-red); padding:6px 12px; border-radius:8px; font-weight:bold;">🛡️ ${b.title}</span>`);
+                    });
+                }
             }
 
             if(document.getElementById('company-stat-earnings')) document.getElementById('company-stat-earnings').innerText = data.companyEarnings || "€ 0";
             if(document.getElementById('company-stat-distance')) document.getElementById('company-stat-distance').innerText = data.distance || "0 km";
             if(document.getElementById('company-stat-drivers')) document.getElementById('company-stat-drivers').innerText = data.drivers || "0";
 
-            renderChart(data.weeklyChartData || []);
+            renderChart(data.dailyChartData || [], currentUser ? currentUser.username : '');
         }
 
-        async function submitWervingForm(e) {
-            e.preventDefault();
-            const username = document.getElementById('w-user').value;
-            const displayname = document.getElementById('w-display').value;
-            const experience = document.getElementById('w-exp').value;
-            const password = document.getElementById('w-pass').value;
-
-            const res = await fetch('/api/werving/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayname, experience, password }) });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                alert('Account succesvol aangemaakt! Je kunt nu inloggen.');
-            } else {
-                alert(data.message || 'Fout bij aanmaken account.');
-            }
-        }
-
-        async function submitSupportForm(e) {
-            e.preventDefault();
-            const type = document.getElementById('sup-type').value;
-            const desc = document.getElementById('sup-desc').value;
-            await fetch('/api/support', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, desc, username: currentUser ? currentUser.username : 'Gast' }) });
-            alert('Verzonden naar het dev-team!');
-            document.getElementById('sup-desc').value = '';
-            fetchFreshData();
-        }
-
-        async function submitAbsence() {
-            const from = document.getElementById('abs-from').value;
-            const to = document.getElementById('abs-to').value;
-            const reason = document.getElementById('abs-reason').value;
-            if (!from || !to) return alert('Vul datums in!');
-            await fetch('/api/absence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, reason, username: currentUser.username }) });
-            alert('Afwezigheid aangevraagd.');
-            fetchFreshData();
-        }
-
-        async function handleAbsence(absId, status) {
-            await fetch('/api/absence/status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ absId, status }) });
-            fetchFreshData();
-        }
-
-        async function votePoll(pollId) {
-            const selected = document.querySelector(`input[name="${pollId}"]:checked`);
-            if (!selected) return alert('Kies een optie!');
-            await fetch('/api/polls/vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pollId, optionIndex: selected.value, username: currentUser.username }) });
-            alert('Stem succesvol uitgebracht!');
-        }
-
-        function goHome() { switchView('home-view'); }
-        function handleNavLogin() { openLoginModal(); }
-        function switchView(viewId) {
-            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        }
-        function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
-        function closeLoginModal() { document.getElementById('login-modal').style.display = 'none'; }
-        function openPasswordModal() { document.getElementById('password-modal').style.display = 'flex'; }
-        function closePasswordModal() { document.getElementById('password-modal').style.display = 'none'; }
-
-        async function handleLogin() {
-            const username = document.getElementById('login-user').value;
-            const password = document.getElementById('login-pass').value;
-            const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                currentUser = data; sessionStorage.setItem('brecht_user', JSON.stringify(currentUser));
-                closeLoginModal(); openPortalDashboard();
-            } else { document.getElementById('login-error').innerText = data.message; }
-        }
-
-        function logout() { currentUser = null; sessionStorage.removeItem('brecht_user'); goHome(); }
-
-        function openPortalDashboard() {
-            document.getElementById('sidebar-username-txt').innerText = currentUser.displayname || currentUser.username;
-            document.getElementById('sidebar-role-txt').innerText = currentUser.role;
-            if (currentUser.canManageStaff) {
-                document.getElementById('mgt-section-head').style.display = 'block';
-                document.getElementById('staff-tab-btn').style.display = 'block';
-            }
-            switchView('portal-view');
-        }
-
-        function switchPortalTab(tabId, btnElement, titleText) {
-            document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).style.display = 'block';
-            if (titleText) document.getElementById('portal-dynamic-title').innerHTML = `<i class="fa-solid fa-compass" style="color:var(--accent-red);"></i> ${titleText}`;
-            if (btnElement && btnElement.parentElement) btnElement.parentElement.classList.add('active');
-        }
-
-        function renderChart(weeklyData) {
+        function renderChart(dailyData, username) {
             const ctx = document.getElementById('earningsChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
+            
+            const labels = dailyData.map(d => d.date);
+            const companyValues = dailyData.map(d => d.company);
+            const datasets = [{ label: 'Bedrijfssaldo (€)', data: companyValues, borderColor: '#ff3333', borderWidth: 3, fill: true, tension: 0.3 }];
+
+            if (username) {
+                const uKey = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const userValues = dailyData.map(d => (d.drivers && d.drivers[uKey]) ? d.drivers[uKey] : 0);
+                datasets.push({ label: `Mijn Saldo (€)`, data: userValues, borderColor: '#68d391', borderWidth: 2, fill: false, tension: 0.3 });
+            }
+
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: weeklyData.map(w => w.week),
-                    datasets: [{ label: 'Bedrijf (€)', data: weeklyData.map(w => w.company), borderColor: '#ff3333', borderWidth: 3, fill: true, tension: 0.3 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#caa8a8' } } } }
+                data: { labels: labels, datasets: datasets },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#caa8a8', callback: function(value) { return '€ ' + value.toLocaleString(); } },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#caa8a8' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    },
+                    plugins: { legend: { labels: { color: '#caa8a8' } } } 
+                }
             });
+        }
+
+        async function completeApp(appId) {
+            await fetch('/api/applications/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ appId }) });
+            fetchFreshData();
+        }
+
+        async function postInfo() {
+            const title = document.getElementById('info-title').value;
+            const content = document.getElementById('info-content').value;
+            const fileInput = document.getElementById('info-file');
+            const formData = new FormData();
+            formData.append('title', title); formData.append('content', content); formData.append('username', currentUser.username);
+            if (fileInput.files.length > 0) formData.append('file', fileInput.files[0]);
+            await fetch('/api/info', { method: 'POST', body: formData });
+            alert('Geplaatst!');
+            document.getElementById('info-title').value = ''; document.getElementById('info-content').value = ''; fileInput.value = '';
+            fetchFreshData();
+        }
+
+        async function postConvoy() {
+            const title = document.getElementById('conv-title').value;
+            const date = document.getElementById('conv-date').value;
+            const time = document.getElementById('conv-time').value;
+            const server = document.getElementById('conv-server').value;
+            const route = document.getElementById('conv-route').value;
+            const details = document.getElementById('conv-details').value;
+            await fetch('/api/convoys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, date, time, server, route, details, username: currentUser.username }) });
+            alert('Konvooi aangemaakt!');
+            fetchFreshData();
+        }
+
+        async function postAnnouncement() {
+            const title = document.getElementById('ann-title').value;
+            const content = document.getElementById('ann-content').value;
+            await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, content, username: currentUser.username }) });
+            alert('Mededeling gepubliceerd!');
+            document.getElementById('ann-title').value = ''; document.getElementById('ann-content').value = '';
+            fetchFreshData();
+        }
+
+        async function addSocialLink() {
+            const platform = document.getElementById('social-platform').value;
+            const url = document.getElementById('social-url').value;
+            await fetch('/api/socials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url, username: currentUser.username }) });
+            document.getElementById('social-url').value = '';
+            fetchFreshData();
+        }
+
+        async function deleteSocial(id) {
+            await fetch(`/api/socials/${id}`, { method: 'DELETE' });
+            fetchFreshData();
+        }
+
+        async function setEmployeeOfWeek() {
+            const targetUser = document.getElementById('eotw-select-user').value;
+            const reason = document.getElementById('eotw-input-reason').value;
+            await fetch('/api/eotw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser, reason, username: currentUser.username }) });
+            alert('Ingesteld!');
+            fetchFreshData();
+        }
+
+        async function updateMyOwnPassword() {
+            const newPassword = document.getElementById('my-new-password').value;
+            await fetch('/api/staff/update-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUser: currentUser.username, newPassword }) });
+            alert('Wachtwoord gewijzigd!');
+            closePasswordModal();
         }
     </script>
 </body>
