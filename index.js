@@ -29,18 +29,18 @@ const DISCORD_APPLICATIONS_CHANNEL_ID = process.env.DISCORD_APPLICATIONS_CHANNEL
 const TARGET_BOT_ID = '1558075057417494582';
 const MONGO_URI = process.env.MONGO_URI;
 
-let db, accountsColl, announcementsColl, applicationsColl, infoColl, convoysColl, convoySignupsColl, badgesColl, eotwColl, socialsColl, jobsColl;
+let db, accountsColl, announcementsColl, applicationsColl, infoColl, convoysColl, convoySignupsColl, badgesColl, eotwColl, socialsColl, jobsColl, pollsColl, absencesColl;
 let isConnected = false;
 
 let cachedAccounts = [
-    { username: "DEV ACCOUNT", password: "DEVACC123", role: "Directeur", isDev: true },
-    { username: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
-    { username: "ItzChaotic_", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
-    { username: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
-    { username: "JoeyKj", password: "JoeyPassword", role: "Management" },
-    { username: "Jellybear", password: "JellyBearPass", role: "Management" },
-    { username: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
-    { username: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
+    { username: "DEV ACCOUNT", displayname: "Developer", password: "DEVACC123", role: "Directeur", isDev: true },
+    { username: "MJGamerNL", displayname: "MJGamerNL", password: "Wachtwoord123", role: "Directeur" },
+    { username: "ItzChaotic_", displayname: "ItzChaotic", password: "ChaoticPassword!", role: "Onder Directeur & Development" },
+    { username: "Ramona", displayname: "Ramona", password: "RamonaPass2026", role: "Onder Directeur" },
+    { username: "JoeyKj", displayname: "JoeyKj", password: "JoeyPassword", role: "Management" },
+    { username: "Jellybear", displayname: "Jellybear", password: "JellyBearPass", role: "Management" },
+    { username: "Dansco54", displayname: "Dansco54", password: "DanscoPass", role: "Leidinggevende" },
+    { username: "Zinnorax", displayname: "Zinnorax", password: "ZinnoraxPass", role: "Leidinggevende" }
 ];
 
 async function connectDB() {
@@ -61,6 +61,8 @@ async function connectDB() {
         eotwColl = db.collection('eotw');
         socialsColl = db.collection('socials');
         jobsColl = db.collection('jobs');
+        pollsColl = db.collection('polls');
+        absencesColl = db.collection('absences');
 
         await jobsColl.createIndex({ timestamp: -1 }).catch(() => {});
         isConnected = true;
@@ -71,7 +73,7 @@ async function connectDB() {
         } else {
             cachedAccounts = await accountsColl.find({}).toArray();
         }
-        console.log(`⏱️ [PERF] MongoDB verbinding & accounts ingeladen in ${Date.now() - startT}ms`);
+        console.log(`⏱️ MongoDB verbinding & accounts ingeladen in ${Date.now() - startT}ms`);
     } catch (err) {
         console.error("❌ MongoDB verbinding mislukt:", err.message);
     }
@@ -117,28 +119,15 @@ function canManageBadges(role) {
 
 function canManageStaff(role) {
     const r = (role || '').toLowerCase();
-    return r.includes('directeur') || r.includes('onder directeur');
-}
-
-function canDeleteContent(role) {
-    const r = (role || '').toLowerCase();
     return r.includes('directeur') || r.includes('onder directeur') || r.includes('management');
 }
 
-function isDriverMatch(jobDriver, accountUsername) {
-    if (!jobDriver || !accountUsername) return false;
+function isDriverMatch(jobDriver, accountUsername, accountDisplayname) {
+    if (!jobDriver) return false;
     const j = jobDriver.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const a = accountUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return j === a || j.includes(a) || a.includes(j);
-}
-
-function getISOWeekKey(timestamp) {
-    const d = new Date(timestamp);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    const yearStart = new Date(d.getFullYear(), 0, 1);
-    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-    return `Wk ${weekNo}`;
+    const u = (accountUsername || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const d = (accountDisplayname || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return j === u || j === d || j.includes(u) || u.includes(j) || (d && (j.includes(d) || d.includes(j)));
 }
 
 const clientBot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -155,7 +144,6 @@ clientBot.on('messageCreate', (message) => {
 });
 
 async function fetch7DaysDiscordJobs() {
-    const startT = Date.now();
     try {
         const channel = await clientBot.channels.fetch(DISCORD_CHANNEL_ID);
         if (!channel) return;
@@ -178,10 +166,7 @@ async function fetch7DaysDiscordJobs() {
             lastId = messages.last()?.id;
             if (messages.size < 50) break;
         }
-        console.log(`⏱️ [PERF] Afgelopen 7 dagen Discord jobs gesyncd in ${Date.now() - startT}ms`);
-    } catch (e) {
-        console.error("❌ Fout bij ophalen Discord jobs:", e.message);
-    }
+    } catch (e) {}
 }
 
 async function parseAndAddApplication(message) {
@@ -225,7 +210,7 @@ async function parseAndAddJob(message) {
         const kmAmount = parseInt(distanceStr.replace(/\D/g, ''), 10) || 0;
         if (paidAmount === 0 && kmAmount > 0) paidAmount = kmAmount * 35;
 
-        const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, weekKey: getISOWeekKey(timestamp), dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
+        const jobObj = { id: message.id || "job-" + Date.now(), from, to, driver, cargo, distance: `${kmAmount.toLocaleString('nl-NL')} km`, kmAmount, paidAmount, timestamp, dateFormatted: new Date(timestamp).toLocaleDateString('nl-NL') };
         if (isConnected && jobsColl) {
             await jobsColl.updateOne({ id: jobObj.id }, { $set: jobObj }, { upsert: true });
         }
@@ -239,9 +224,9 @@ app.post('/api/login', (req, res) => {
         if (!account) return res.status(401).json({ success: false, message: 'Onjuiste gegevens!' });
         
         res.json({ 
-            success: true, username: account.username, role: account.role, color: getRoleColor(account.role), 
+            success: true, username: account.username, displayname: account.displayname || account.username, role: account.role, color: getRoleColor(account.role), 
             discordId: account.discordId || '', avatarUrl: account.avatarUrl || '', 
-            canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role), canDelete: canDeleteContent(account.role)
+            canManageBadges: canManageBadges(account.role), canManageStaff: canManageStaff(account.role)
         });
     } catch(e) {
         res.status(500).json({ success: false, message: "Serverfout" });
@@ -249,41 +234,26 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/haulmp', async (req, res) => {
-    const requestStart = Date.now();
     try {
         const tenDaysAgo = Date.now() - (10 * 24 * 60 * 60 * 1000);
         let allJobsHistory = [];
         
         if (isConnected && jobsColl) {
-            const stepT = Date.now();
             allJobsHistory = await jobsColl.find({ timestamp: { $gte: tenDaysAgo } }).sort({ timestamp: -1 }).toArray();
-            console.log(`⏱️ [PERF] /api/haulmp - Jobs ophalen uit DB duurde: ${Date.now() - stepT}ms`);
         }
 
         const totalDeliveries = allJobsHistory.length;
         const totalDistanceKm = allJobsHistory.reduce((acc, curr) => acc + curr.kmAmount, 0);
         const totalCompanyEarnings = allJobsHistory.reduce((acc, curr) => acc + curr.paidAmount, 0);
 
-        let customBadges = [];
-        let announcementsList = [];
-        let applicationsList = [];
-        let infoList = [];
-        let convoysList = [];
-        let convoySignupsList = [];
-        let socialsList = [];
+        let customBadges = [], announcementsList = [], applicationsList = [], infoList = [], convoysList = [], convoySignupsList = [], socialsList = [], pollsList = [], absencesList = [];
         let employeeOfTheWeek = { username: "MJGamerNL", reason: "Uitstekende inzet!" };
 
         if (isConnected && db) {
-            const stepT2 = Date.now();
-            const fetchWithTimeout = (promise, ms = 1500) => {
-                return Promise.race([
-                    promise,
-                    new Promise((resolve) => setTimeout(() => resolve([]), ms))
-                ]);
-            };
+            const fetchWithTimeout = (promise, ms = 1500) => Promise.race([promise, new Promise(resolve => resolve([]))]);
 
             try {
-                const [badges, announcements, applications, info, convoys, signups, socials, eotw] = await Promise.all([
+                const [badges, announcements, applications, info, convoys, signups, socials, polls, absences, eotw] = await Promise.all([
                     fetchWithTimeout(badgesColl.find({}).toArray()),
                     fetchWithTimeout(announcementsColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(applicationsColl.find({}).toArray()),
@@ -291,38 +261,31 @@ app.get('/api/haulmp', async (req, res) => {
                     fetchWithTimeout(convoysColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(convoySignupsColl.find({}).toArray()),
                     fetchWithTimeout(socialsColl.find({}).sort({ _id: -1 }).toArray()),
+                    fetchWithTimeout(pollsColl.find({}).sort({ _id: -1 }).toArray()),
+                    fetchWithTimeout(absencesColl.find({}).sort({ _id: -1 }).toArray()),
                     fetchWithTimeout(eotwColl.findOne({}), 1000)
                 ]);
 
-                customBadges = Array.isArray(badges) ? badges : [];
-                announcementsList = Array.isArray(announcements) ? announcements : [];
-                applicationsList = Array.isArray(applications) ? applications : [];
-                infoList = Array.isArray(info) ? info : [];
-                convoysList = Array.isArray(convoys) ? convoys : [];
-                convoySignupsList = Array.isArray(signups) ? signups : [];
-                socialsList = Array.isArray(socials) ? socials : [];
+                customBadges = badges || []; announcementsList = announcements || []; applicationsList = applications || [];
+                infoList = info || []; convoysList = convoys || []; convoySignupsList = signups || []; socialsList = socials || [];
+                pollsList = polls || []; absencesList = absences || [];
                 if (eotw && !Array.isArray(eotw)) employeeOfTheWeek = eotw;
-                console.log(`⏱️ [PERF] /api/haulmp - Overige collecties opgehaald in: ${Date.now() - stepT2}ms`);
-            } catch (e) {
-                console.error("⚠️ Foutje bij ophalen extra collecties:", e.message);
-            }
+            } catch (e) {}
         }
 
         let formattedDrivers = cachedAccounts.map(m => {
-            const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username));
+            const userJobs = allJobsHistory.filter(j => isDriverMatch(j.driver, m.username, m.displayname));
             return {
-                username: m.username, role: m.role, weight: getRoleWeight(m.role), color: getRoleColor(m.role), isDev: !!m.isDev,
+                username: m.username, displayname: m.displayname || m.username, role: m.role, weight: getRoleWeight(m.role), color: getRoleColor(m.role), isDev: !!m.isDev,
                 avatarUrl: m.avatarUrl || '', discordId: m.discordId || '',
                 deliveries: userJobs.length,
                 distance: `${userJobs.reduce((a, c) => a + c.kmAmount, 0).toLocaleString('nl-NL')} km`,
                 earnings: `€ ${userJobs.reduce((a, c) => a + c.paidAmount, 0).toLocaleString('nl-NL', { minimumFractionDigits: 0 })}`,
-                userJobs: userJobs.slice(0, 15),
                 badges: customBadges.filter(b => b.targetUser.toLowerCase() === m.username.toLowerCase())
             };
         });
         formattedDrivers.sort((a, b) => b.weight - a.weight);
 
-        // Bereken dagelijkse data voor de afgelopen 10 dagen (voor grafiek en persoonlijke statistieken)
         const dailyChartData = {};
         for (let i = 9; i >= 0; i--) {
             const d = new Date();
@@ -340,8 +303,6 @@ app.get('/api/haulmp', async (req, res) => {
             }
         });
 
-        console.log(`⚡ [PERF] /api/haulmp AFGEROND IN: ${Date.now() - requestStart}ms`);
-
         res.json({
             deliveries: totalDeliveries.toString(),
             distance: `${totalDistanceKm.toLocaleString('nl-NL')} km`,
@@ -350,18 +311,95 @@ app.get('/api/haulmp', async (req, res) => {
             drivers_list: formattedDrivers,
             recent_jobs: allJobsHistory.slice(0, 10),
             badges: customBadges, announcements: announcementsList, applications: applicationsList,
-            infoList, convoysList, convoySignupsList, socialsList, employeeOfTheWeek,
+            infoList, convoysList, convoySignupsList, socialsList, pollsList, absencesList, employeeOfTheWeek,
             dailyChartData: Object.values(dailyChartData)
         });
     } catch(e) {
-        console.error("❌ Fout in /api/haulmp:", e.message);
         res.status(500).json({ error: e.message });
     }
 });
 
+// Werving: Gebruiker toevoegen
+app.post('/api/werving/add', async (req, res) => {
+    const { username, displayname, password, role } = req.body;
+    if (!username || !password) return res.status(400).json({ success: false, message: 'Vul gebruikersnaam en wachtwoord in.' });
+    
+    const newAcc = { 
+        username: username.trim(), 
+        displayname: (displayname || username).trim(), 
+        password: password.trim(), 
+        role: role || 'Chauffeur in opleiding' 
+    };
+
+    if (isConnected && accountsColl) {
+        await accountsColl.insertOne(newAcc);
+        cachedAccounts = await accountsColl.find({}).toArray();
+    } else {
+        cachedAccounts.push(newAcc);
+    }
+    res.json({ success: true });
+});
+
+// Update Volledig Personeelslid
+app.post('/api/staff/update-full', async (req, res) => {
+    const { oldUsername, username, displayname, role, password } = req.body;
+    if (isConnected && accountsColl) {
+        const updateDoc = { username, displayname, role };
+        if (password) updateDoc.password = password;
+        await accountsColl.updateOne({ username: oldUsername }, { $set: updateDoc });
+        cachedAccounts = await accountsColl.find({}).toArray();
+    }
+    res.json({ success: true });
+});
+
+// Verwijderen & Aanmaken via API
+app.delete('/api/announcements/:id', async (req, res) => {
+    if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.delete('/api/info/:id', async (req, res) => {
+    if (isConnected && infoColl) await infoColl.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+});
+
+app.delete('/api/convoys/:id', async (req, res) => {
+    if (isConnected && convoysColl) {
+        await convoysColl.deleteOne({ id: req.params.id });
+        if (convoySignupsColl) await convoySignupsColl.deleteMany({ convoyId: req.params.id });
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/convoys/signup', async (req, res) => {
+    const { convoyId, username, status } = req.body;
+    if (isConnected && convoySignupsColl) {
+        await convoySignupsColl.updateOne({ convoyId, username }, { $set: { convoyId, username, status, date: new Date().toLocaleDateString('nl-NL') } }, { upsert: true });
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/convoys/cancel', async (req, res) => {
+    const { convoyId, username } = req.body;
+    if (isConnected && convoySignupsColl) await convoySignupsColl.deleteOne({ convoyId, username });
+    res.json({ success: true });
+});
+
+app.post('/api/absence', async (req, res) => {
+    const { from, to, reason, username } = req.body;
+    const item = { id: "abs-" + Date.now(), username, from, to, reason, status: 'In Afwachting', date: new Date().toLocaleDateString('nl-NL') };
+    if (isConnected && absencesColl) await absencesColl.insertOne(item);
+    res.json({ success: true });
+});
+
+app.post('/api/absence/status', async (req, res) => {
+    const { absId, status } = req.body;
+    if (isConnected && absencesColl) await absencesColl.updateOne({ id: absId }, { $set: { status } });
+    res.json({ success: true });
+});
+
 app.post('/api/staff/upload-pfp', async (req, res) => {
     const { targetUser, pfp } = req.body;
-    if (!targetUser || !pfp) return res.status(400).json({ success: false });
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${targetUser}$`, 'i') } }, { $set: { avatarUrl: pfp } });
         cachedAccounts = await accountsColl.find({}).toArray();
@@ -376,7 +414,6 @@ app.post('/api/applications/complete', async (req, res) => {
 
 app.post('/api/badges', async (req, res) => {
     const { title, targetUser } = req.body;
-    if (!title || !targetUser) return res.status(400).json({ success: false });
     const badgeObj = { id: "badge-" + Date.now(), title: title.trim(), targetUser: targetUser.trim(), date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && badgesColl) await badgesColl.insertOne(badgeObj);
     res.json({ success: true });
@@ -390,45 +427,14 @@ app.post('/api/badges/delete', async (req, res) => {
 app.post('/api/info', upload.single('file'), async (req, res) => {
     let fileLink = req.body.link || '';
     if (req.file) fileLink = `data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString('base64')}`;
-    const infoObj = { 
-        id: "info-" + Date.now(), title: req.body.title, content: req.body.content, 
-        link: fileLink, fileName: req.file ? req.file.originalname : null,
-        username: req.body.username, date: new Date().toLocaleDateString('nl-NL') 
-    };
+    const infoObj = { id: "info-" + Date.now(), title: req.body.title, content: req.body.content, link: fileLink, fileName: req.file ? req.file.originalname : null, username: req.body.username, date: new Date().toLocaleDateString('nl-NL') };
     if (isConnected && infoColl) await infoColl.insertOne(infoObj);
     res.json({ success: true });
 });
 
-app.delete('/api/info/:id', async (req, res) => {
-    if (isConnected && infoColl) await infoColl.deleteOne({ id: req.params.id });
-    res.json({ success: true });
-});
-
 app.post('/api/convoys', async (req, res) => {
-    const convObj = { id: "conv-" + Date.now(), ...req.body };
+    const convObj = { id: "conv-" + Date.now(), ...req.body, img: req.body.img || 'https://raw.githubusercontent.com/ItzChaotic/Random-Pics/main/3%20Trucksinlog.png' };
     if (isConnected && convoysColl) await convoysColl.insertOne(convObj);
-    res.json({ success: true });
-});
-
-app.delete('/api/convoys/:id', async (req, res) => {
-    if (isConnected && convoysColl) {
-        await convoysColl.deleteOne({ id: req.params.id });
-        if (convoySignupsColl) await convoySignupsColl.deleteMany({ convoyId: req.params.id });
-    }
-    res.json({ success: true });
-});
-
-app.post('/api/convoys/signup', async (req, res) => {
-    const { convoyId, username } = req.body;
-    if (isConnected && convoySignupsColl) {
-        await convoySignupsColl.updateOne({ convoyId, username }, { $set: { convoyId, username, date: new Date().toLocaleDateString('nl-NL') } }, { upsert: true });
-    }
-    res.json({ success: true });
-});
-
-app.post('/api/convoys/cancel', async (req, res) => {
-    const { convoyId, username } = req.body;
-    if (isConnected && convoySignupsColl) await convoySignupsColl.deleteOne({ convoyId, username });
     res.json({ success: true });
 });
 
@@ -446,14 +452,8 @@ app.post('/api/announcements', async (req, res) => {
     res.json({ success: true });
 });
 
-app.delete('/api/announcements/:id', async (req, res) => {
-    if (isConnected && announcementsColl) await announcementsColl.deleteOne({ id: req.params.id });
-    res.json({ success: true });
-});
-
 app.post('/api/socials', async (req, res) => {
     const { platform, url, username } = req.body;
-    if (!platform || !url) return res.status(400).json({ success: false });
     const socialObj = { id: "soc-" + Date.now(), platform: platform.trim(), url: url.trim(), addedBy: username || 'Admin' };
     if (isConnected && socialsColl) await socialsColl.insertOne(socialObj);
     res.json({ success: true });
@@ -467,24 +467,6 @@ app.delete('/api/socials/:id', async (req, res) => {
 app.post('/api/staff/update-password', async (req, res) => {
     if (isConnected && accountsColl) {
         await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { password: req.body.newPassword.trim() } });
-        cachedAccounts = await accountsColl.find({}).toArray();
-    }
-    res.json({ success: true });
-});
-
-app.post('/api/staff/add', async (req, res) => {
-    const pw = "Brecht" + Math.floor(1000 + Math.random() * 9000);
-    const newAcc = { username: req.body.username.trim(), password: pw, role: req.body.role.trim() };
-    if (isConnected && accountsColl) {
-        await accountsColl.insertOne(newAcc);
-        cachedAccounts = await accountsColl.find({}).toArray();
-    }
-    res.json({ success: true, message: pw });
-});
-
-app.post('/api/staff/update-role', async (req, res) => {
-    if (isConnected && accountsColl) {
-        await accountsColl.updateOne({ username: { $regex: new RegExp(`^${req.body.targetUser}$`, 'i') } }, { $set: { role: req.body.newRole.trim() } });
         cachedAccounts = await accountsColl.find({}).toArray();
     }
     res.json({ success: true });
